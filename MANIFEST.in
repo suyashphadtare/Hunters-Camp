@@ -1,0 +1,18 @@
+include MANIFEST.in
+include requirements.txt
+include *.json
+include *.md
+include *.py
+include *.txt
+recursive-include hunters_camp *.css
+recursive-include hunters_camp *.csv
+recursive-include hunters_camp *.html
+recursive-include hunters_camp *.ico
+recursive-include hunters_camp *.js
+recursive-include hunters_camp *.json
+recursive-include hunters_camp *.md
+recursive-include hunters_camp *.png
+recursive-include hunters_camp *.py
+recursive-include hunters_camp *.svg
+recursive-include hunters_camp *.txt
+recursive-exclude hunters_camp *.pyc
