@@ -35,6 +35,7 @@ app_version = "0.0.1"
 # Generators
 # ----------
 
+fixtures = ["Custom Field"]
 # automatically create page for each record of this doctype
 # website_generators = ["Web Page"]
 
