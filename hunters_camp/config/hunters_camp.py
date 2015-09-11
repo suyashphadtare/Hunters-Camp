@@ -42,6 +42,11 @@ def get_data():
 					"name": "Flat Facilities",
 					"description": _("Facilities of Flats"),
 				},
+				{
+					"type": "doctype",
+					"name": "Area",
+					"description": _("Location / Area"),
+				}
 				
 			]
 		},
