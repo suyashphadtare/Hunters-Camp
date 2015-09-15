@@ -1,0 +1,21 @@
+{
+ "content": null, 
+ "creation": "2015-09-14 14:57:11.142145", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "modified": "2015-09-14 14:57:11.142145", 
+ "modified_by": "Administrator", 
+ "module": "Hunters Camp", 
+ "name": "property", 
+ "owner": "Administrator", 
+ "page_name": "property", 
+ "roles": [
+  {
+   "role": "All"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "Property"
+}
