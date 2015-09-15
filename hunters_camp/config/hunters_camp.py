@@ -50,4 +50,30 @@ def get_data():
 				
 			]
 		},
+		{
+			"label": _("Document"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Enquiry",
+					"description": _("Lead/Customer enquiry form"),
+				},
+				{
+					"type": "doctype",
+					"name": "Lead Management",
+					"description": _("Allocation of lead/customer to consultant"),
+				},
+				{
+					"type": "doctype",
+					"name": "Site Visit",
+					"description": _("Sales Executive Visit Details"),
+				},
+				{
+					"type": "doctype",
+					"name": "ACM Visit",
+					"description": _("ACM Visit Details"),
+				},
+			]
+		},
 	]
