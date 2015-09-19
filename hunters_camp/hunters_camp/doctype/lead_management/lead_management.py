@@ -135,3 +135,70 @@ def acm_query(doctype, txt, searchfield, start, page_len, filters):
 		limit %s, %s""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),
 			key=searchfield, mcond=get_match_cond(doctype)),
 			tuple(list(STANDARD_USERS) + [txt, txt, txt, txt, start, page_len]))
+
+
+@frappe.whitelist()
+def get_diffrent_property(data=None,lead_management=None):
+	property_id_list = frappe.db.sql("""select property_id from `tabLead Property Details` 
+		where parent='%s' """%lead_management,as_dict=1)
+	if property_id_list:
+
+		return {"property_id": property_id_list}
+
+@frappe.whitelist()
+def get_administartor(property_type=None,property_subtype=None,location=None,operation=None,
+						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None):
+	
+	users =  frappe.db.sql("""select parent from `tabUserRole` where role='System Manager' 
+						and parent!='Administrator'""",as_list=1)
+	frappe.errprint(users)
+	if users:
+		for user_id in users:
+			frappe.errprint(user_id[0])
+			create_email(user_id[0],property_type,property_subtype,location,operation,
+						area_minimum,area_maximum,budget_minimum,budget_maximum)
+
+def create_email(user_id,property_type=None,property_subtype=None,location=None,operation=None,
+						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None):
+	style_data= """table, th, td {
+			    border: 1px solid black;
+			    border-collapse: collapse;
+			}
+			th, td {
+			    padding: 5px;
+			}"""
+	msg="""Hello, 
+		here is no any property is available for the specified serach criteria-
+			<html>
+			<head>
+			<style>{style_data}</style>
+			</head>
+			<body>
+			<table style="width:100%">
+			<tr>
+				<th>Property Type</th>
+				<th>Property Subtype</th>
+				<th>Location</th>
+				<th>Operation</th>
+				<th>Area Minimum</th>
+				<th>Area Maximum</th>
+				<th>Budget Minimum</th>
+				<th>Budget Maximum</th>
+			</tr>
+			<tr>
+				<td>{property_type}</td>	
+				<td>{property_subtype}</td>
+				<td>{location}</td>
+				<td>{operation}</td>
+				<td>{area_minimum}</td>
+				<td>{area_maximum}</td>	
+				<td>{budget_minimum}</td>
+				<td>{budget_maximum}</td>	
+			</tr>
+			</table>
+			</body>
+			</html>""".format(style_data=style_data,property_type=property_type,property_subtype=property_subtype,location=location,operation=operation,area_minimum=area_minimum,area_maximum=area_maximum,budget_minimum=budget_minimum,budget_maximum=budget_maximum)
+
+
+	# frappe.errprint(msg)
+	frappe.sendmail(user_id,subject='Property Serach Criteria',message=msg)
