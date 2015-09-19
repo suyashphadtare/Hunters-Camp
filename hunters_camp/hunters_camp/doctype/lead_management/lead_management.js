@@ -220,32 +220,91 @@ lead_management.Composer = Class.extend({
 frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 	if (!frm.doc.__islocal){
 		property_details = frm.doc.property_details || [];
-		if(property_details.length < 1){
-			frm.add_custom_button(__("Search Property"), function() { 
-
-				make_dashboard(frm.doc)
-			// 	frappe.route_options = {
-			// 		"lead_management": frm.doc.name,
-			// 		"property_type": frm.doc.property_type,
-			// 		"property_subtype": frm.doc.property_subtype,
-			// 		"location": frm.doc.location,
-			// 		"budget_minimum": frm.doc.budget_minimum,
-			// 		"budget_maximum": frm.doc.budget_maximum,
-			// 		"area_minimum":frm.doc.area_minimum,
-			// 		"area_maximum": frm.doc.area_maximum
-
-			// };
-			// 	frappe.set_route("property", "Hunters Camp");
-			})
-
-	}	
-
-		
+		frm.add_custom_button(__("Search Property"), function() { 
+			make_dashboard(frm.doc)
+		})	
 	}
 
 	make_dashboard =  function(doc){
-		console.log(doc)
-	}
+		if(doc){
+			return frappe.call({
+					method:'propshikari.versions.v1.search_property',
+					args :{
+						"data":{
+						"operation": doc.operation,
+						"property_type": doc.property_type,
+						"property_subtype": doc.property_subtype,
+						"location": doc.location,
+						"budget_minimum": doc.budget_minimum,
+						"budget_maximum": doc.budget_maximum,
+						"area_minimum": doc.area_minimum,
+						"area_maximum": doc.area_maximum,
+						"user_id": 'Guest',
+						"sid": 'Guest'
+					  },
+					},
+					callback: function(r,rt) {
+						if(!r.exc) {
+							result=r.message['data']
+							if(r.message['total_records']>0){
+
+								return frappe.call({
+									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_diffrent_property',
+									args :{
+										"data":r.message["data"],
+										"lead_management":doc.name
+									},
+									callback: function(r,rt) {
+										var final_property_result = {}
+										if(r.message){
+											$.each(r.message['property_id'],function(i, property){
+	  											final_property_result[(property['property_id'])]=''
+	  											
+											});
+											final_result = jQuery.grep(result, function( d ) {
+	 											return !(d['property_id'] in final_property_result)
+											});
+											frappe.route_options = {
+												"lead_management": doc.name,
+												"property_type": doc.property_type,
+												"property_subtype": doc.property_subtype,
+												"location": doc.location,
+												"operation":doc.operation,
+												"budget_minimum": doc.budget_minimum,
+												"budget_maximum": doc.budget_maximum,
+												"area_minimum": doc.area_minimum,
+												"area_maximum": doc.area_maximum,
+												"data": final_result
+											};
+											frappe.set_route("property", "Hunters Camp");
+									  }
+									},
+								});		
+							}
+							else{
+								console.log("hi")// email to admin
+								return frappe.call({
+									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
+									args :{
+										"property_type": doc.property_type,
+										"property_subtype": doc.property_subtype,
+										"operation":doc.operation,
+										"location": doc.location,
+										"budget_minimum": doc.budget_minimum,
+										"budget_maximum": doc.budget_maximum,
+										"area_minimum": doc.area_minimum,
+										"area_maximum": doc.area_maximum,
+									},
+									callback: function(r,rt) {
+										
+									},
+								})
+							}
+						}
+					},
+				});
+			}
+		}
 
 });
 

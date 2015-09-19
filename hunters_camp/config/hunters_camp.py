@@ -76,4 +76,17 @@ def get_data():
 				},
 			]
 		},
+
+		{
+			"label": _("Tools"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "page",
+					"name": "property",
+					"label": _("Property Serach"),
+					"icon": "icon-bar-chart",
+				},
+			]
+		},
 	]
