@@ -1,4 +1,7 @@
 import frappe
+from frappe.model.document import Document
+from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+import datetime
 import json
 
 @frappe.whitelist()
@@ -14,12 +17,39 @@ def get_property_details(property_id):
 
 
 @frappe.whitelist()
-def add_properties_in_lead_management(property_list=None,lead_management=None,property_resultset=None):
-  frappe.errprint(property_list)
-  frappe.errprint(lead_management)
-  frappe.errprint(property_resultset)
-  frappe.errprint(json.loads(property_resultset))
+def add_properties_in_lead_management(lead_management=None,property_resultset=None):
+  properties = json.loads(property_resultset)
+  if len(properties)>0:
+  	for property_id in properties:
+  		frappe.errprint(property_id)
+  		lead_record = frappe.get_doc("Lead Management", lead_management)
+		pd = lead_record.append('property_details', {})
+		pd.property_id = property_id.get('property_id')
+		pd.property_name = property_id.get('property_title')
+		pd.area = property_id.get('carpet_area')
+		pd.location = property_id.get('location')
+		pd.price = property_id.get('price')
+		pd.address = property_id.get('address')
+		pd.bhk = property_id.get('bhk')
+		pd.bathroom = property_id.get('no_of_bathroom')
+		pd.posting_date = datetime.datetime.strptime(cstr(property_id.get('posting_date')),'%d-%m-%Y')
+		lead_record.save(ignore_permissions=True)
+	frappe.msgprint("Property sharing process is completed..!")
 
+
+@frappe.whitelist()
+def share_property_to_user(property_resultset=None,user=None,comments=None):
+	share_property =  json.loads(property_resultset)
+	user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
+	args = { "title":"Property Shared by  {0}" .format(frappe.session.user) , "property_data":share_property ,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
+	send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
+	return True
+
+
+
+def send_email(email, subject, template, args):
+	frappe.sendmail(recipients=email, sender=None, subject=subject,
+			message=frappe.get_template(template).render(args))
 # @frappe.whitelist()
 # def get_property(args=None):
 # 	return {"data": [
