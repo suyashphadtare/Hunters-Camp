@@ -24,7 +24,7 @@
    "print_hide": 0, 
    "read_only": 0, 
    "report_hide": 0, 
-   "reqd": 1, 
+   "reqd": 0, 
    "search_index": 0, 
    "set_only_once": 0, 
    "unique": 0
@@ -341,7 +341,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-18 15:06:11.829237", 
+ "modified": "2015-09-21 13:38:05.813717", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Alerts", 
