@@ -239,6 +239,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						"budget_maximum": doc.budget_maximum,
 						"area_minimum": doc.area_minimum,
 						"area_maximum": doc.area_maximum,
+						"records_per_page": 10,
+						"page_number":1,
 						"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
@@ -246,40 +248,64 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					callback: function(r,rt) {
 						if(!r.exc) {
 							result=r.message['data']
+							total_records = r.message['total_records']
+							console.log(["total",r.message['total_records']])
 							if(r.message['total_records']>0){
-
-								return frappe.call({
-									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_diffrent_property',
-									args :{
-										"data":r.message["data"],
-										"lead_management":doc.name
-									},
-									callback: function(r,rt) {
-										var final_property_result = {}
-										if(r.message){
-											$.each(r.message['property_id'],function(i, property){
-	  											final_property_result[(property['property_id'])]=''
-	  											
-											});
-											final_result = jQuery.grep(result, function( d ) {
-	 											return !(d['property_id'] in final_property_result)
-											});
-											frappe.route_options = {
-												"lead_management": doc.name,
-												"property_type": doc.property_type,
-												"property_subtype": doc.property_subtype,
-												"location": doc.location,
-												"operation":doc.operation,
-												"budget_minimum": doc.budget_minimum,
-												"budget_maximum": doc.budget_maximum,
-												"area_minimum": doc.area_minimum,
-												"area_maximum": doc.area_maximum,
-												"data": final_result
-											};
-											frappe.set_route("property", "Hunters Camp");
-									  }
-									},
-								});		
+								var cl=doc.property_details || [ ]
+								if(cl.length>0){
+									return frappe.call({
+										method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_diffrent_property',
+										args :{
+											"data":r.message["data"],
+											"lead_management":doc.name
+										},
+										callback: function(r,rt) {
+											var final_property_result = {}
+											console.log(["r message",r.message])
+											if(r.message){
+												$.each(r.message['property_id'],function(i, property){
+		  											final_property_result[(property['property_id'])]=''
+		  											
+												});
+												final_result = jQuery.grep(result, function( d ) {
+		 											return !(d['property_id'] in final_property_result)
+												});
+												if(final_result!=null)
+													final_result=final_result
+												else
+													final_result=result
+												frappe.route_options = {
+													"lead_management": doc.name,
+													"property_type": doc.property_type,
+													"property_subtype": doc.property_subtype,
+													"location": doc.location,
+													"operation":doc.operation,
+													"budget_minimum": doc.budget_minimum,
+													"budget_maximum": doc.budget_maximum,
+													"area_minimum": doc.area_minimum,
+													"area_maximum": doc.area_maximum,
+													"total_records": total_records,
+													"data": final_result
+												};
+												frappe.set_route("property", "Hunters Camp");
+										  }
+										},
+									});		
+								}
+								frappe.route_options = {
+													"lead_management": doc.name,
+													"property_type": doc.property_type,
+													"property_subtype": doc.property_subtype,
+													"location": doc.location,
+													"operation":doc.operation,
+													"budget_minimum": doc.budget_minimum,
+													"budget_maximum": doc.budget_maximum,
+													"area_minimum": doc.area_minimum,
+													"area_maximum": doc.area_maximum,
+													"total_records": total_records,
+													"data": r.message['data']
+												};
+												frappe.set_route("property", "Hunters Camp");
 							}
 							else{
 								console.log("hi")// email to admin
@@ -296,6 +322,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"area_maximum": doc.area_maximum,
 									},
 									callback: function(r,rt) {
+										msgprint("There is no any properties found aginst the specified criteria so,email with property search criteria is sent to administartor.")
 										
 									},
 								})

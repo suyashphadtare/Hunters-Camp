@@ -8,7 +8,6 @@ frappe.pages['property'].on_page_load = function(wrapper) {
 	$("<div class='user-settings' \
 		style='min-height: 2600px; padding: 15px;'></div>").appendTo(page.main);
 
-
 	wrapper.property = new Property(wrapper);
 }
 
@@ -97,8 +96,7 @@ Property = Class.extend({
 		});
 
 		
-
-		
+		// SEARCH CLICK
 		me.search.$input.on("click", function() {
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
@@ -113,14 +111,36 @@ Property = Class.extend({
 						"budget_maximum": me.filters.budget_max.$input.val(),
 						"area_minimum": me.filters.area_min.$input.val(),
 						"area_maximum": me.filters.area_max.$input.val(),
+						"records_per_page": 10,
+						"page_number":1,
 						"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
 					},
 					callback: function(r,rt) {
 						if(!r.exc) {
-							me.render(r.message['data'])
-								
+							console.log(["serach property",r.message])
+							if(r.message['total_records']>0){
+								me.render(r.message['data'],r.message['total_records'])
+							}
+							else{
+								return frappe.call({
+									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
+									args :{
+										"property_type": me.filters.property_type.$input.val(),
+										"property_subtype": me.filters.property_subtype.$input.val(),
+										"operation":me.filters.operation.$input.val(),
+										"location": me.filters.location.$input.val(),
+										"budget_minimum": me.filters.budget_min.$input.val(),
+										"budget_maximum": me.filters.budget_max.$input.val(),
+										"area_minimum": me.filters.area_min.$input.val(),
+										"area_maximum": me.filters.area_max.$input.val()
+									},
+									callback: function(r,rt) {
+										msgprint("There is no any properties found aginst the specified criteria so,email with property search criteria is sent to administartor.")
+									},
+								})
+							}		
 					}
 
 				},
@@ -129,11 +149,12 @@ Property = Class.extend({
 
 	}
 	else
-		msgprint("'Operation','Property Type','Property Subtype' are the amnadatory fields tos erach criteria please specify it")
+		msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE are the amnadatory fields tos erach criteria please specify it")
 
 	});
 
-
+	
+	// ADVANCE FILTERING
 	me.advance_filters.$input.on("click", function() {
 
 		var d = new frappe.ui.Dialog({
@@ -175,40 +196,70 @@ Property = Class.extend({
 	
 	me.share.$input.on("click", function() {
 		var final_property_result = {}
-		console.log(typeof(me.property_list))
 		if(me.property_list.length>0){
-			console.log(me.lead_management.$input.val())
 			lead_record=me.lead_management.$input.val()
-			if (me.lead_management.$input.val().length != 0){
-				console.log(me.property_list)
-
-
-				$.each(me.property_list,function(i, property_id){
+			$.each(me.property_list,function(i, property_id){
 					final_property_result[property_id]=''
 						
-				});
-				console.log(["final",final_property_result])
-				final_result = jQuery.grep(me.prop_list, function( d ) {
+			});
+			final_result = jQuery.grep(me.prop_list, function( d ) {
 						return (d['property_id'] in final_property_result)
-				});
-				console.log(["final_result",final_result])
-
-
-				// return frappe.call({
-				// 	method:'hunters_camp.hunters_camp.page.property.property.add_properties_in_lead_management',
-				// 	args :{
-				// 		"property_list":me.property_list,
-				// 		"lead_management":me.lead_management.$input.val(),
-				// 		"property_resultset": me.prop_list
-				// 	},
-				// 	callback: function(r,rt) {
-				// 		if(!r.exc) {
-				// 		}
-				// 	},
-				// });	
+			});
+			if (me.lead_management.$input.val().length != 0){
+				return frappe.call({
+					method:'hunters_camp.hunters_camp.page.property.property.add_properties_in_lead_management',
+					args :{
+						"lead_management":me.lead_management.$input.val(),
+						"property_resultset": final_result
+					},
+					callback: function(r,rt) {
+						if(!r.exc) {
+						}
+					},
+				});	
 			}
 			else{
-				alert("popup for sharing property for user")
+				//alert("popup for sharing property for user")
+				var d = new frappe.ui.Dialog({
+					title: __("Shared properties to user"),
+					fields: [
+						{fieldtype:"Link", label:__("User"),
+							options:"User", reqd:1, fieldname:"user"},
+						{fieldtype:"Small Text", label:__("Comments"),
+							fieldname:"comments"},
+						{fieldtype:"Button", label:__("Share Property"),
+						 fieldname:"share_property"}		
+					]
+
+				});
+				fields=d.fields_dict
+				d.show();
+				$('[data-fieldname=share_property]').css('display','none')
+
+				$(fields.user.input).change(function(){
+		            $('[data-fieldname=share_property]').css('display','block')
+		            
+		        });
+
+				$(fields.share_property.input).click(function() {
+            		if(fields.user.$input.val()!=null){
+            		return frappe.call({
+						method:'hunters_camp.hunters_camp.page.property.property.share_property_to_user',
+						args :{
+							"user": fields.user.$input.val(),
+							"property_resultset": final_result,
+							"comments":fields.comments.$input.val()
+						},
+						callback: function(r,rt) {
+							if(!r.exc) {
+								msgprint("property is successfully shared to the spcified user.")
+								d.hide();
+							}
+						},
+				});	
+            		}
+        		});
+				
 			}
 		}
 		else
@@ -246,37 +297,83 @@ Property = Class.extend({
 		me.filters.area_min.input.value=frappe.route_options['area_minimum'] ? frappe.route_options['area_minimum'] : null
 		me.lead_management.input.value=frappe.route_options['lead_management']
 
-		me.render(frappe.route_options['data']);
+		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
+		console.log(["frrrr",frappe.route_options['total_records']])
 	},
 	
-	render: function(prop_list) {
+	render: function(prop_list,total_records) {
+		console.log("in render")
+		console.log(total_records)
+		console.log(prop_list.length)
 		var me = this;
+		var current_page = 1;
+		var records_per_page = 10;
+		var numPages=Math.ceil(total_records/records_per_page)
+		console.log(["numPages",numPages])
+		var listing_table = document.getElementById("listingTable");
 		this.property_list = []
 		this.body.empty();
 		this.prop_list=prop_list
-		this.show_user_property_table();
-
+		this.changePage(1,numPages,prop_list,records_per_page,prop_list.length,listing_table);
+		
 
 	},
-	
-	show_user_property_table: function() {
-		var me = this;
+
+
+	changePage: function(page,numPages,values,records_per_page,length,listing_table)
+	{	
+		$("#property").empty();
+		$("#buttons").empty();
+		var me=this;
+		var arr= []
+		console.log(["values",values])
+	    if (page < 1) page = 1;
+	    if (page > numPages) page = numPages;
+
+	    me.show_user_property_table(page,numPages,values,records_per_page,length,listing_table);
+
+	    $("#page").text(length)
+	    if(length==1)
+	    	$("#page")
+
+	    if (page == 1) {
+	        btn_prev.style.visibility = "hidden";
+	    } else {
+	        btn_prev.style.visibility = "visible";
+	    }
+	    if (page == numPages){
+	        btn_next.style.visibility = "hidden";
+	     } 
+	     else {
+	        btn_next.style.visibility = "visible";
+	    }
+	  
+	},
+
+
+	show_user_property_table: function(page,numPages,values,records_per_page,length,listing_table) {
+		var me = this
+		console.log("show_user_property_table")
+		console.log(page)
 
 		$("<div id='property' class='col-md-12'>\
 			<div class='row'><ul id='mytable'style='list-style-type:none'></ul>\
 			</div>\
-			</div>").appendTo(me.body);
+		<div id='buttons' >\
+		<p align='right'><input type='button' value='Prev' class='btn btn-default btn-sm btn-modal-close' id='btn_prev'>\
+		<input type='button' value='Next' class='btn btn-default btn-sm btn-modal-close' id='btn_next'></p>\
+		<b>Total Documents:</b> <span id='page'></span></div></div>").appendTo(me.body);
 
-		
 
-		$.each(me.prop_list, function(i, d) {
+		$.each(values, function(i, d) {
 			var amenities = [];
+			//console.log(d['total_records'])
 			$.each(d['amenities'], function(i, j) {
 				amenities.push(j['name'])
 			})
 
-			$("<li id='property_list' list-style-position: inside;><div class='col-md-12' style='border: 1px solid black'>\
-				<div id='image' class='col-md-2'>  \
+			$("<li id='property_list' list-style-position: inside;><div class='col-md-12 property-div'>\
+				<div id='image' class='col-md-2 property-image'>  \
 				<div id='img' class='col-md-12'>\
 				<div id="+i+" class='row'></div>\
 				</div>\
@@ -292,10 +389,10 @@ Property = Class.extend({
 				$("<div class='ui-icon ui-icon-image'></div>").appendTo($(me.body).find("#"+i+""))
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist'>\
-      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'>General Details</a></li>\
-      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'>More Details</a></li>\
-      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'>Amenities</a></li>\
-      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'>Contacts</a></li>\
+      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'><i class='icon-li icon-file'></i>&nbsp;&nbsp;General Details</a></li>\
+      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-book'></i>&nbsp;&nbsp;More Details</a></li>\
+      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-building'></i>&nbsp;&nbsp;Amenities</a></li>\
+      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-user'></i>&nbsp;&nbsp;Contacts</a></li>\
       <div id="+d['property_id']+" style='float:right;'>\
 	<input type='checkbox' class='cb' />\
 	</div></ul></div>\
@@ -377,13 +474,86 @@ Property = Class.extend({
 
 	
 
-	//$(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
-
-		})
+	$(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
 	
+
+	})
 	me.init_for_checkbox();
 
+	$('#btn_prev').click(function(){
+		if (page > 1) {
+        	page--;
+       		return frappe.call({
+					method:'propshikari.versions.v1.search_property',
+					args :{
+						"data":{
+						"operation": me.filters.operation.$input.val(),
+						"property_type": me.filters.property_type.$input.val(),
+						"property_subtype": me.filters.property_subtype.$input.val(),
+						"location": me.filters.location.$input.val(),
+						"budget_minimum": me.filters.budget_min.$input.val(),
+						"budget_maximum": me.filters.budget_max.$input.val(),
+						"area_minimum": me.filters.area_min.$input.val(),
+						"area_maximum": me.filters.area_max.$input.val(),
+						"records_per_page": 10,
+						"page_number":page,
+						"user_id": 'Guest',
+						"sid": 'Guest'
+					  },
+					},
+					callback: function(r,rt) {
+						if(!r.exc) {
+							console.log(["message",r.message['data']])
+							if(r.message['data'].length>0)
+								me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length);
+						}
+					},
+			});	
+    }
+
+    })
+
+    $('#btn_next').click(function(){
+    	console.log("Next button")
+    	console.log(me.filters.operation.$input.val())
+    	console.log(page)
+    	if (page < numPages) {
+       	 	page++;
+       	 	console.log(["page",page])
+       	 	return frappe.call({
+					method:'propshikari.versions.v1.search_property',
+					args :{
+						"data":{
+						"operation": me.filters.operation.$input.val(),
+						"property_type": me.filters.property_type.$input.val(),
+						"property_subtype": me.filters.property_subtype.$input.val(),
+						"location": me.filters.location.$input.val(),
+						"budget_minimum": me.filters.budget_min.$input.val(),
+						"budget_maximum": me.filters.budget_max.$input.val(),
+						"area_minimum": me.filters.area_min.$input.val(),
+						"area_maximum": me.filters.area_max.$input.val(),
+						"records_per_page": 10,
+						"page_number":page,
+						"user_id": 'Guest',
+						"sid": 'Guest'
+					  },
+					},
+					callback: function(r,rt) {
+						if(!r.exc) {
+							console.log(["message",r.message['data']])
+							if(r.message['data'].length>0)
+								me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length);
+						}
+					},
+			});	
+
+       	}
+    })
+
+
 	},
+
+
 
 	init_for_checkbox: function(){
 		var me = this;
@@ -393,17 +563,18 @@ Property = Class.extend({
 				me.property_list.push($(this).parent().attr("id"))
 				console.log(me.property_list)
 			}
+			else if($(this).prop('checked')==false){
+				var removeItem = $(this).parent().attr("id");
+				me.property_list = jQuery.grep(me.property_list, function(value) {
+				  return value != removeItem;
+				});
+
+			}
 	});
 
 	
-	}
-
-    // $('#cblist').click(function() {
-    //     if (!$(this).is(':checked')) {
-    //         return confirm("Are you sure?");
-    //     }
-    // });
-
+	},
 
 })
+
 
