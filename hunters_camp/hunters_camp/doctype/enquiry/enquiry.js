@@ -41,6 +41,10 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc) {
 	}
 }
 
+cur_frm.cscript.validate = function(doc, cdt, cdn){
+	erpnext.utils.get_address_display(this.frm, "address","address_details");
+}
+
 cur_frm.cscript.address = function(doc,cdt,cdn){
 
 	erpnext.utils.get_address_display(this.frm, "address","address_details");
