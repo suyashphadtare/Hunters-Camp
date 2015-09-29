@@ -7,7 +7,6 @@ frappe.provide("property")
 	it should have menu items for various operations and update button.
 	else it should have post property button.
 */
-
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
 	property.operations.init(frm);
@@ -42,11 +41,11 @@ property.operations = {
 		if(me.check_mandatory(frm)) {
 			frappe.call({
 				freeze: true,
-				freeze_message:"Posting Property Please Wait",
+				freeze_message:"Posting Property,Please Wait..",
 				method:"hunters_camp.hunters_camp.doctype.property.property.post_property",
 				args:{doc: frm.doc},
 				callback: function(r) {
-					console.log("shshs")
+					
 				},
 				always: function() {
 					frappe.ui.form.is_saving = false;
@@ -102,3 +101,11 @@ property.operations = {
 
 
 }
+
+frappe.ui.form.on("Property", "refresh", function(frm) {
+	var me = this;
+	property.operations.init(frm);
+	
+});
+
+
