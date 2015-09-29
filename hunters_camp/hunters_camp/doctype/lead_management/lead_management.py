@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+from frappe.model.mapper import get_mapped_doc
 import datetime
 import json
 
@@ -13,8 +14,14 @@ STANDARD_USERS = ("Guest", "Administrator")
 
 
 class LeadManagement(Document):
-	pass
+	def on_update(self):
+		if self.lead_status=='Closed':
+			self.change_enquiry_status(self.name,self.enquiry_id,self.lead_status)
 
+	def change_enquiry_status(self,lead_management,enquiry_id,lead_status):
+		enquiry = frappe.get_doc("Enquiry", enquiry_id)
+		enquiry.enquiry_status = lead_status
+		enquiry.save(ignore_permissions=True)
 
 @frappe.whitelist()
 def make_visit(doc=None,lead=None,lead_name=None,mobile_no=None,address=None,address_details=None,customer=None,customer_contact=None,contact_details=None,
@@ -144,6 +151,8 @@ def get_diffrent_property(data=None,lead_management=None):
 	if property_id_list:
 
 		return {"property_id": property_id_list}
+	else:
+		return None
 
 @frappe.whitelist()
 def get_administartor(property_type=None,property_subtype=None,location=None,operation=None,
@@ -160,45 +169,13 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 
 def create_email(user_id,property_type=None,property_subtype=None,location=None,operation=None,
 						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None):
-	style_data= """table, th, td {
-			    border: 1px solid black;
-			    border-collapse: collapse;
-			}
-			th, td {
-			    padding: 5px;
-			}"""
-	msg="""Hello, 
-		here is no any property is available for the specified serach criteria-
-			<html>
-			<head>
-			<style>{style_data}</style>
-			</head>
-			<body>
-			<table style="width:100%">
-			<tr>
-				<th>Property Type</th>
-				<th>Property Subtype</th>
-				<th>Location</th>
-				<th>Operation</th>
-				<th>Area Minimum</th>
-				<th>Area Maximum</th>
-				<th>Budget Minimum</th>
-				<th>Budget Maximum</th>
-			</tr>
-			<tr>
-				<td>{property_type}</td>	
-				<td>{property_subtype}</td>
-				<td>{location}</td>
-				<td>{operation}</td>
-				<td>{area_minimum}</td>
-				<td>{area_maximum}</td>	
-				<td>{budget_minimum}</td>
-				<td>{budget_maximum}</td>	
-			</tr>
-			</table>
-			</body>
-			</html>""".format(style_data=style_data,property_type=property_type,property_subtype=property_subtype,location=location,operation=operation,area_minimum=area_minimum,area_maximum=area_maximum,budget_minimum=budget_minimum,budget_maximum=budget_maximum)
+	
+	user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
+	args = { "title":"Property Search Criteria Shared By  {0}" .format(frappe.session.user) , "property_type":property_type ,"property_subtype":property_subtype,"budget_maximum":budget_maximum,"budget_minimum":budget_minimum,"area_minimum":area_minimum,"area_maximum":area_maximum,"location":location,"operation":operation,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
+	send_email(user_id, "Property Serach Criteria Shared With you", "/templates/search_criteria_shared.html", args)
+	return True
 
-
-	# frappe.errprint(msg)
-	frappe.sendmail(user_id,subject='Property Serach Criteria',message=msg)
+def send_email(email, subject, template, args):
+	frappe.sendmail(recipients=email, sender=None, subject=subject,
+			message=frappe.get_template(template).render(args))
+	

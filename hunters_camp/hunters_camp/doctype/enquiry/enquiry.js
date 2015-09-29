@@ -46,7 +46,6 @@ cur_frm.cscript.address = function(doc,cdt,cdn){
 	erpnext.utils.get_address_display(this.frm, "address","address_details");
 }
 
-
 cur_frm.cscript.customer_address = function(doc,cdt,cdn){
 
 	erpnext.utils.get_address_display(this.frm, "customer_address","customer_address_details");
