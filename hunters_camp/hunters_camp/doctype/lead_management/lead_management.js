@@ -267,8 +267,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						if(!r.exc) {
 							result=r.message['data']
 							total_records = r.message['total_records']
-							console.log(r.message['data'])
-							console.log(["totalllll",r.message['total_records']])
+							//console.log(r.message['data'])
+							//console.log(["totalllll",r.message['total_records']])
 							if(r.message['total_records']>0){
 								var cl=doc.property_details || [ ]
 								if(cl.length>0){
@@ -280,19 +280,19 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										},
 										callback: function(r,rt) {
 											var final_property_result = {}
-											console.log(["r message",r.message])
+											//console.log(["r message",r.message])
 											if(r.message){
 												$.each(r.message['property_id'],function(i, property){
 		  											final_property_result[(property['property_id'].trim())]=''
 		  											
 												});
 
-												console.log(["final_property_result",final_property_result])
+												//console.log(["final_property_result",final_property_result])
 												final_result = jQuery.grep(result, function( d ) {
 		 											return !(d['property_id'] in final_property_result)
 												});
 
-												console.log(["final_result",final_result.length])
+												//console.log(["final_result",final_result.length])
 												if(final_result.length>0){
 													final_result=final_result
 													frappe.route_options = {
@@ -311,7 +311,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 												frappe.set_route("property", "Hunters Camp");
 												}
 												else {
-													console.log(["result",result])
+													//console.log(["result",result])
 													// final_result=result
 													return frappe.call({
 														method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
@@ -352,7 +352,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 												frappe.set_route("property", "Hunters Camp");
 							}
 							else{
-								console.log("hi")// email to admin
+								//console.log("hi")// email to admin
 								return frappe.call({
 									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
 									args :{

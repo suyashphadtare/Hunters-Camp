@@ -3,8 +3,8 @@
 }
 
 .image-div{
-    margin-bottom: 30px;
-    margin-top: 36px;
+    margin-bottom: 37px;
+    margin-top: 37px;
     margin-left:20px;
 }
 
@@ -17,6 +17,10 @@
 }*/
 
 
+
+body{
+    font-size: 14px;
+}
 .row{
     margin-left: :-15px;
 }
@@ -33,9 +37,14 @@
     margin-bottom: 0px;
 }
 
-.property_img {
-    margin-bottom: 10px;
+table{
+    margin-bottom: -30px;
+    margin-top: -6px;
 }
+
+/*.th-div{
+    border-top: 1px;
+}*/
 
 .property-main-div{
     padding-left: 0px;

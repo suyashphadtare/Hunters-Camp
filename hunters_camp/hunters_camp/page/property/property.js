@@ -33,7 +33,15 @@ Property = Class.extend({
 					fieldname: "property_subtype",
 					label: __("Property Subtype"),
 					fieldtype: "Link",
-					options: "Property Subtype"
+					options: "Property Subtype",
+					"get_query": function() {
+				return {
+					"doctype": "Property Subtype",
+					"filters": {
+						"property_type": me.filters.operation.$input.val(),
+					}
+				}
+			}
 		});
 		me.filters.operation = me.wrapper.page.add_field({
 					fieldname: "operation",
@@ -125,7 +133,7 @@ Property = Class.extend({
 					},
 					callback: function(r,rt) {
 						if(!r.exc) {
-							console.log(["serach property",r.message])
+							//console.log(["serach property",r.message])
 							//me.render(r.message['data'],10)
 							if(r.message['total_records']>0){
 								me.render(r.message['data'],r.message['total_records'])
@@ -390,26 +398,34 @@ Property = Class.extend({
 			$.each(filter_ammenities, function(i,n) {
 			    x.push(n);
 			});
-	 		console.log(filter_ammenities.length)
-	 		flag_new=0
+	 		//console.log(["filter_ammenities",filter_ammenities])
+	 		
 	 		//console.log(typeof(fields.amenities.input.value))
 	 		$.each(final_result, function(k, v) {
+	 			flag_new=0
 	 			amenities=[]
 				$.each(v['amenities'], function(i, j) {
 						amenities.push(j['name'])
 				})
+				//console.log(["amenities",amenities])
 				$.each(filter_ammenities, function(k,f) {
-					console.log(["f",f])
+					
 					$.each(amenities, function(k,a) {
-						console.log(["a",a])
-						if(f==a)
+						console.log(["aaaa",typeof(a)])
+						if(f.toLowerCase()==a.toLowerCase()){
+							//console.log(["f",f])
+							//console.log(["a",a])
+							//console.log(v['property_id'])
 							flag_new+=1
+							console.log(flag_new)
+						}
 					})
 					
 				})
 				if(flag_new==filter_ammenities.length)
 						amenities_list.push(v)
 			})
+			//console.log(["amenities_list",amenities_list])
 			final_result=amenities_list
 	 	}
 	 	else{
@@ -466,8 +482,8 @@ Property = Class.extend({
 					var d = new frappe.ui.Dialog({
 						title: __("Shared properties to user"),
 						fields: [
-							{fieldtype:"Link", label:__("User"),
-								options:"User", reqd:1, fieldname:"user"},
+							{fieldtype:"Data", label:__("User"),
+								reqd:1, fieldname:"user"},
 							{fieldtype:"Small Text", label:__("Comments"),
 								fieldname:"comments"},
 							{fieldtype:"Button", label:__("Share Property"),
@@ -476,6 +492,12 @@ Property = Class.extend({
 
 					});
 					fields=d.fields_dict
+				// 	if(fields.user.$input.val()){
+				// 		var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
+				// 		if (!filter.test(fields.user.$input.val())) {
+    // 						alert('Please provide a valid email address');
+				// 	}
+				// }
 					d.show();
 					$('[data-fieldname=share_property]').css('display','none')
 
@@ -583,10 +605,10 @@ Property = Class.extend({
 			$("#buttons").remove();
 			$("#sorting").remove();
 			$("<div id='sorting' style='float:right;text-align=right'>\
-			<select name='primary' class='select-block' id='select_alert'>\
-			<option value='sort_by'>Sort By</option>\
-  			<option value='posting_date'>Posting Date</option>\
-   			<option value='rate'>Rate</option>\
+			<select name='primary' class='input-with-feedback form-control input-sm' id='select_alert' >\
+			<option class='form-control' value='sort_by'>Sort By</option>\
+  			<option class='form-control' value='posting_date'>Posting Date</option>\
+   			<option class='form-control' value='rate'>Rate</option>\
 			</select></div>").appendTo(me.body)
 		}
 		else{
@@ -655,96 +677,113 @@ Property = Class.extend({
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
 			if(d['property_photo'])
-				$("<img id='theImg' src="+d['property_photo']+"/ width='60%' height='60%' align='center'>").appendTo($(me.body).find("#"+i+""))
+				$("<img id='theImg' src="+d['property_photo']+"/ width='60%' height='60%' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 			else
-				$("<img id='theImg' src='/files/Home-icon.png'/ width='60%' height='60%' align='center'>").appendTo($(me.body).find("#"+i+""))
+				$("<img id='theImg' src='/files/Home-icon.png'/ width='60%' height='60%' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				//$("<div class='ui-icon ui-icon-home'></div>").appendTo($(me.body).find("#"+i+""))
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist'>\
-      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'><i class='icon-li icon-file'></i>&nbsp;&nbsp;General Details</a></li>\
-      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-book'></i>&nbsp;&nbsp;More Details</a></li>\
-      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-building'></i>&nbsp;&nbsp;Amenities</a></li>\
-      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-user'></i>&nbsp;&nbsp;Contacts</a></li>\
-      <div id="+d['property_id']+" style='float:right;'>\
-	<input type='checkbox' class='cb' />\
-	</div></ul></div>\
-    </ul>\
-    <div id='mytable' class='tab-content '>\
-      <div role='tabpanel' class='tab-pane fade active in' style='height=100%;background-color:#fafbfc' id='general"+""+i+"' aria-labelledby='home-tab'>\
-       <table width= '100%'>\
-       <thead><tbody><tr>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Property ID:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['property_id']+"</td></tr></p>\
-       <p><tr><td><b>Area:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['carpet_area']+"</td></tr></p>\
-       <p><tr><td><b>Price:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['price']+"</td></tr></p>\
-       <p><tr><td><b>Location:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['location']+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Property Name:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['property_title']+"</td></tr></p>\
-       <p><tr><td><b>BHK:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr></p>\
-       <p><tr><td><b>Posting Date:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['posting_date']+"</td></tr></p>\
-       <p><tr><td><b>Bathroom:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['no_of_bathroom']+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       </tr></tbody></thead></table>\
-       </div>\
-      <div role='tabpanel' class='tab-pane fade' style='height=100%'  id='more"+""+i+"' aria-labelledby='profile-tab'>\
-      <table width= '100%'>\
-       <thead><tbody><tr>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Property Owenership:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['property_ownership']+"</td></tr></p>\
-       <p><tr><td><b>Number Of Floors.:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['no_of_floors']+"</td></tr></p>\
-       <p><tr><td><b>Maintenance:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['maintainance_charges']+"</td></tr></p>\
-       <p><tr><td><b>Security Deposit:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['security_deposit']+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Age Of Property:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['property_age']+"</td></tr></p>\
-       <p><tr><td><b>Furnishing Type:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['furnishing_type']+"</td></tr></p>\
-       <p><tr><td><b>Society Name:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['society_name']+"</td></tr></p>\
-       <p><tr><td><b>Address:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['address']+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       </tr></tbody></thead></table>\
-      </div>\
-      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='amenities"+""+i+"' aria-labelledby='profile-tab'>\
-      <table width= '100%'>\
-       <thead><tbody><tr>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[0]+"</td></tr></p>\
-       <p><tr><td><b>Amenities.:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[1]+"</td></tr></p>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[2]+"</td></tr></p>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[3]+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[4]+"</td></tr></p>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[5]+"</td></tr></p>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[6]+"</td></tr></p>\
-       <p><tr><td><b>Amenities:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+amenities[7]+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       </tr></tbody></thead></table>\
-      </div>\
-      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='contact"+""+i+"' aria-labelledby='profile-tab'>\
-      <table width= '100%'>\
-       <thead><tbody><tr>\
-       <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Agent Name:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['agent_name']+"</td></tr></p>\
-       <p><tr><td><b>Agent No:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['agent_no']+"</td></tr></p>\
-       <p><tr><td><b>Contact Person:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['contact_person']+"</td></tr></p>\
-       <p><tr><td><b>Contact No.:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['contact_no']+"</td></tr></p>\
-       <p></p>\
-       </table></td>\
-       </tr></tbody></thead></table>\
-      </div>\
-    </div>").appendTo($(me.body).find("#"+d['property_id']+""))
+			      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' style='height:35px;margin-top:-3px;'role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'><i class='icon-li icon-file'></i>&nbsp;&nbsp;General Details</a></li>\
+			      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' style='height:35px;margin-top:-3px;' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-book'></i>&nbsp;&nbsp;More Details</a></li>\
+			      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab'  style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-building'></i>&nbsp;&nbsp;Amenities</a></li>\
+			      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-user'></i>&nbsp;&nbsp;Contacts</a></li>\
+			      <div id="+d['property_id']+" style='float:right;'>\
+				<input type='checkbox' class='cb' />\
+				</div></ul></div>\
+			    </ul>\
+			    <div id='mytable' class='tab-content '>\
+			      <div role='tabpanel' class='tab-pane fade active in' style='height=100%;background-color=#fafbfc;' id='general"+""+i+"' aria-labelledby='home-tab'>\
+			       <table width= '100%'>\
+			       <thead><tbody><tr class='tr-div'>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='general-first' width='100%'>\
+			       </table></td>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='general-second' width='100%'>\
+			       </table></td>\
+			       </tr></tbody></thead></table>\
+			       </div>\
+			      <div role='tabpanel' class='tab-pane fade' style='height=100%'  id='more"+""+i+"' aria-labelledby='profile-tab'>\
+			      <table width= '100%'>\
+			       <thead><tbody><tr>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='more-details-first' width='100%'>\
+			       </table></td>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='more-details-second' width='100%'>\
+			       </table></td>\
+			       </tr></tbody></thead></table>\
+			      </div>\
+			      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='amenities"+""+i+"' aria-labelledby='profile-tab'>\
+			      <table width= '100%'>\
+			       <thead><tbody><tr>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='amenities-first' width='100%'>\
+			       </table></td>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='amenities-second' width='100%'>\
+			       </table></td>\
+			       </tr></tbody></thead></table>\
+			      </div>\
+			      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='contact"+""+i+"' aria-labelledby='profile-tab'>\
+			      <table width= '100%'>\
+			       <thead><tbody><tr>\
+			       <td width ='50%''><table class=' table table-hover table-condensed table-div' id='contact-first' width='100%'>\
+			       </table></td>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='contact-second' width='100%'>\
+			       </table></td>\
+			       </tr></tbody></thead></table>\
+			      </div>\
+			    </div>").appendTo($(me.body).find("#"+d['property_id']+""))
 
 	
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Property Ownership :</th><td class="ng-binding td-div" style="border-top: 1px;">'+d['property_ownership']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Number Of Floors :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['no_of_floors']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Maintenance :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['maintainance_charges']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Security Deposite :</th><td class="ng-b td-divinding td-div"style="border-top: 1px;">'+d['security_deposit']+'</ td-divtd></tr>')
 
-	$(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Property ID :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_id']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Area :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['carpet_area']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Price :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['price']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Location :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['location']+'</td></tr>')
+
+
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div" style="border-top: 1px;>Property Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_title']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">BHK :</th><td class="ng-binding td-div"style="border-top: 1px;"></td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Posting Date :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['posting_date']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Bathroom :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['no_of_bathroom']+'</td></tr>')
+
+
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Age Of Property :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_age']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Furnishing Type :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['furnishing_type']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Society Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['society_name']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Address :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['address']+'</td></tr>')
+
+		$.each(d['amenities'], function(i, j){
+			if(i<4){
+				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+				
+			}
+			else
+				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+
+		})
 	
+		if(d['amenities'].length<4){
+			for(i=0;i<4-(amenities.length);i++){
+				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+			}
+		}
+
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><th class="th-div"style="border-top: 1px;">Agent Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['agent_name']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><th class="th-div"style="border-top: 1px;">Agent No. :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['agent_no']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><th class="th-div"style="border-top: 1px;">Contact Person :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['contact_person']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><th class="th-div"style="border-top: 1px;">Contact No. :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['contact_no']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+
+
+
+
+		$(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
+		
 
 	})
 	me.init_for_checkbox();

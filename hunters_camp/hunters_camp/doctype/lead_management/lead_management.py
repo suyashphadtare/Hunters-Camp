@@ -160,10 +160,10 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 	
 	users =  frappe.db.sql("""select parent from `tabUserRole` where role='System Manager' 
 						and parent!='Administrator'""",as_list=1)
-	frappe.errprint(users)
+	#frappe.errprint(users)
 	if users:
 		for user_id in users:
-			frappe.errprint(user_id[0])
+			#frappe.errprint(user_id[0])
 			create_email(user_id[0],property_type,property_subtype,location,operation,
 						area_minimum,area_maximum,budget_minimum,budget_maximum)
 
