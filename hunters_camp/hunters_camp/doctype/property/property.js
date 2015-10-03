@@ -13,16 +13,34 @@ frappe.ui.form.on("Property", "refresh", function(frm) {
 	
 });
 
+frappe.ui.form.on("Property", "possession_date", function(frm) {
+	var me = this;
+	me.$input.datepicker({
+		dateFormat: 'MM yy'
+	})
+	alert("hshsh")
+	
+});
+
 property.operations = {
 	init:function(frm){
 		var me = this;
 		this.doc = frm.doc
 		if (frappe.route_options){
-			console.log("view")
+			me.enable_property_editing(frm)
 		}
 		else {
 			me.enable_property_posting(frm)
 		}
+		//me.set_mm_yy_format_for_posssession(frm)
+	},
+	set_mm_yy_format_for_posssession:function(frm){
+		console.log(cur_frm.get_field("possession_date").$input)
+		/*$input = cur_frm.get_field("possession_date").$input
+		console.log([$input,"ss"])
+		*//*$($input.find('[data-fieldtype="date"]' )).datepicker({
+						dateFormat: 'MM yy'
+		})*/
 	},
 	enable_property_posting:function(frm){
 		var me = this;
@@ -43,7 +61,7 @@ property.operations = {
 				freeze: true,
 				freeze_message:"Posting Property,Please Wait..",
 				method:"hunters_camp.hunters_camp.doctype.property.property.post_property",
-				args:{doc: frm.doc},
+				args:{doc: frm.doc,sid:frappe.get_cookie('sid')},
 				callback: function(r) {
 					
 				},
@@ -73,11 +91,9 @@ property.operations = {
 				if(docfield.fieldname) {
 					var df = frappe.meta.get_docfield(doc.doctype,
 						docfield.fieldname, frm.doc.name);
-
 					if(df.fieldtype==="Fold") {
 						folded = frm.layout.folded;
 					}
-
 					if(df.reqd && !frappe.model.has_value(doc.doctype, doc.name, df.fieldname)) {
 						has_errors = true;
 						error_fields[error_fields.length] = __(df.label);
@@ -87,7 +103,6 @@ property.operations = {
 							folded = false;
 						}
 					}
-
 				}
 			});
 			if(error_fields.length)
@@ -98,16 +113,62 @@ property.operations = {
 
 		return !has_errors;
 	},
-
-
+	enable_property_editing:function(frm){
+		var me = this;
+		me.manage_primary_operations_for_update(frm)
+		me.add_status_and_tag_to_menu(frm)
+	},
+	add_status_and_tag_to_menu:function(frm){
+		frm.page.add_menu_item(__("Set as Discounted"),function(){},"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Verified"),function(){},"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Invested"),function(){},"icon-file-alt");
+		frm.page.add_menu_item(__("Deactivate Property"),function(){},"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Sold"),function(){},"icon-file-alt");
+	},
+	manage_primary_operations_for_update:function(frm){
+		var me = this;
+		frm.disable_save();
+		frm.page.set_primary_action(__("Update Property"), function() {
+			me.post_property(frm,frm.doc)		
+		});
+	},
 }
 
-frappe.ui.form.on("Property", "refresh", function(frm) {
+frappe.ui.form.on("Property", "add_amenities", function(frm) {
 	var me = this;
-	property.operations.init(frm);
+	if (frm.doc.amenities_link){
+		amenities_list = []
+		if (frm.doc.amenities){
+			amenities_list = (frm.doc.amenities).split(',')
+		}
+		if ((amenities_list.indexOf(frm.doc.amenities_link))<0){
+			amenities_list.push(frm.doc.amenities_link)
+		}
+		frm.doc.amenities = amenities_list.join(',')
+		cur_frm.refresh_field("amenities")
+		frm.doc.amenities_link = ''
+		cur_frm.refresh_field("amenities_link") 	
+	}
 	
 });
 
+frappe.ui.form.on("Property", "add_flat_facilities", function(frm) {
+	var me = this;
+	if (frm.doc.fa_link){
+		ff_list = []
+		if (frm.doc.flat_facilities){
+			ff_list = (frm.doc.flat_facilities).split(',')
+		}
+		if ((ff_list.indexOf(frm.doc.fa_link))<0){
+			ff_list.push(frm.doc.fa_link)
+		}
+		frm.doc.flat_facilities = ff_list.join(',')
+		cur_frm.refresh_field("flat_facilities")
+		frm.doc.fa_link = ''
+		cur_frm.refresh_field("fa_link") 	
+	}
+	
+});
 
 
 
