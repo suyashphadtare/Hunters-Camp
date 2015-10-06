@@ -78,14 +78,26 @@ def get_data():
 		},
 
 		{
-			"label": _("Tools"),
+			"label": _("Property"),
 			"icon": "icon-star",
 			"items": [
 				{
 					"type": "page",
 					"name": "property",
-					"label": _("Property Serach"),
+					"label": _("Property Search"),
 					"icon": "icon-bar-chart",
+				},
+				{
+					"type": "doctype",
+					"name": "Property",
+					"label": _("Post Property"),
+					"description": _("Post Property"),
+				},
+				{
+					"type": "doctype",
+					"name": "Projects",
+					"label": _("Post Project"),
+					"description": _("Post Project"),
 				},
 			]
 		},
