@@ -50,7 +50,6 @@ cur_frm.cscript.address = function(doc,cdt,cdn){
 	erpnext.utils.get_address_display(this.frm, "address","address_details");
 }
 
-
 cur_frm.cscript.customer_address = function(doc,cdt,cdn){
 
 	erpnext.utils.get_address_display(this.frm, "customer_address","customer_address_details");
@@ -77,7 +76,7 @@ cur_frm.cscript.customer_contact = function(doc,cdt,cdn){
 frappe.ui.form.on("Enquiry", "refresh", function(frm) {
 	if (!frm.doc.__islocal){
 		property_details = frm.doc.property_details || [];
-		if(property_details.length > 0 && frm.doc.enquiry_status=='Unprocessed'){
+		if(frm.doc.enquiry_status=='Unprocessed'){
 			frm.add_custom_button(__("Allocate Lead"), function() { new enquiry.Composer({
 				doc: frm.doc,
 				frm: frm,
@@ -177,7 +176,7 @@ enquiry.Composer = Class.extend({
 		var me = this;
 		property = this.doc.property_details || []
 		return frappe.call({
-            method: "hunters_camp.hunters_camp.doctype.enquiry.enquiry.create_lead_management",
+            method: "hunters_camp.hunters_camp.doctype.enquiry.enquiry.create_lead_management_form",
             args:{ 
             		source_name:me.doc.name,
             		assign_to: me.dialog.fields_dict.assign_to.get_value()
