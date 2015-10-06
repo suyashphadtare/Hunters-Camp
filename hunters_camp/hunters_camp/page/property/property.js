@@ -402,7 +402,7 @@ Property = Class.extend({
        <table width= '100%'>\
        <thead><tbody><tr>\
        <td width ='50%''><table width='100%'>\
-       <p><tr><td><b>Property ID:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['property_id']+"</td></tr></p>\
+       <p><tr><td><b>Property ID:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<a class='pv' id="+d['property_id']+">"+d['property_id']+"</a></td></tr></p>\
        <p><tr><td><b>Area:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['carpet_area']+"</td></tr></p>\
        <p><tr><td><b>Price:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['price']+"</td></tr></p>\
        <p><tr><td><b>Location:</b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;"+d['location']+"</td></tr></p>\
@@ -479,6 +479,25 @@ Property = Class.extend({
 
 	})
 	me.init_for_checkbox();
+
+	$('.pv').click(function(){
+		return frappe.call({
+			type: "GET",
+			method:"hunters_camp.hunters_camp.doctype.property.property.view_property",
+			args: {
+				"property_id":$(this).attr('id'),
+				"sid":frappe.get_cookie("sid")
+			},
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc) {
+					var doc = frappe.model.sync(r.message);
+					frappe.route_options = {"doc":doc};
+					frappe.set_route("Form",'Property','Property');
+				}
+			}
+		})
+	})
 
 	$('#btn_prev').click(function(){
 		if (page > 1) {

@@ -1,5 +1,6 @@
 frappe.provide("frappe.ui.form");
 frappe.provide("property")
+{% include 'hunters_camp/hunters_camp/doctype/property/upload.js' %};
 /*
 	Page to Manage Property posting and view property
 	data will be saved on Elastic search and shown by calling api
@@ -7,18 +8,16 @@ frappe.provide("property")
 	it should have menu items for various operations and update button.
 	else it should have post property button.
 */
+
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
 	property.operations.init(frm);
 	
 });
-
-frappe.ui.form.on("Property", "possession_date", function(frm) {
+frappe.ui.form.on("Property", "possession", function(frm) {
 	var me = this;
-	me.$input.datepicker({
-		dateFormat: 'MM yy'
-	})
-	alert("hshsh")
+	frm.toggle_reqd("month", frm.doc.possession===0);
+	frm.toggle_reqd("year", frm.doc.possession===0);
 	
 });
 
@@ -27,20 +26,11 @@ property.operations = {
 		var me = this;
 		this.doc = frm.doc
 		if (frappe.route_options){
-			me.enable_property_editing(frm)
+			me.enable_property_editing(frm,frappe.route_options["doc"])
 		}
 		else {
 			me.enable_property_posting(frm)
 		}
-		//me.set_mm_yy_format_for_posssession(frm)
-	},
-	set_mm_yy_format_for_posssession:function(frm){
-		console.log(cur_frm.get_field("possession_date").$input)
-		/*$input = cur_frm.get_field("possession_date").$input
-		console.log([$input,"ss"])
-		*//*$($input.find('[data-fieldtype="date"]' )).datepicker({
-						dateFormat: 'MM yy'
-		})*/
 	},
 	enable_property_posting:function(frm){
 		var me = this;
@@ -63,7 +53,11 @@ property.operations = {
 				method:"hunters_camp.hunters_camp.doctype.property.property.post_property",
 				args:{doc: frm.doc,sid:frappe.get_cookie('sid')},
 				callback: function(r) {
-					
+					if (!r.exec){
+						frappe.msgprint(r.message.message)
+						frm.doc.property_id = r.message.property_id
+						refresh_field("property_id")
+					}
 				},
 				always: function() {
 					frappe.ui.form.is_saving = false;
@@ -110,20 +104,22 @@ property.operations = {
 					? (__(frappe.meta.docfield_map[doc.parenttype][doc.parentfield].label) + ' ('+ __("Table") + ')')
 					: __(doc.doctype))]) + '\n' + error_fields.join('\n'));
 		});
-
 		return !has_errors;
 	},
-	enable_property_editing:function(frm){
+	enable_property_editing:function(frm,doc){
 		var me = this;
-		me.manage_primary_operations_for_update(frm)
+		me.add_data_to_form(frm,doc)
+		//me.manage_primary_operations_for_update(frm)
 		me.add_status_and_tag_to_menu(frm)
+
 	},
 	add_status_and_tag_to_menu:function(frm){
-		frm.page.add_menu_item(__("Set as Discounted"),function(){},"icon-file-alt");
-		frm.page.add_menu_item(__("Set as Verified"),function(){},"icon-file-alt");
-		frm.page.add_menu_item(__("Set as Invested"),function(){},"icon-file-alt");
-		frm.page.add_menu_item(__("Deactivate Property"),function(){},"icon-file-alt");
-		frm.page.add_menu_item(__("Set as Sold"),function(){},"icon-file-alt");
+		var me = this;
+		frm.page.add_menu_item(__("Set as Discounted"),function(){ me.update_tag("Discounted",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Verified"),function(){ me.update_tag("Verified",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Invested"),function(){ me.update_tag("Invested",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Deactivate Property"),function(){ me.update_status("Deactivated",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Sold"),function(){ me.update_status("Sold",frm) },"icon-file-alt");
 	},
 	manage_primary_operations_for_update:function(frm){
 		var me = this;
@@ -132,6 +128,43 @@ property.operations = {
 			me.post_property(frm,frm.doc)		
 		});
 	},
+	add_data_to_form:function(frm,doc){
+		$.each(frappe.meta.docfield_list["Property"] || [], function(i, docfield) {
+			var df = frappe.meta.get_docfield(doc.doctype,
+				docfield.fieldname, frm.doc.name);
+			frm.doc[docfield.fieldname] = doc[0][docfield.fieldname]
+			refresh_field(docfield.fieldname)
+		});
+	},
+	update_tag:function(tag,frm){
+		frappe.call({
+			freeze: true,
+			freeze_message:"Updaing Proeprty Tag,Please Wait..",
+			method:"hunters_camp.hunters_camp.doctype.property.property.update_tag",
+			args:{doc: frm.doc,sid:frappe.get_cookie('sid'),"tag":tag},
+			callback: function(r) {
+				
+			},
+			always: function() {
+				frappe.ui.form.is_saving = false;
+			}
+		})
+	},
+	update_status:function(status,frm){
+		frappe.call({
+			freeze: true,
+			freeze_message:"Updaing Proeprty Status,Please Wait..",
+			method:"hunters_camp.hunters_camp.doctype.property.property.update_status",
+			args:{doc: frm.doc,sid:frappe.get_cookie('sid'),"status":status},
+			callback: function(r) {
+				
+			},
+			always: function() {
+				frappe.ui.form.is_saving = false;
+			}
+		})
+	}
+
 }
 
 frappe.ui.form.on("Property", "add_amenities", function(frm) {
@@ -170,5 +203,102 @@ frappe.ui.form.on("Property", "add_flat_facilities", function(frm) {
 	
 });
 
+frappe.ui.form.on("Property", "attach_image", function(frm) {
+	var me = this;
+	this.dialog = new frappe.ui.Dialog({
+		title: __(__("Upload")),
+		fields: [
+			{fieldtype:"HTML", fieldname:"upload_area"},
+		]
+	});
+	this.dialog.show();
+	this.dialog.get_field("upload_area").$wrapper.empty();
+	
+	this.upload_options = {
+		parent: this.dialog.get_field("upload_area").$wrapper,
+		args: {from_form: 1,doctype: frm.doctype,docname: frm.docname},
+		options: "Image",
+		btn: this.dialog.set_primary_action(__("Attach")),
+		on_no_attach: function() {
+			msgprint(__("Please attach a file or set a URL"));
+		},
+		callback: function(file_data) {
+			me.process_images(frm,file_data)
+			me.display_thumbnail(frm)
+			me.dialog.hide();
+		},
+		onerror: function() {
+			me.dialog.hide();
+		},
+	}
+	
+	hc.upload.make(this.upload_options);
+	
+});
+
+process_images = function(frm,file_data){
+	var me = this;
+	if (file_data){
+		if (me.check_file_exists(frm,file_data)){
+			image_list = frm.doc.property_photos
+			show_list = []
+			if (image_list){
+				image_list.push(file_data)
+				frm.doc.property_photos = image_list
+				if (frm.doc.photo_names)
+					show_list = (frm.doc.photo_names).split(',')
+					show_list.push(file_data["file_name"])
+					frm.doc.photo_names = show_list.join(',')
+
+			}
+			else {
+				img_list = []
+				img_list.push(file_data)
+				frm.doc.property_photos = img_list
+				show_list.push(file_data["file_name"])
+				frm.doc.photo_names = show_list.join(',')
+			}
+			refresh_field(["property_photos","photo_names"])
+		}
+	}
+}
+display_thumbnail =function(frm){
+	wrapper = $(cur_frm.get_field("attachment_display").wrapper)
+	wrapper.empty()
+	if (frm.doc.property_photos){
+		image_list = frm.doc.property_photos
+		if(image_list){
+			$.each(image_list,function(i,img){
+				$("<img></img>",{
+	 				class : "imageThumb",
+	 				src : img["file_data"],
+	 				title : img["file_name"]
+	 			}).appendTo(wrapper);
+			});
+		}
+	}
+}
 
 
+check_file_exists = function(frm,file_data){
+	var res = true
+	if (frm.doc.property_photos){
+		image_list = frm.doc.property_photos
+		if(image_list){
+			$.each(image_list,function(i,img){
+				if (img["file_name"] == file_data["file_name"]){
+					res = false
+				}
+			});
+		}
+	}
+	return res
+}
+
+cur_frm.fields_dict.property_subtype.get_query = function(doc) {
+	return{
+		filters:{
+			'property_type': doc.property_type
+		}
+	}
+}

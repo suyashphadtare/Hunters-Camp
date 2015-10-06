@@ -1,0 +1,11 @@
+
+input[type="file"] {
+ 
+ display:block;
+}
+.imageThumb {
+ 	max-height: 75px;
+ 	border: 2px solid;
+ 	margin: 10px 10px 0 0;
+ 	padding: 1px;
+ }
