@@ -16,6 +16,7 @@ Property = Class.extend({
 		this.wrapper = wrapper;
 		this.body = $(this.wrapper).find(".user-settings");
 		this.filters = {};
+		this.page=1
 		this.property_list = []
 		this.make();
 		this.refresh();
@@ -83,16 +84,12 @@ Property = Class.extend({
 						disp_status:"Read"
 		});
 
-		$('[data-fieldname=lead_management]').css('display','none')
-
 		me.search = me.wrapper.page.add_field({
 						fieldname: "search",
 						label: __("Search Property"),
 						fieldtype: "Button",
 						icon: "icon-search"
 		});
-
-		
 
 		me.advance_filters = me.wrapper.page.add_field({
 						fieldname: "advance_filters",
@@ -108,7 +105,17 @@ Property = Class.extend({
 						icon: "icon-share-sign"
 		});
 
-		
+		me.tag = me.wrapper.page.add_field({
+						fieldname: "tag",
+						label: __("Apply Tag"),
+						fieldtype: "Button",
+						icon: "icon-tag"
+		});
+
+		$('[data-fieldname=tag]').css('display','none')
+		$('[data-fieldname=share]').css('display','none')
+		$('[data-fieldname=lead_management]').css('display','none')
+
 		// SEARCH CLICK
 		me.search.$input.on("click", function() {
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
@@ -127,7 +134,7 @@ Property = Class.extend({
 						"area_maximum": me.filters.area_max.$input.val(),
 						"records_per_page": 10,
 						"page_number":1,
-						"user_id": 'Guest',
+						//"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
 					},
@@ -136,6 +143,7 @@ Property = Class.extend({
 							//console.log(["serach property",r.message])
 							//me.render(r.message['data'],10)
 							if(r.message['total_records']>0){
+								console.log(["search_property",r.message['data']])
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
@@ -398,26 +406,18 @@ Property = Class.extend({
 			$.each(filter_ammenities, function(i,n) {
 			    x.push(n);
 			});
-	 		//console.log(["filter_ammenities",filter_ammenities])
-	 		
-	 		//console.log(typeof(fields.amenities.input.value))
 	 		$.each(final_result, function(k, v) {
 	 			flag_new=0
 	 			amenities=[]
 				$.each(v['amenities'], function(i, j) {
 						amenities.push(j['name'])
 				})
-				//console.log(["amenities",amenities])
 				$.each(filter_ammenities, function(k,f) {
 					
 					$.each(amenities, function(k,a) {
 						console.log(["aaaa",typeof(a)])
 						if(f.toLowerCase()==a.toLowerCase()){
-							//console.log(["f",f])
-							//console.log(["a",a])
-							//console.log(v['property_id'])
 							flag_new+=1
-							console.log(flag_new)
 						}
 					})
 					
@@ -451,7 +451,7 @@ Property = Class.extend({
 
 	});
 
-	
+	// SHARE FEATURE..............................................
 	me.share.$input.on("click", function() {
 		var final_property_result = {}
 		if(me.prop_list){
@@ -492,12 +492,7 @@ Property = Class.extend({
 
 					});
 					fields=d.fields_dict
-				// 	if(fields.user.$input.val()){
-				// 		var filter = /^([a-zA-Z0-9_\.\-])+\@(([a-zA-Z0-9\-])+\.)+([a-zA-Z0-9]{2,4})+$/;
-				// 		if (!filter.test(fields.user.$input.val())) {
-    // 						alert('Please provide a valid email address');
-				// 	}
-				// }
+				
 					d.show();
 					$('[data-fieldname=share_property]').css('display','none')
 
@@ -534,10 +529,97 @@ Property = Class.extend({
 		else
 			msgprint("There is no any property is available to share.")
 
-	})
+	});
 	
-	
+	// TAG FEATURE...............................................................................
+	me.tag.$input.on("click", function() {
+		tag_list=[]
+		frappe.route_options=[]
+		discount_percentage=0.0
+		var d = new frappe.ui.Dialog({
+			title: __("Apply Tags On Property"),
+			fields: [
+				{fieldtype:"Check", label:__("Verified"),
+					 fieldname:"verified"},
+				{fieldtype:"Check", label:__("Invested"),
+					fieldname:"invested"},
+				{fieldtype:"Check", label:__("Discounted"),
+				 fieldname:"discounted"},
 
+				{fieldtype:"Int", label:__("Discounted Percentage"),
+				 fieldname:"discount_percentage"},
+
+				 {fieldtype:"Button", label:__("Apply Tag"),
+				 fieldname:"apply_tag"}
+
+			]
+
+		});
+
+		fields=d.fields_dict
+
+		$('[data-fieldname=discount_percentage]').css('display','none')
+		d.show();
+		$(fields.verified.input).click(function() {
+			if ($(fields.verified.$input).prop('checked')==true){
+				tag_list['Verified']=1
+			}
+			else if($(fields.verified.$input).prop('checked')==false){
+				delete tag_list['Verified']
+			}
+		})
+
+		$(fields.invested.input).click(function() {
+			if ($(fields.invested.$input).prop('checked')==true){
+				tag_list['Invested']=1
+			}
+			else if($(fields.invested.$input).prop('checked')==false){
+				delete tag_list['Invested']
+			}
+		})
+
+		$(fields.discounted.input).click(function() {
+			if ($(fields.discounted.$input).prop('checked')==true){
+				$('[data-fieldname=discount_percentage]').css('display','block')
+				tag_list['Discounted']=1
+				
+			}
+			else if($(fields.discounted.$input).prop('checked')==false){
+				$('[data-fieldname=discount_percentage]').css('display','none')
+				delete tag_list['Discounted']
+				discount_percentage=0.0
+			}
+		})
+
+
+		$(fields.apply_tag.input).click(function() {
+			if((Object.keys(tag_list).length)>0){
+				$.each(me.property_list, function(i, j) {
+					 frappe.call({
+								method:'propshikari.versions.v1.update_property_tag',
+								'async': false,
+								args :{
+									"data":{
+									"property_id": j,
+									"tags": Object.keys(tag_list),
+									"discount_percentage": parseInt(fields.discount_percentage.$input.val()),
+									"user_id": 'Guest',
+									"sid": 'Guest'
+								  },
+								},
+								callback: function(r,rt) {
+									if(!r.exc) {
+										if(i+1==me.property_list.length){
+											$('[data-fieldname=search]').trigger("click");	
+										}
+										d.hide();		
+									}
+								},
+						});	
+				})
+			}
+		})	
+	});
 
 	// bind change event
 	// $.each(me.filters, function(k, f) {
@@ -547,10 +629,9 @@ Property = Class.extend({
 	// });
 
 	},
-
 	refresh: function() {
 		var me = this;
-
+		
 		if(!frappe.route_options){
 			me.filters.property_type.input.value= 'Residential'
 		me.filters.property_subtype.input.value='Family Home'
@@ -574,14 +655,13 @@ Property = Class.extend({
 		else
 			$('[data-fieldname=search]').css('display','block')
 
+
 		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
 	},
 	
 	render: function(prop_list,total_records) {
-		console.log("in render")
-		console.log(total_records)
-		console.log(prop_list)
 		var me = this;
+		//me.body.innerHTML = ''
 		var current_page = 1;
 		var records_per_page = 10;
 		var property_data
@@ -591,6 +671,7 @@ Property = Class.extend({
 		this.final_data = []
 		this.body.empty();
 		this.prop_list=prop_list
+		
 		this.changePage(1,numPages,prop_list,records_per_page,prop_list.length,flag='Normal');
 		
 
@@ -655,15 +736,11 @@ Property = Class.extend({
 		$.each(values, function(i, d) {
 			var amenities = []
 			var amenities_dict = new Array();
-			//console.log(d['total_records'])
 			$.each(d['amenities'], function(i, j) {
 				if(d.amenities)
 					if(j['name'])
 						amenities.push(j['name'])
 			})
-
-			// amenities_dict[j['name']]=j['']
-			// console.log(amenities_dict)
 
 			$("<li id='property_list' list-style-position: inside;><div class='col-md-12 property-div'>\
 				<div id='image' class='col-md-2 property-image' style='border: 1px solid #d1d8dd;'>  \
@@ -680,13 +757,14 @@ Property = Class.extend({
 				$("<img id='theImg' src="+d['property_photo']+"/ width='60%' height='60%' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 			else
 				$("<img id='theImg' src='/files/Home-icon.png'/ width='60%' height='60%' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
-				//$("<div class='ui-icon ui-icon-home'></div>").appendTo($(me.body).find("#"+i+""))
+				
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist'>\
 			      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' style='height:35px;margin-top:-3px;'role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'><i class='icon-li icon-file'></i>&nbsp;&nbsp;General Details</a></li>\
 			      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' style='height:35px;margin-top:-3px;' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-book'></i>&nbsp;&nbsp;More Details</a></li>\
 			      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab'  style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-building'></i>&nbsp;&nbsp;Amenities</a></li>\
 			      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-user'></i>&nbsp;&nbsp;Contacts</a></li>\
+			      <li role='presentation' class=''><a href='#tag"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-tag'></i>&nbsp;&nbsp;Tags</a></li>\
 			      <div id="+d['property_id']+" style='float:right;'>\
 				<input type='checkbox' class='cb' />\
 				</div></ul></div>\
@@ -728,6 +806,15 @@ Property = Class.extend({
 			       </table></td>\
 			       </tr></tbody></thead></table>\
 			      </div>\
+			      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='tag"+""+i+"' aria-labelledby='profile-tab'>\
+			      <table width= '100%'>\
+			       <thead><tbody><tr>\
+			       <td width ='50%''><table class=' table table-hover table-condensed table-div' id='tag-first' width='100%'>\
+			       </table></td>\
+			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='tag-second' width='100%'>\
+			       </table></td>\
+			       </tr></tbody></thead></table>\
+			      </div>\
 			    </div>").appendTo($(me.body).find("#"+d['property_id']+""))
 
 	
@@ -742,7 +829,7 @@ Property = Class.extend({
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Location :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['location']+'</td></tr>')
 
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div" style="border-top: 1px;>Property Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_title']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Property Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_title']+'</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">BHK :</th><td class="ng-binding td-div"style="border-top: 1px;"></td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Posting Date :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['posting_date']+'</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Bathroom :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['no_of_bathroom']+'</td></tr>')
@@ -764,7 +851,7 @@ Property = Class.extend({
 		})
 	
 		if(d['amenities'].length<4){
-			for(i=0;i<4-(amenities.length);i++){
+			for(i=0;i<4-(d['amenities'].length);i++){
 				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 			}
 		}
@@ -779,7 +866,21 @@ Property = Class.extend({
 		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 
+		$.each(d['tag'], function(i, j){
+			if(i<4){
+				$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
+				
+			}
+			else
+				$($(me.body).find("#"+d['property_id']+"")).find("#tag-second").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
 
+		})
+	
+		if(d['tag'].length<4){
+			for(i=0;i<4-(d['tag'].length);i++){
+				$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+			}
+		}
 
 
 		$(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
@@ -811,7 +912,6 @@ Property = Class.extend({
 					},
 					callback: function(r,rt) {
 						if(!r.exc) {
-							console.log(["message",r.message['data']])
 							if(r.message['data'].length>0){
 								if(me.lead_management.$input.val().length != 0){
 									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal');
@@ -829,7 +929,6 @@ Property = Class.extend({
     $('#btn_next').click(function(){
     	if (page < numPages) {
        	 	page++;
-       	 	console.log(["page",page])
        	 	return frappe.call({
 					method:'propshikari.versions.v1.search_property',
 					args :{
@@ -850,7 +949,6 @@ Property = Class.extend({
 					},
 					callback: function(r,rt) {
 						if(!r.exc) {
-							console.log(["message",r.message['data']])
 							if(r.message['data'].length>0){
 								me.prop_list=r.message['data']
 								me.property_list=[]
@@ -901,9 +999,15 @@ Property = Class.extend({
 
 	init_for_checkbox: function(){
 		var me = this;
+		me.flag=0
 		$('.cb').click(function(){
 			if ($(this).prop('checked')==true){ 
 				me.property_list.push($(this).parent().attr("id"))
+				if(me.property_list.length==1){
+					$('[data-fieldname=tag]').css('display','block')
+					$('[data-fieldname=share]').css('display','block')
+
+				}
 				
 			}
 			else if($(this).prop('checked')==false){
@@ -911,16 +1015,19 @@ Property = Class.extend({
 				me.property_list = jQuery.grep(me.property_list, function(value) {
 				  return value != removeItem;
 				});
+				if(me.property_list.length==0){
+					$('[data-fieldname=tag]').css('display','none')
+					$('[data-fieldname=share]').css('display','none')
+				}
 
 			}
+			
 	});
-
 	
 	},
 
 	show_unique_properties:function(page,numPages,data,records_per_page,length,flag){
 		var me=this
-		console.log("show_unique_properties")
 		result=data
 		return frappe.call({
 			method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_diffrent_property',

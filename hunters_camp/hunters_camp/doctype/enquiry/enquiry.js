@@ -171,7 +171,6 @@ enquiry.Composer = Class.extend({
 	create_lead_management: function(){
 		var me = this;
 		property = this.doc.property_details || []
-		//console.log(me.doc.name)
 		return frappe.call({
             method: "hunters_camp.hunters_camp.doctype.enquiry.enquiry.create_lead_management_form",
             args:{ 
