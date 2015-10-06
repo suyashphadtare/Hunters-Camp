@@ -2,6 +2,7 @@
 // License: GNU General Public License v3. See license.txt
 
 
+
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 
 $.extend(cur_frm.cscript, new lead_management.Composer({
@@ -218,7 +219,8 @@ lead_management.Composer = Class.extend({
 
 
 frappe.ui.form.on("Lead Management", "refresh", function(frm) {
-	if (!frm.doc.__islocal){
+	if (!frm.doc.__islocal)// && !frm.doc.lead_status=='Closed')
+	{
 		property_details = frm.doc.property_details || [];
 		frm.add_custom_button(__("Search Property"), function() { 
 			make_dashboard(frm.doc)
@@ -249,7 +251,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						if(!r.exc) {
 							result=r.message['data']
 							total_records = r.message['total_records']
-							console.log(["total",r.message['total_records']])
 							if(r.message['total_records']>0){
 								var cl=doc.property_details || [ ]
 								if(cl.length>0){
@@ -261,20 +262,19 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										},
 										callback: function(r,rt) {
 											var final_property_result = {}
-											console.log(["r message",r.message])
 											if(r.message){
 												$.each(r.message['property_id'],function(i, property){
-		  											final_property_result[(property['property_id'])]=''
+		  											final_property_result[(property['property_id'].trim())]=''
 		  											
 												});
+
 												final_result = jQuery.grep(result, function( d ) {
 		 											return !(d['property_id'] in final_property_result)
 												});
-												if(final_result!=null)
+
+												if(final_result.length>0){
 													final_result=final_result
-												else
-													final_result=result
-												frappe.route_options = {
+													frappe.route_options = {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
@@ -284,10 +284,31 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"budget_maximum": doc.budget_maximum,
 													"area_minimum": doc.area_minimum,
 													"area_maximum": doc.area_maximum,
-													"total_records": total_records,
+													"total_records":total_records,
 													"data": final_result
 												};
 												frappe.set_route("property", "Hunters Camp");
+												}
+												else {
+													return frappe.call({
+														method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
+														args :{
+															"property_type": doc.property_type,
+															"property_subtype": doc.property_subtype,
+															"operation":doc.operation,
+															"location": doc.location,
+															"budget_minimum": doc.budget_minimum,
+															"budget_maximum": doc.budget_maximum,
+															"area_minimum": doc.area_minimum,
+															"area_maximum": doc.area_maximum,
+														},
+														callback: function(r,rt) {
+															msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
+															
+														},
+													})
+												}
+												
 										  }
 										},
 									});		
@@ -308,7 +329,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 												frappe.set_route("property", "Hunters Camp");
 							}
 							else{
-								console.log("hi")// email to admin
+								// email to admin
 								return frappe.call({
 									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
 									args :{
@@ -322,7 +343,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"area_maximum": doc.area_maximum,
 									},
 									callback: function(r,rt) {
-										msgprint("There is no any properties found aginst the specified criteria so,email with property search criteria is sent to administartor.")
+										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
 										
 									},
 								})
