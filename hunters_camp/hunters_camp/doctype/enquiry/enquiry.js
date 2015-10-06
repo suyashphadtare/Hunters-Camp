@@ -3,14 +3,22 @@
 
 
 // Return query for getting contact name in link field
-cur_frm.fields_dict['address'].get_query = function(doc) {
+/*cur_frm.fields_dict['address'].get_query = function(doc) {
 	return {
 		filters: {
 			
 			"lead": doc.lead
 		}
 	}
+}*/
+cur_frm.fields_dict.address.get_query = function(doc) {
+	return{
+		filters:{
+			'lead': doc.lead
+		}
+	}
 }
+
 
 // Return query for getting customer address name in link field
 cur_frm.fields_dict['customer_address'].get_query = function(doc) {
