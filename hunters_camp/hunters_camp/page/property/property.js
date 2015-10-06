@@ -801,7 +801,7 @@ Property = Class.extend({
 		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Maintenance :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['maintainance_charges']+'</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Security Deposite :</th><td class="ng-b td-divinding td-div"style="border-top: 1px;">'+d['security_deposit']+'</ td-divtd></tr>')
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Property ID :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_id']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Property ID :</th><td class="ng-binding td-div"style="border-top: 1px;"><a class="pv" id="'+d['property_id']+'">'+d['property_id']+'<a></td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Area :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['carpet_area']+'</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Price :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['price']+'</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Location :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['location']+'</td></tr>')
@@ -866,6 +866,24 @@ Property = Class.extend({
 
 	})
 	me.init_for_checkbox();
+	$('.pv').click(function(){
+		return frappe.call({
+			type: "GET",
+			method:"hunters_camp.hunters_camp.doctype.property.property.view_property",
+			args: {
+				"property_id":$(this).attr('id'),
+				"sid":frappe.get_cookie("sid")
+			},
+			freeze: true,
+			callback: function(r) {
+				if(!r.exc) {
+					var doc = frappe.model.sync(r.message);
+					frappe.route_options = {"doc":doc};
+					frappe.set_route("Form",'Property','Property');
+				}
+			}
+		})
+	})
 
 	$('#btn_prev').click(function(){
 		if (page > 1) {
@@ -1058,5 +1076,4 @@ Property = Class.extend({
 
 
 })
-
 

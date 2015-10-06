@@ -1,0 +1,4 @@
+execute:import unidecode # new requirement
+
+execute:frappe.db.sql("update `tabUser` set user_id='Guest' where name='Guest' ")
+execute:frappe.db.sql("update `tabUser` set user_id='Administrator' where name='Administrator' ")
