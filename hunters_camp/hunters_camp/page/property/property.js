@@ -120,7 +120,6 @@ Property = Class.extend({
 		me.search.$input.on("click", function() {
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
-					//method:'hunters_camp.hunters_camp.page.property.property.get_property',
 					method:'propshikari.versions.v1.search_property',
 					args :{
 						"data":{
@@ -140,36 +139,19 @@ Property = Class.extend({
 					},
 					callback: function(r,rt) {
 						if(!r.exc) {
-							//console.log(["serach property",r.message])
-							//me.render(r.message['data'],10)
+							console.log(["serach property",r.message])
 							if(r.message['total_records']>0){
 								console.log(["search_property",r.message['data']])
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
-								return frappe.call({
-									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
-									args :{
-										"property_type": me.filters.property_type.$input.val(),
-										"property_subtype": me.filters.property_subtype.$input.val(),
-										"operation":me.filters.operation.$input.val(),
-										"location": me.filters.location.$input.val(),
-										"budget_minimum": me.filters.budget_min.$input.val(),
-										"budget_maximum": me.filters.budget_max.$input.val(),
-										"area_minimum": me.filters.area_min.$input.val(),
-										"area_maximum": me.filters.area_max.$input.val()
-									},
-									callback: function(r,rt) {
-										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
-									},
-								})
+								msgprint("Property is not available related to search criteria which you have specified.")
 							}		
 					}
 
 				},
 				
 			});
-
 	}
 	else
 		msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE are the amnadatory fields tos erach criteria please specify it")
@@ -177,10 +159,9 @@ Property = Class.extend({
 	});
 
 	
-	// ADVANCE FILTERING
+	// ADVANCE FILTERING...................................................................................
 	me.advance_filters.$input.on("click", function() {
 		if(me.prop_list){
-			console.log(me.prop_list)
 			var d = new frappe.ui.Dialog({
 
 				title: __("Add Advance filters"),
@@ -216,26 +197,28 @@ Property = Class.extend({
 			
 			fields=d.fields_dict
 			$('[data-fieldname=submit]').css('display','none')
+
 			fields.property_type.input.value=me.filters.property_type.$input.val()
 			fields.property_subtype.input.value=me.filters.property_subtype.$input.val()
 			fields.operation.input.value=me.filters.operation.$input.val()
 			fields.minimum_budget.input.value=me.filters.budget_min.$input.val()
-			fields.maximum_budget.input.value=me.filters.budget_max.$input.val()	
+			fields.maximum_budget.input.value=me.filters.budget_max.$input.val()
+
 			$('[data-fieldname=submit]').css('display','block')
 			d.show();
+
 			values = ['property_type','property_subtype','operation','transaction_type','age_of_property','listed_by']
 			final_result=[]
 			$(fields.submit.input).click(function() {
-			
 				this.filter_object={}
 				var me1=this
+
 				$.each(values, function(i, d) {
 					if(fields[d].input.value)
 						me1.filter_object[d]=fields[d].input.value
 				})
 
 				this.filter_length=Object.keys(this.filter_object).length
-				console.log(this.filter_length)
 				var arrByID = me.prop_list.filter(filterByID);
 				function filterByID(obj) {
 					var flag=0
@@ -247,7 +230,6 @@ Property = Class.extend({
 							
 					})
 					if(flag==me1.filter_length){
-						//console.log(["obj",obj])
 						return true
 					}
 					else
@@ -267,8 +249,6 @@ Property = Class.extend({
 	 	 			if(date1>date2){
 	 	 				posting_list.push(v)
 	 	 			}
-	 	 			else
-	 	 				console.log("done")
 	 	 			
 				});
 				final_result=posting_list
@@ -316,7 +296,6 @@ Property = Class.extend({
 		 	 	}
 	 	 	}
 	 	 	else if(fields.minimum_budget.input.value && fields.maximum_budget.input.value){
-	 	 		console.log("mimimum Maximimum budget")
 	 	 		if(fields.minimum_budget.input.value=='25Lac' || fields.minimum_budget.input.value=='50Lac' || fields.minimum_budget.input.value=='75Lac' ||fields.minimum_budget.input.value=='0'){
 	 	 			min_amount=fields.minimum_budget.input.value.split("Lac")[0]*100000
 	 	 		}
@@ -355,7 +334,6 @@ Property = Class.extend({
 				} 
 
 				today = dd+'-'+mm+'-'+yyyy;
-	 	 		console.log(["tday",typeof(today)])
 
 	 	 	if(fields.possession.input.value){
 	 	 		if(fields.possession.input.value=='Ready'){
@@ -367,7 +345,6 @@ Property = Class.extend({
 	 	 	}
 	 	 	else if(fields.possession.input.value=='5 Months'){
 	 	 		$.each(final_result, function(k,v) {
-	 	 			 ///http://stackoverflow.com/questions/2536379/difference-in-months-between-two-dates-in-javascript
 	 	 			if(v['possession_date']){
 		 	 			var today_date=new Date(today.split("-").reverse().join("-"));//Remember, months are 0 based in JS
 						var past_date=new Date(v['possession_date'].split("-").reverse().join("-"));
@@ -415,7 +392,6 @@ Property = Class.extend({
 				$.each(filter_ammenities, function(k,f) {
 					
 					$.each(amenities, function(k,a) {
-						console.log(["aaaa",typeof(a)])
 						if(f.toLowerCase()==a.toLowerCase()){
 							flag_new+=1
 						}
@@ -425,7 +401,6 @@ Property = Class.extend({
 				if(flag_new==filter_ammenities.length)
 						amenities_list.push(v)
 			})
-			//console.log(["amenities_list",amenities_list])
 			final_result=amenities_list
 	 	}
 	 	else{
@@ -609,6 +584,8 @@ Property = Class.extend({
 								},
 								callback: function(r,rt) {
 									if(!r.exc) {
+										console.log(["callback"])
+										console.log(["message",r.message])
 										if(i+1==me.property_list.length){
 											$('[data-fieldname=search]').trigger("click");	
 										}
@@ -617,6 +594,7 @@ Property = Class.extend({
 								},
 						});	
 				})
+				console.log("end for lopp")
 			}
 		})	
 	});
