@@ -109,7 +109,7 @@ property.operations = {
 	enable_property_editing:function(frm,doc){
 		var me = this;
 		me.add_data_to_form(frm,doc)
-		//me.manage_primary_operations_for_update(frm)
+		me.manage_primary_operations_for_update(frm)
 		me.add_status_and_tag_to_menu(frm)
 
 	},
@@ -124,9 +124,9 @@ property.operations = {
 	manage_primary_operations_for_update:function(frm){
 		var me = this;
 		frm.disable_save();
-		frm.page.set_primary_action(__("Update Property"), function() {
+		/*frm.page.set_primary_action(__("Update Property"), function() {
 			me.post_property(frm,frm.doc)		
-		});
+		});*/
 	},
 	add_data_to_form:function(frm,doc){
 		$.each(frappe.meta.docfield_list["Property"] || [], function(i, docfield) {

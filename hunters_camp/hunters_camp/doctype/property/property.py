@@ -40,6 +40,7 @@ def view_property(property_id,sid):
 	data = json.dumps(doc)
 	doc = api.get_property_of_given_id(data)
 	doclist = get_mapped_doc(doc["data"],{})
+	print doclist.city
 	doclist.city_link = frappe.db.get_value("City",{"city_name":doclist.city},"name")
 	doclist.location_link = frappe.db.get_value("Area",{"area":doclist.location},"name")
 	return doclist

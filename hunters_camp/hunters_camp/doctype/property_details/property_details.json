@@ -11,12 +11,14 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
-   "in_list_view": 1, 
+   "in_list_view": 0, 
    "label": "Property ID", 
    "no_copy": 0, 
    "permlevel": 0, 
@@ -31,6 +33,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_type", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -51,6 +55,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_subtype", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -71,6 +77,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "bhk", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -92,6 +100,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -112,6 +122,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "posting_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -132,14 +144,17 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "location", 
-   "fieldtype": "Data", 
+   "fieldtype": "Link", 
    "hidden": 0, 
    "ignore_user_permissions": 0, 
    "in_filter": 0, 
    "in_list_view": 0, 
    "label": "Location", 
    "no_copy": 0, 
+   "options": "Area", 
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
@@ -152,6 +167,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_6", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -171,6 +188,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "address", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -191,6 +210,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "area", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -211,6 +232,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "price", 
    "fieldtype": "Currency", 
    "hidden": 0, 
@@ -232,6 +255,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_status", 
    "fieldtype": "Select", 
    "hidden": 1, 
@@ -253,6 +278,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "bathroom", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -273,6 +300,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "lead_management_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -299,7 +328,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 1, 
- "modified": "2015-09-23 13:23:19.488646", 
+ "modified": "2015-10-06 17:53:17.527892", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Property Details", 
