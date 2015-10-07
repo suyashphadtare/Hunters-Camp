@@ -33,8 +33,8 @@ def make_visit(doc=None,lead=None,lead_name=None,mobile_no=None,address=None,add
 		name = schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_details,customer,customer_contact,contact_details,
 				customer_contact_no,customer_address,customer_address_details,enquiry_id,consultant,
 				enquiry_from,assign_to,property_id,property_name,area,price,property_address,
-				bhk,bathroom,posting_date,button_name,completion_date,location)
-		update_se_status_in_leadform(property_doc)
+				bhk,bathroom,posting_date,button_name,completion_date,property_doc,location)
+		update_se_status_in_leadform(property_doc,name,assign_to)
 		if name:
 			return name
 	elif button_name == 'ACM Visit':
@@ -42,8 +42,8 @@ def make_visit(doc=None,lead=None,lead_name=None,mobile_no=None,address=None,add
 		name = schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_details,customer,customer_contact,contact_details,
 				customer_contact_no,customer_address,customer_address_details,enquiry_id,consultant,
 				enquiry_from,assign_to,property_id,property_name,area,price,property_address,
-				bhk,bathroom,posting_date,button_name,completion_date,location)
-		update_acm_status_in_leadform(property_doc)
+				bhk,bathroom,posting_date,button_name,completion_date,property_doc,location)
+		update_acm_status_in_leadform(property_doc,name,assign_to)
 		if name:
 			return name
 
@@ -51,7 +51,7 @@ def make_visit(doc=None,lead=None,lead_name=None,mobile_no=None,address=None,add
 def schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_details,customer,customer_contact,contact_details,
 				customer_contact_no,customer_address,customer_address_details,enquiry_id,consultant,
 				enquiry_from,assign_to,property_id,property_name,area,price,property_address,
-				bhk,bathroom,posting_date,button_name,completion_date,location):
+				bhk,bathroom,posting_date,button_name,completion_date,property_doc,location):
 	se_visit = frappe.get_doc({
 		"doctype":doctype ,
 		"lead":lead,
@@ -80,7 +80,8 @@ def schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_detai
 		"visiter": assign_to,
 		"location": location,
 		"posting_date":posting_date,
-		"schedule_date": datetime.datetime.strptime(cstr(completion_date),'%d-%m-%Y')
+		"child_id":property_doc,
+		"schedule_date": nowdate()#datetime.datetime.strptime(cstr(completion_date),'%d-%m-%Y')
 	})
 
 	se_visit.insert(ignore_permissions=True)
@@ -88,14 +89,18 @@ def schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_detai
 	return se_visit.name
 	
 
-def update_se_status_in_leadform(source_name):
+def update_se_status_in_leadform(source_name,se_visit,assign_to):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
 	lead_name.se_status = 'Scheduled'
+	lead_name.site_visit = se_visit
+	lead_name.site_visit_assignee = assign_to
 	lead_name.save()
 
-def update_acm_status_in_leadform(source_name):
+def update_acm_status_in_leadform(source_name,acm_visit,assign_to):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
 	lead_name.acm_status = 'Scheduled'
+	lead_name.acm_visit = acm_visit
+	lead_name.acm_visit_assignee = assign_to
 	lead_name.save()
 
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
@@ -160,10 +165,8 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 	
 	users =  frappe.db.sql("""select parent from `tabUserRole` where role='System Manager' 
 						and parent!='Administrator'""",as_list=1)
-	#frappe.errprint(users)
 	if users:
 		for user_id in users:
-			#frappe.errprint(user_id[0])
 			create_email(user_id[0],property_type,property_subtype,location,operation,
 						area_minimum,area_maximum,budget_minimum,budget_maximum)
 

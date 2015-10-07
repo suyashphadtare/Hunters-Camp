@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.add_fetch('location', 'area', 'location_name');
 
 // Return query for getting contact name in link field
 cur_frm.fields_dict['address'].get_query = function(doc) {
@@ -39,10 +40,6 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc) {
 			"property_type": doc.property_type
 		}
 	}
-}
-
-cur_frm.cscript.validate = function(doc, cdt, cdn){
-	erpnext.utils.get_address_display(this.frm, "address","address_details");
 }
 
 cur_frm.cscript.address = function(doc,cdt,cdn){
@@ -111,16 +108,10 @@ enquiry.Composer = Class.extend({
 			me.dialog = new frappe.ui.Dialog({
 				title: __('Add to To Do'),
 				fields: [
-					{fieldtype:'Check', fieldname:'myself', label:__("Assign to me"), "default":0},
+					
 					{fieldtype:'Link', fieldname:'assign_to', options:'User',
 						label:__("Assign To Consultant"),
-						description:__("Add to To Do List Of"), reqd:true},
-					{fieldtype:'Data', fieldname:'description', label:__("Comment"), reqd:true},
-					{fieldtype:'Check', fieldname:'notify',
-						label:__("Notify by Email"), "default":1},
-					{fieldtype:'Date', fieldname:'date', label: __("Due Date/Complete By")},
-					{fieldtype:'Select', fieldname:'priority', label: __("Priority"),
-						options:'Low\nMedium\nHigh', 'default':'Medium'},
+						description:__("Add to To Do List Of"), reqd:true}
 				],
 				primary_action: function() { me.create_lead_management(); },
 				primary_action_label: __("Add")
@@ -156,6 +147,7 @@ enquiry.Composer = Class.extend({
 				args: $.extend(args, {
 					doctype: 'Lead Management',
 					name: property_id,
+					description:'Please Check',
 					assign_to: assign_to
 				}),
 				callback: function(r,rt) {

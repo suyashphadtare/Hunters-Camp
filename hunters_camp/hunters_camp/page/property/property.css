@@ -2,11 +2,11 @@
     margin-top: 20px;
 }
 
-.image-div{
+./*image-div{
     margin-bottom: 37px;
     margin-top: 37px;
     margin-left:20px;
-}
+}*/
 
 .button-div{
     margin-top: 20px;
@@ -26,7 +26,8 @@ body{
 }
 
 .property-image{
-    min-height: 50%;
+    min-height: 161px;
+    max-height: 161px;
     background-color: #fafbfc;
 }
 
@@ -58,6 +59,8 @@ table{
     }
 
 .property-id{
+    min-height: 161px;
+    max-height: 161px;
     padding-left: 0px;
     padding-right: 0px;
     background-color: #fafbfc;
@@ -95,3 +98,7 @@ table{
     background: #f00;
 }
 
+.img-class{
+
+    margin-top:20px;
+}

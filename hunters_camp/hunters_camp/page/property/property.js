@@ -23,7 +23,6 @@ Property = Class.extend({
 	},
 	make: function() {
 		var me = this;
-		console.log("in make")
 		me.filters.property_type = me.wrapper.page.add_field({
 					fieldname: "property_type",
 					label: __("Property Type"),
@@ -39,7 +38,7 @@ Property = Class.extend({
 				return {
 					"doctype": "Property Subtype",
 					"filters": {
-						"property_type": me.filters.operation.$input.val(),
+						"property_type": me.filters.property_type.$input.val(),
 					}
 				}
 			}
@@ -133,15 +132,14 @@ Property = Class.extend({
 						"area_maximum": me.filters.area_max.$input.val(),
 						"records_per_page": 10,
 						"page_number":1,
+						"request_source":'Hunterscamp',
 						//"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
 					},
 					callback: function(r,rt) {
 						if(!r.exc) {
-							console.log(["serach property",r.message])
 							if(r.message['total_records']>0){
-								console.log(["search_property",r.message['data']])
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
@@ -448,6 +446,8 @@ Property = Class.extend({
 						},
 						callback: function(r,rt) {
 							if(!r.exc) {
+								frappe.set_route("Form", 'Lead Management', me.lead_management.$input.val());
+								location.reload()
 							}
 						},
 					});	
@@ -584,8 +584,6 @@ Property = Class.extend({
 								},
 								callback: function(r,rt) {
 									if(!r.exc) {
-										console.log(["callback"])
-										console.log(["message",r.message])
 										if(i+1==me.property_list.length){
 											$('[data-fieldname=search]').trigger("click");	
 										}
@@ -594,7 +592,6 @@ Property = Class.extend({
 								},
 						});	
 				})
-				console.log("end for lopp")
 			}
 		})	
 	});
@@ -639,7 +636,6 @@ Property = Class.extend({
 	
 	render: function(prop_list,total_records) {
 		var me = this;
-		//me.body.innerHTML = ''
 		var current_page = 1;
 		var records_per_page = 10;
 		var property_data
@@ -650,7 +646,7 @@ Property = Class.extend({
 		this.body.empty();
 		this.prop_list=prop_list
 		
-		this.changePage(1,numPages,prop_list,records_per_page,prop_list.length,flag='Normal');
+		this.changePage(1,numPages,this.prop_list,records_per_page,this.prop_list.length,flag='Normal');
 		
 
 	},
@@ -700,6 +696,7 @@ Property = Class.extend({
 
 
 	show_user_property_table: function(page,numPages,values,records_per_page,length,flag) {
+
 		var me = this
 		me.property_data=values
 		$("<div id='property' class='col-md-12'>\
@@ -732,9 +729,9 @@ Property = Class.extend({
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
 			if(d['property_photo'])
-				$("<img id='theImg' src="+d['property_photo']+"/ width='60%' height='60%' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
-			else
-				$("<img id='theImg' src='/files/Home-icon.png'/ width='60%' height='60%' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
+				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+"/ style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
+			// else
+			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist'>\
@@ -818,19 +815,23 @@ Property = Class.extend({
 		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Society Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['society_name']+'</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Address :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['address']+'</td></tr>')
 
-		$.each(d['amenities'], function(i, j){
-			if(i<4){
-				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
-				
-			}
-			else
-				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+		if(d['amenities']!=null){
 
-		})
-	
-		if(d['amenities'].length<4){
-			for(i=0;i<4-(d['amenities'].length);i++){
-				$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+			$.each(d['amenities'], function(i, j){
+				if(i<4){
+					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+					
+				}
+				else
+					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+
+			})
+			
+		
+			if(d['amenities'].length<4){
+				for(i=0;i<4-(d['amenities'].length);i++){
+					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+				}
 			}
 		}
 
@@ -844,28 +845,37 @@ Property = Class.extend({
 		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 
-		$.each(d['tag'], function(i, j){
-			if(i<4){
-				$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
-				
-			}
-			else
-				$($(me.body).find("#"+d['property_id']+"")).find("#tag-second").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
+		if(d['tag']!=null){
 
-		})
-	
-		if(d['tag'].length<4){
-			for(i=0;i<4-(d['tag'].length);i++){
-				$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+		if(d['tag'].length!=0){
+			$.each(d['tag'], function(i, j){
+				if(i<4){
+					$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
+					
+				}
+				else
+					$($(me.body).find("#"+d['property_id']+"")).find("#tag-second").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
+
+			})
+		
+			if(d['tag'].length<4){
+				for(i=0;i<4-(d['tag'].length);i++){
+					$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+				}
 			}
 		}
 
+	}
 
-		$(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
+		// $(me.body).find("#property_list"+i+"").after('<hr class="line"></hr>');
 		
 
 	})
+
+
 	me.init_for_checkbox();
+
+
 	$('.pv').click(function(){
 		return frappe.call({
 			type: "GET",
@@ -884,6 +894,8 @@ Property = Class.extend({
 			}
 		})
 	})
+
+
 
 	$('#btn_prev').click(function(){
 		if (page > 1) {
@@ -921,6 +933,8 @@ Property = Class.extend({
     }
 
     })
+
+
 
     $('#btn_next').click(function(){
     	if (page < numPages) {
@@ -964,6 +978,7 @@ Property = Class.extend({
        	}
     })
 
+
 	
 	//$( "#sorting" ).click(function() {
 	$( "#select_alert" ).change(function(){
@@ -993,6 +1008,8 @@ Property = Class.extend({
 
 	},
 
+
+
 	init_for_checkbox: function(){
 		var me = this;
 		me.flag=0
@@ -1021,6 +1038,8 @@ Property = Class.extend({
 	});
 	
 	},
+
+
 
 	show_unique_properties:function(page,numPages,data,records_per_page,length,flag){
 		var me=this
