@@ -53,9 +53,12 @@ def update_tag(doc,sid,tag):
 	data["sid"] = sid
 	data["tags"] = [tag]
 	data["property_id"] = doc["property_id"]
+	data["fields"] = ["tag"]
 	data = json.dumps(data)
 	doc_rec = api.update_tags_of_property(data)
-	return doc_rec
+	tags = api.get_property_details(data)
+	tag = ",".join(tags["data"]["tag"]) if tags else []
+	return doc_rec,tag
 
 @frappe.whitelist(allow_guest=True)
 def update_status(doc,sid,status):
@@ -65,6 +68,8 @@ def update_status(doc,sid,status):
 	data["sid"] = sid
 	data["property_status"] = status
 	data["property_id"] = doc["property_id"]
+	data["fields"] = ["status"]
 	data = json.dumps(data)
 	doc_rec = api.update_property_status(data)
-	return doc_rec
+	status = api.get_property_details(data)
+	return doc_rec,status["data"]["status"]

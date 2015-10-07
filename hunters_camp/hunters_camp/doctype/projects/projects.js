@@ -55,7 +55,11 @@ project.operations = {
 				method:"hunters_camp.hunters_camp.doctype.projects.projects.post_project",
 				args:{doc: frm.doc,sid:frappe.get_cookie('sid')},
 				callback: function(r) {
-					
+					if (!r.exec){
+						frappe.msgprint(r.message.message)
+						frm.doc.property_id = r.message.property_id
+						refresh_field("property_id")
+					}
 				},
 				always: function() {
 					frappe.ui.form.is_saving = false;
