@@ -712,9 +712,9 @@ Property = Class.extend({
 			var amenities = []
 			var amenities_dict = new Array();
 			$.each(d['amenities'], function(i, j) {
-				if(d.amenities)
-					if(j['name'])
+				if(j['status']=='Yes'){
 						amenities.push(j['name'])
+				}
 			})
 
 			$("<li id='property_list' list-style-position: inside;><div class='col-md-12 property-div'>\
@@ -818,21 +818,24 @@ Property = Class.extend({
 		if(d['amenities']!=null){
 
 			$.each(d['amenities'], function(i, j){
-				if(i<4){
-					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
-					
-				}
-				else
-					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+				if(j['status']=='Yes'){
 
-			})
-			
-		
-			if(d['amenities'].length<4){
-				for(i=0;i<4-(d['amenities'].length);i++){
-					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+					if(i<4){
+							$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+							
+						}
+						else
+							$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
 				}
-			}
+
+					})	
+				
+			
+				if(d['amenities'].length<4){
+					for(i=0;i<4-(d['amenities'].length);i++){
+						$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+					}
+				}
 		}
 
 		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><th class="th-div"style="border-top: 1px;">Agent Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['agent_name']+'</td></tr>')
