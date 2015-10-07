@@ -26,7 +26,7 @@ def add_properties_in_lead_management(lead_management=None,property_resultset=No
       pd.property_id = property_id.get('property_id')
       pd.property_name = property_id.get('property_title')
       pd.area = property_id.get('carpet_area')
-      pd.location = property_id.get('location')
+      pd.location_name = property_id.get('location')
       pd.price = property_id.get('price')
       pd.address = property_id.get('address')
       pd.bhk = property_id.get('bhk')
@@ -38,12 +38,14 @@ def add_properties_in_lead_management(lead_management=None,property_resultset=No
        user= frappe.db.get_value('Customer',{'name':lead_record.customer,},'email_id')
       lead_record.save(ignore_permissions=True)
 
-  share_property =  json.loads(property_resultset)
-  user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
-  args = { "title":"Property Shared by  {0}" .format(frappe.session.user) , "property_data":share_property ,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
-  send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
+    share_property =  json.loads(property_resultset)
+    user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
+    args = { "title":"Property Shared by  {0}" .format(frappe.session.user) , "property_data":share_property ,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
+    send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
 
-  frappe.msgprint("Property sharing process is completed..!")
+    #frappe.msgprint("Property shared successfully..!")
+  
+  return True
 
 def send_email(email, subject, template, args):
   frappe.sendmail(recipients=email, sender=None, subject=subject,
@@ -67,9 +69,7 @@ def send_email(email, subject, template, args):
 
 @frappe.whitelist()
 def get_sorted_list(resultset=None):
-	frappe.errprint(resultset)
 	final_list = json.loads(resultset)
-	frappe.errprint(final_list)
 
 @frappe.whitelist()
 def get_property(args=None):
