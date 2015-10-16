@@ -1,16 +1,25 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.add_fetch('location', 'area', 'location_name');
 
 // Return query for getting contact name in link field
-cur_frm.fields_dict['address'].get_query = function(doc) {
+/*cur_frm.fields_dict['address'].get_query = function(doc) {
 	return {
 		filters: {
 			
 			"lead": doc.lead
 		}
 	}
+}*/
+cur_frm.fields_dict.address.get_query = function(doc) {
+	return{
+		filters:{
+			'lead': doc.lead
+		}
+	}
 }
+
 
 // Return query for getting customer address name in link field
 cur_frm.fields_dict['customer_address'].get_query = function(doc) {
@@ -41,15 +50,10 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc) {
 	}
 }
 
-cur_frm.cscript.validate = function(doc, cdt, cdn){
-	erpnext.utils.get_address_display(this.frm, "address","address_details");
-}
-
 cur_frm.cscript.address = function(doc,cdt,cdn){
 
 	erpnext.utils.get_address_display(this.frm, "address","address_details");
 }
-
 
 cur_frm.cscript.customer_address = function(doc,cdt,cdn){
 
@@ -77,7 +81,7 @@ cur_frm.cscript.customer_contact = function(doc,cdt,cdn){
 frappe.ui.form.on("Enquiry", "refresh", function(frm) {
 	if (!frm.doc.__islocal){
 		property_details = frm.doc.property_details || [];
-		if(property_details.length > 0 && frm.doc.enquiry_status=='Unprocessed'){
+		if(frm.doc.enquiry_status=='Unprocessed'){
 			frm.add_custom_button(__("Allocate Lead"), function() { new enquiry.Composer({
 				doc: frm.doc,
 				frm: frm,
@@ -112,16 +116,10 @@ enquiry.Composer = Class.extend({
 			me.dialog = new frappe.ui.Dialog({
 				title: __('Add to To Do'),
 				fields: [
-					{fieldtype:'Check', fieldname:'myself', label:__("Assign to me"), "default":0},
+					
 					{fieldtype:'Link', fieldname:'assign_to', options:'User',
 						label:__("Assign To Consultant"),
-						description:__("Add to To Do List Of"), reqd:true},
-					{fieldtype:'Data', fieldname:'description', label:__("Comment"), reqd:true},
-					{fieldtype:'Check', fieldname:'notify',
-						label:__("Notify by Email"), "default":1},
-					{fieldtype:'Date', fieldname:'date', label: __("Due Date/Complete By")},
-					{fieldtype:'Select', fieldname:'priority', label: __("Priority"),
-						options:'Low\nMedium\nHigh', 'default':'Medium'},
+						description:__("Add to To Do List Of"), reqd:true}
 				],
 				primary_action: function() { me.create_lead_management(); },
 				primary_action_label: __("Add")
@@ -157,6 +155,7 @@ enquiry.Composer = Class.extend({
 				args: $.extend(args, {
 					doctype: 'Lead Management',
 					name: property_id,
+					description:'Please Check',
 					assign_to: assign_to
 				}),
 				callback: function(r,rt) {
@@ -177,7 +176,7 @@ enquiry.Composer = Class.extend({
 		var me = this;
 		property = this.doc.property_details || []
 		return frappe.call({
-            method: "hunters_camp.hunters_camp.doctype.enquiry.enquiry.create_lead_management",
+            method: "hunters_camp.hunters_camp.doctype.enquiry.enquiry.create_lead_management_form",
             args:{ 
             		source_name:me.doc.name,
             		assign_to: me.dialog.fields_dict.assign_to.get_value()

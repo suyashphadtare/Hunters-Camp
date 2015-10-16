@@ -7,4 +7,12 @@ import frappe
 from frappe.model.document import Document
 
 class ACMVisit(Document):
-	pass
+	def on_update(self):
+		if self.acm_status=='Visited':
+			self.change_lead_managemnet_child_status(self.name,self.acm_status,self.child_id)
+
+	def change_lead_managemnet_child_status(self,acm_Visit,se_status,child_id):
+		child_entry = frappe.get_doc("Lead Property Details", child_id)
+		child_entry.acm_status = 'Visited'
+		child_entry.save(ignore_permissions=True)
+

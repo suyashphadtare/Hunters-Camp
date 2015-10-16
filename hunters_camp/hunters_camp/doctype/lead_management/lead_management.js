@@ -1,6 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
 
+cur_frm.add_fetch('location', 'area', 'location_name');
 
 cur_frm.cscript.onload = function(doc,cdt,cdn) {
 
@@ -20,20 +21,20 @@ lead_management.Composer = Class.extend({
 		$.extend(this, opts);
 			this.d = locals[cdt][cdn]
 			this.button_name = 'SE Visit'
-			if(opts.property_details[0]['location']!=null && opts.property_details[0]['area']!=null)	
-				this.add()
-			else
-				msgprint("Property row values must be specified to create SE visit")
+			//if(opts.property_details[0]['location']!=null && opts.property_details[0]['area']!=null)	
+			this.add()
+			// else
+			// 	msgprint("Property row values must be specified to create SE visit")
 	},
 	schedule_acm_visit: function(opts,cdt,cdn) {
 		$.extend(this, opts);
 			this.frm.reload_doc();
 			this.d = locals[cdt][cdn]
 			this.button_name = 'ACM Visit'
-			if(opts.property_details[0]['location']!=null && opts.property_details[0]['area']!=null)	
-				this.add_acm()
-			else
-				msgprint("Property row values must be specified to create ACM visit")
+			//if(opts.property_details[0]['location']!=null && opts.property_details[0]['area']!=null)	
+			this.add_acm()
+			// else
+			// 	msgprint("Property row values must be specified to create ACM visit")
 	},
 	add: function(button_name) {
 		var me = this;
@@ -46,16 +47,10 @@ lead_management.Composer = Class.extend({
 			me.dialog = new frappe.ui.Dialog({
 				title: __('Add to To Do'),
 				fields: [
-					{fieldtype:'Check', fieldname:'myself', label:__("Assign to me"), "default":0},
+					
 					{fieldtype:'Link', fieldname:'assign_to', options:'User',
 						label:__("Assign To Sales Executive"),
-						description:__("Add to To Do List Of"), reqd:true},
-					{fieldtype:'Data', fieldname:'description', label:__("Comment"), reqd:true},
-					{fieldtype:'Check', fieldname:'notify',
-						label:__("Notify by Email"), "default":1},
-					{fieldtype:'Date', fieldname:'date', label: __("Due Date/Complete By")},
-					{fieldtype:'Select', fieldname:'priority', label: __("Priority"),
-						options:'Low\nMedium\nHigh', 'default':'Medium'},
+						description:__("Add to To Do List Of"), reqd:true}
 				],
 				primary_action: function() { me.create_se_visit(); },
 				primary_action_label: __("Add")
@@ -92,16 +87,9 @@ lead_management.Composer = Class.extend({
 			me.dialog1 = new frappe.ui.Dialog({
 				title: __('Add to To Do'),
 				fields: [
-					{fieldtype:'Check', fieldname:'myself', label:__("Assign to me"), "default":0},
 					{fieldtype:'Link', fieldname:'assign_to', options:'User',
 						label:__("Assign To ACM"),
-						description:__("Add to To Do List Of"), reqd:true},
-					{fieldtype:'Data', fieldname:'description', label:__("Comment"), reqd:true},
-					{fieldtype:'Check', fieldname:'notify',
-						label:__("Notify by Email"), "default":1},
-					{fieldtype:'Date', fieldname:'date', label: __("Due Date/Complete By")},
-					{fieldtype:'Select', fieldname:'priority', label: __("Priority"),
-						options:'Low\nMedium\nHigh', 'default':'Medium'},
+						description:__("Add to To Do List Of"), reqd:true}
 				],
 				primary_action: function() { me.create_se_visit(); },
 				primary_action_label: __("Add")
@@ -148,6 +136,7 @@ lead_management.Composer = Class.extend({
 				args: $.extend(args, {
 					doctype: doctype,
 					name: visit_id,
+					description: 'Check Visit',
 					assign_to: assign_to
 				}),
 				callback: function(r,rt) {
@@ -168,12 +157,12 @@ lead_management.Composer = Class.extend({
 		var me = this;
 		if(me.dialog){
 			this.assign_to = me.dialog.fields_dict.assign_to.get_value()
-            this.completion_date = me.dialog.fields_dict.date.get_value()
+            //this.completion_date = me.dialog.fields_dict.date.get_value()
 
 		}
 		if(me.dialog1){
 			this.assign_to = me.dialog1.fields_dict.assign_to.get_value()
-            this.completion_date = me.dialog1.fields_dict.date.get_value()
+            //this.completion_date = me.dialog1.fields_dict.date.get_value()
 		}
 		return frappe.call({
             method: "hunters_camp.hunters_camp.doctype.lead_management.lead_management.make_visit",
@@ -198,7 +187,7 @@ lead_management.Composer = Class.extend({
             		property_id: me.d['property_id'],
             		property_name: me.d['property_name'],
             		area: me.d['area'],
-            		location: me.d['location'],
+            		location: me.d['location_name'],
             		price: me.d['price'],
             		property_address: me.d['address'],
             		bhk: me.d['bhk'],
@@ -218,7 +207,8 @@ lead_management.Composer = Class.extend({
 
 
 frappe.ui.form.on("Lead Management", "refresh", function(frm) {
-	if (!frm.doc.__islocal){
+	if (!frm.doc.__islocal)// && !frm.doc.lead_status=='Closed')
+	{
 		property_details = frm.doc.property_details || [];
 		frm.add_custom_button(__("Search Property"), function() { 
 			make_dashboard(frm.doc)
@@ -234,13 +224,14 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						"operation": doc.operation,
 						"property_type": doc.property_type,
 						"property_subtype": doc.property_subtype,
-						"location": doc.location,
+						"location": doc.location_name,
 						"budget_minimum": doc.budget_minimum,
 						"budget_maximum": doc.budget_maximum,
 						"area_minimum": doc.area_minimum,
 						"area_maximum": doc.area_maximum,
 						"records_per_page": 10,
 						"page_number":1,
+						"request_source":'Hunterscamp',
 						"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
@@ -249,7 +240,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						if(!r.exc) {
 							result=r.message['data']
 							total_records = r.message['total_records']
-							console.log(["total",r.message['total_records']])
 							if(r.message['total_records']>0){
 								var cl=doc.property_details || [ ]
 								if(cl.length>0){
@@ -261,33 +251,53 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										},
 										callback: function(r,rt) {
 											var final_property_result = {}
-											console.log(["r message",r.message])
 											if(r.message){
 												$.each(r.message['property_id'],function(i, property){
-		  											final_property_result[(property['property_id'])]=''
+		  											final_property_result[(property['property_id'].trim())]=''
 		  											
 												});
+
 												final_result = jQuery.grep(result, function( d ) {
 		 											return !(d['property_id'] in final_property_result)
 												});
-												if(final_result!=null)
+
+												if(final_result.length>0){
 													final_result=final_result
-												else
-													final_result=result
-												frappe.route_options = {
+													frappe.route_options = {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
-													"location": doc.location,
+													"location": doc.location_name,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
 													"area_minimum": doc.area_minimum,
 													"area_maximum": doc.area_maximum,
-													"total_records": total_records,
+													"total_records":total_records,
 													"data": final_result
 												};
 												frappe.set_route("property", "Hunters Camp");
+												}
+												else {
+													return frappe.call({
+														method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
+														args :{
+															"property_type": doc.property_type,
+															"property_subtype": doc.property_subtype,
+															"operation":doc.operation,
+															"location": doc.location_name,
+															"budget_minimum": doc.budget_minimum,
+															"budget_maximum": doc.budget_maximum,
+															"area_minimum": doc.area_minimum,
+															"area_maximum": doc.area_maximum,
+														},
+														callback: function(r,rt) {
+															msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
+															
+														},
+													})
+												}
+												
 										  }
 										},
 									});		
@@ -296,7 +306,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
-													"location": doc.location,
+													"location": doc.location_name,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
@@ -308,21 +318,21 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 												frappe.set_route("property", "Hunters Camp");
 							}
 							else{
-								console.log("hi")// email to admin
+								// email to admin
 								return frappe.call({
 									method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
 									args :{
 										"property_type": doc.property_type,
 										"property_subtype": doc.property_subtype,
 										"operation":doc.operation,
-										"location": doc.location,
+										"location": doc.location_name,
 										"budget_minimum": doc.budget_minimum,
 										"budget_maximum": doc.budget_maximum,
 										"area_minimum": doc.area_minimum,
 										"area_maximum": doc.area_maximum,
 									},
 									callback: function(r,rt) {
-										msgprint("There is no any properties found aginst the specified criteria so,email with property search criteria is sent to administartor.")
+										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
 										
 									},
 								})

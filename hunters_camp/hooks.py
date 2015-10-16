@@ -72,7 +72,7 @@ fixtures = ["Custom Field"]
 # 		"on_update": "method",
 # 		"on_cancel": "method",
 # 		"on_trash": "method"
-#	}
+# 	}
 # }
 
 # Scheduled Tasks
