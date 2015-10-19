@@ -8,11 +8,11 @@ def get_data():
 			"label": _("CRM"),
 			"icon": "icon-star",
 			"items": [
-				{
-					"type": "doctype",
-					"name": "Lead",
-					"description": _("Lead Details"),
-				},
+				# {
+				# 	"type": "doctype",
+				# 	"name": "Lead",
+				# 	"description": _("Lead Details"),
+				# },
 				{
 					"type": "doctype",
 					"name": "Customer",

@@ -14,8 +14,7 @@ def get_mapped_doc(source_doc, table_maps, target_doc=None):
 	# main
 
 	target_doc = frappe.new_doc("Property")
-	print target_doc.meta.get("fields")
-	
+		
 	map_doc(source_doc, target_doc, table_maps)
 
 	# row_exists_for_parentfield = {}

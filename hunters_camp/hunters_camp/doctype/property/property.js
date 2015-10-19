@@ -57,6 +57,10 @@ property.operations = {
 						frappe.msgprint(r.message.message)
 						frm.doc.property_id = r.message.property_id
 						refresh_field("property_id")
+						if (frm.doc.property_id){
+							frm.page.clear_primary_action();
+							me.enable_property_editing(frm)
+						}
 					}
 				},
 				always: function() {
@@ -108,8 +112,10 @@ property.operations = {
 	},
 	enable_property_editing:function(frm,doc){
 		var me = this;
-		me.add_data_to_form(frm,doc)
-		//me.manage_primary_operations_for_update(frm)
+		if (doc){
+			me.add_data_to_form(frm,doc)
+		}
+		me.manage_primary_operations_for_update(frm)
 		me.add_status_and_tag_to_menu(frm)
 
 	},
@@ -124,9 +130,9 @@ property.operations = {
 	manage_primary_operations_for_update:function(frm){
 		var me = this;
 		frm.disable_save();
-		frm.page.set_primary_action(__("Update Property"), function() {
+		/*frm.page.set_primary_action(__("Update Property"), function() {
 			me.post_property(frm,frm.doc)		
-		});
+		});*/
 	},
 	add_data_to_form:function(frm,doc){
 		$.each(frappe.meta.docfield_list["Property"] || [], function(i, docfield) {
@@ -137,13 +143,18 @@ property.operations = {
 		});
 	},
 	update_tag:function(tag,frm){
+		var me = this;
 		frappe.call({
 			freeze: true,
 			freeze_message:"Updaing Proeprty Tag,Please Wait..",
 			method:"hunters_camp.hunters_camp.doctype.property.property.update_tag",
 			args:{doc: frm.doc,sid:frappe.get_cookie('sid'),"tag":tag},
 			callback: function(r) {
-				
+				if (!r.exec){
+					frappe.msgprint(r.message[0].message)
+					frm.doc.tag = r.message[1]
+					refresh_field(["property_id","tag"])
+				}	
 			},
 			always: function() {
 				frappe.ui.form.is_saving = false;
@@ -157,7 +168,12 @@ property.operations = {
 			method:"hunters_camp.hunters_camp.doctype.property.property.update_status",
 			args:{doc: frm.doc,sid:frappe.get_cookie('sid'),"status":status},
 			callback: function(r) {
-				
+				if (!r.exec){
+					frappe.msgprint(r.message[0].message)
+					refresh_field("property_id")
+					frm.doc.status = r.message[1]
+					refresh_field("status")
+				}
 			},
 			always: function() {
 				frappe.ui.form.is_saving = false;

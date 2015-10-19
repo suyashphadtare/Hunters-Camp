@@ -140,6 +140,7 @@ Property = Class.extend({
 					callback: function(r,rt) {
 						if(!r.exc) {
 							if(r.message['total_records']>0){
+								console.log(r.message['data'])
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
@@ -608,9 +609,9 @@ Property = Class.extend({
 		var me = this;
 		
 		if(!frappe.route_options){
-			me.filters.property_type.input.value= 'Residential'
-		me.filters.property_subtype.input.value='Family Home'
-		me.filters.operation.input.value='Rent'
+			// me.filters.property_type.input.value= 'Residential'
+			// me.filters.property_subtype.input.value='Family Home'
+			// me.filters.operation.input.value='Rent'
 			this.body.html("<p class='text-muted'>"+__("Specify filters to serach property.")+"</p>");
 			return;
 		}
@@ -639,6 +640,7 @@ Property = Class.extend({
 		var current_page = 1;
 		var records_per_page = 10;
 		var property_data
+		var check_property_list =[]
 		var flag 
 		var numPages=Math.ceil(total_records/records_per_page)
 		this.property_list = []
@@ -659,17 +661,30 @@ Property = Class.extend({
 			$("#property").remove();
 			$("#buttons").remove();
 			$("#sorting").remove();
-			$("<div id='sorting' style='float:right;text-align=right'>\
+			$("#status").remove();
+			$("<div><div id='sorting' style='float:right;text-align=right'>\
 			<select name='primary' class='input-with-feedback form-control input-sm' id='select_alert' >\
 			<option class='form-control' value='sort_by'>Sort By</option>\
   			<option class='form-control' value='posting_date'>Posting Date</option>\
    			<option class='form-control' value='rate'>Rate</option>\
-			</select></div>").appendTo(me.body)
+			</select></div>\
+			<div id='status' style='float:right;text-align=right;margin-right:10px'>\
+			<select name='primary' class='input-with-feedback form-control input-sm' id='select_status' >\
+			<option class='form-control' value='status'>Status</option>\
+   			<option class='form-control' value='Deactivated'>Deactivated</option>\
+   			<option class='form-control' value='Sold'>Sold</option>\
+			</select></div>\
+			</div>").appendTo(me.body)
+			var e = document.getElementById("status");
+			e.style.display = 'none';
 		}
 		else{
 			$("#property").remove();
 			$("#buttons").remove();
 		}
+
+		
+
 		var arr= []
 	    if (page < 1) page = 1;
 	    if (page > numPages) page = numPages;
@@ -709,13 +724,6 @@ Property = Class.extend({
 
 
 		$.each(values, function(i, d) {
-			var amenities = []
-			var amenities_dict = new Array();
-			$.each(d['amenities'], function(i, j) {
-				if(d.amenities)
-					if(j['name'])
-						amenities.push(j['name'])
-			})
 
 			$("<li id='property_list' list-style-position: inside;><div class='col-md-12 property-div'>\
 				<div id='image' class='col-md-2 property-image' style='border: 1px solid #d1d8dd;'>  \
@@ -734,7 +742,7 @@ Property = Class.extend({
 			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
 
-			$("<ul id='mytab' class='nav nav-tabs' role='tablist'>\
+			$("<ul id='mytab' class='nav nav-tabs' role='tablist' >\
 			      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' style='height:35px;margin-top:-3px;'role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'><i class='icon-li icon-file'></i>&nbsp;&nbsp;General Details</a></li>\
 			      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' style='height:35px;margin-top:-3px;' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-book'></i>&nbsp;&nbsp;More Details</a></li>\
 			      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab'  style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-building'></i>&nbsp;&nbsp;Amenities</a></li>\
@@ -744,125 +752,266 @@ Property = Class.extend({
 				<input type='checkbox' class='cb' />\
 				</div></ul></div>\
 			    </ul>\
-			    <div id='mytable' class='tab-content '>\
-			      <div role='tabpanel' class='tab-pane fade active in' style='height=100%;background-color=#fafbfc;' id='general"+""+i+"' aria-labelledby='home-tab'>\
-			       <table width= '100%'>\
-			       <thead><tbody><tr class='tr-div'>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='general-first' width='100%'>\
-			       </table></td>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='general-second' width='100%'>\
-			       </table></td>\
-			       </tr></tbody></thead></table>\
+			    <div id='mytable' class='tab-content' style='background-color=#fafbfc;'>\
+			      <div role='tabpanel' class='tab-pane fade active in' id='general"+""+i+"' aria-labelledby='home-tab'>\
+			       <div class='col-md-6' style='background-color=#fafbfc;'>\
+			        <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Property Id :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='property-id'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Area :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='area'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Location :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='location'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Price :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='price'></div>\
+			        </div>\
+			       </div>\
+			       </div>\
+			       <div class='col-md-6' style='background-color=#fafbfc;'>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Property Name :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='property-name'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>BHK :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='bhk'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Posting Date :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='posting_date'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Bathroom :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='bathroom'></div>\
+			        </div>\
+			       </div>\
+			       </div>\
 			       </div>\
 			      <div role='tabpanel' class='tab-pane fade' style='height=100%'  id='more"+""+i+"' aria-labelledby='profile-tab'>\
-			      <table width= '100%'>\
-			       <thead><tbody><tr>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='more-details-first' width='100%'>\
-			       </table></td>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='more-details-second' width='100%'>\
-			       </table></td>\
-			       </tr></tbody></thead></table>\
+			      <div class='col-md-6' style='background-color=#fafbfc;'>\
+			        <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Property Ownership :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='property-ownership'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Number Of Floors :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='floors'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Maintenance :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='maintainance'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Security Deposite :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='deposite'></div>\
+			        </div>\
+			       </div>\
+			       </div>\
+			       <div class='col-md-6' style='background-color=#fafbfc;'>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Age Of Property :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='age'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Furnishing Type :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='furnishing_type'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Society Name :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='society_name'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Address :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='address'></div>\
+			        </div>\
+			       </div>\
+			       </div>\
 			      </div>\
-			      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='amenities"+""+i+"' aria-labelledby='profile-tab'>\
-			      <table width= '100%'>\
-			       <thead><tbody><tr>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='amenities-first' width='100%'>\
-			       </table></td>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='amenities-second' width='100%'>\
-			       </table></td>\
-			       </tr></tbody></thead></table>\
+			      <div role='tabpanel' class='tab-pane fade' style='overflow:auto;height: 110px;' id='amenities"+""+i+"' aria-labelledby='profile-tab'>\
+			      <div class='col-md-6' id='amenities-first' style='background-color=#fafbfc;'>\
 			      </div>\
-			      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='contact"+""+i+"' aria-labelledby='profile-tab'>\
-			      <table width= '100%'>\
-			       <thead><tbody><tr>\
-			       <td width ='50%''><table class=' table table-hover table-condensed table-div' id='contact-first' width='100%'>\
-			       </table></td>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='contact-second' width='100%'>\
-			       </table></td>\
-			       </tr></tbody></thead></table>\
+			      <div class='col-md-6' id='amenities-second' style='background-color=#fafbfc;'>\
 			      </div>\
-			      <div role='tabpanel' class='tab-pane fade' style='height=100%' id='tag"+""+i+"' aria-labelledby='profile-tab'>\
-			      <table width= '100%'>\
-			       <thead><tbody><tr>\
-			       <td width ='50%''><table class=' table table-hover table-condensed table-div' id='tag-first' width='100%'>\
-			       </table></td>\
-			       <td width ='50%''><table class='table table-hover table-condensed table-div' id='tag-second' width='100%'>\
-			       </table></td>\
-			       </tr></tbody></thead></table>\
+			      </div>\
+			      <div role='tabpanel' class='tab-pane fade'  id='contact"+""+i+"' aria-labelledby='profile-tab'>\
+			      <div class='col-md-6' style='background-color=#fafbfc;'>\
+			        <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Agent Name :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='agent_name'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Agent No. :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='agent_no'></div>\
+			        </div>\
+			       </div>\
+			       </div>\
+			       <div class='col-md-6' style='background-color=#fafbfc;'>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Contact Person :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='contact-name'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Contact No :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='contact_no'></div>\
+			        </div>\
+			       </div>\
+			      </div>\
+			      </div>\
+			      <div role='tabpanel' class='tab-pane fade' style='overflow:auto;height: 110px;' id='tag"+""+i+"' aria-labelledby='profile-tab'>\
+			      <div class='col-md-6' id='tag-first' style='background-color=#fafbfc;'>\
+			      </div>\
+			      <div class='col-md-6' id='tag-second' style='background-color=#fafbfc;'>\
+			      </div>\
 			      </div>\
 			    </div>").appendTo($(me.body).find("#"+d['property_id']+""))
 
 	
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Property Ownership :</th><td class="ng-binding td-div" style="border-top: 1px;">'+d['property_ownership']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Number Of Floors :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['no_of_floors']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Maintenance :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['maintainance_charges']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-first").append('<tr><th class="th-div" style="border-top: 1px;">Security Deposite :</th><td class="ng-b td-divinding td-div"style="border-top: 1px;">'+d['security_deposit']+'</ td-divtd></tr>')
+		
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Property ID :</th><td class="ng-binding td-div"style="border-top: 1px;"><a class="pv" id="'+d['property_id']+'">'+d['property_id']+'<a></td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div" style="border-top: 1px;">Area :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['carpet_area']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Price :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['price']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-first").append('<tr><th class="th-div"style="border-top: 1px;">Location :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['location']+'</td></tr>')
-
-
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Property Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_title']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">BHK :</th><td class="ng-binding td-div"style="border-top: 1px;"></td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Posting Date :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['posting_date']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#general-second").append('<tr><th class="th-div"style="border-top: 1px;">Bathroom :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['no_of_bathroom']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#property-id").append('<div class="row property-row">'+d['property_id'] ? d['property_id'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#area").append('<div class="row property-row">'+d['carpet_area'] ? d['carpet_area'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#location").append('<div class="row property-row">'+d['location'] ? d['location'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#price").append('<div class="row property-row">'+d['price'] ? d['price'] : ""+'</div>')
+		
+		$($(me.body).find("#"+d['property_id']+"")).find("#property-name").append('<div class="row property-row">'+d['property_title'] ? d['property_title'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#bhk").append('<div class="row property-row">'+d['bhk'] ? d['bhk'] :" "+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#posting_date").append('<div class="row property-row">'+d['posting_date'] ? d['posting_date'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#bathroom").append('<div class="row property-row">'+d['no_of_bathroom'] ? d['no_of_bathroom'] : ""+'</div>')
 
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Age Of Property :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['property_age']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Furnishing Type :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['furnishing_type']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Society Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['society_name']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#more-details-second").append('<tr><th class="th-div"style="border-top: 1px;">Address :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['address']+'</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#property-ownership").append('<div class="row property-row">'+d['property_ownership'] ? d['property_ownership'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#floors").append('<div class="row property-row">'+d['no_of_floors'] ? d['no_of_floors'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#maintainance").append('<div class="row property-row">'+d['maintainance_charges'] ? d['maintainance_charges'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#deposite").append('<div class="row property-row">'+d['security_deposit'] ? d['security_deposit'] : ""+'</div>')
+		
+		$($(me.body).find("#"+d['property_id']+"")).find("#age").append('<div class="row property-row">'+d['property_age'] ? d['property_age'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#furnishing_type").append('<div class="row property-row">'+d['furnishing_type'] ? d['furnishing_type'] :" "+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#society_name").append('<div class="row property-row">'+d['society_name'] ? d['society_name'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#address").append('<div class="row property-row">'+d['address'] ? d['address'] : ""+'</div>')
+
+
+		
 
 		if(d['amenities']!=null){
 
 			$.each(d['amenities'], function(i, j){
-				if(i<4){
-					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
-					
-				}
-				else
-					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<tr><th class="th-div"style="border-top: 1px;">'+j['name']+' :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j['status']+'</td></tr>')
+				if(j['status']=='Yes'){
+					console.log("hi")
+					if(i%2==0)
+					{
+						$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<div class="row row-id"><div class="col-md-6 row"><div class="row property-row"><b>'+j['name']+' :</b></div></div><div class="col-md-6 row"><div class="row property-row">'+j['status']+'</div></div></div>')
+					}
+					else if(Math.abs(i) % 2 == 1){
+						$($(me.body).find("#"+d['property_id']+"")).find("#amenities-second").append('<div class="row row-id"><div class="col-md-6 row"><div class="row property-row"><b>'+j['name']+' :</b></div></div><div class="col-md-6 row"><div class="row property-row">'+j['status']+'</div></div></div>')
 
-			})
-			
-		
-			if(d['amenities'].length<4){
-				for(i=0;i<4-(d['amenities'].length);i++){
-					$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 				}
-			}
+
+				}
+					
+				})
 		}
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><th class="th-div"style="border-top: 1px;">Agent Name :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['agent_name']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><th class="th-div"style="border-top: 1px;">Agent No. :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['agent_no']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><th class="th-div"style="border-top: 1px;">Contact Person :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['contact_person']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><th class="th-div"style="border-top: 1px;">Contact No. :</th><td class="ng-binding td-div"style="border-top: 1px;">'+d['contact_no']+'</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-second").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-name").append('<div class="row property-row">'+d['contact_person'] ? d['property_person'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact_no").append('<div class="row property-row">'+d['contact_no'] ? d['contact_no'] :" "+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#agent_name").append('<div class="row property-row">'+d['agent_name'] ? d['agent_name'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#agent_no").append('<div class="row property-row">'+d['agent_no'] ? d['agent_no'] : ""+'</div>')
+
+
+		
 
 		if(d['tag']!=null){
 
 		if(d['tag'].length!=0){
 			$.each(d['tag'], function(i, j){
-				if(i<4){
-					$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
+				if(i%2==0){
+					$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<div class="row row-id"><div class="col-md-6 row"><div class="row property-row"><b><i class="icon-check"></i></b></div></div><div class="col-md-6 row"><div class="row property-row tag-row">'+j+'</div></div></div>')
 					
 				}
-				else
-					$($(me.body).find("#"+d['property_id']+"")).find("#tag-second").append('<tr><th class="th-div"style="border-top: 1px;">Tag :</th><td class="ng-binding td-div"style="border-top: 1px;">'+j+'</td></tr>')
-
-			})
-		
-			if(d['tag'].length<4){
-				for(i=0;i<4-(d['tag'].length);i++){
-					$($(me.body).find("#"+d['property_id']+"")).find("#tag-first").append('<tr><td style="border-top: 1px;"><b></b>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;</td></tr>')
+				else if(Math.abs(i) % 2 == 1){
+					$($(me.body).find("#"+d['property_id']+"")).find("#tag-second").append('<div class="row row-id"><div class="col-md-6 row"><div class="row property-row"><i class="icon-check"></i></div></div><div class="col-md-6 row"><div class="row property-row tag-row">'+j+'</div></div></div>')
 				}
-			}
+			})
 		}
 
 	}
@@ -898,7 +1047,9 @@ Property = Class.extend({
 
 
 	$('#btn_prev').click(function(){
+		//console.log(page)
 		if (page > 1) {
+			//console.log(page)
         	page--;
        		return frappe.call({
 					method:'propshikari.versions.v1.search_property',
@@ -991,6 +1142,8 @@ Property = Class.extend({
 			me.property_data.sort(rate_sort_asc);
 			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting');
 		}
+
+
 	});
 
 	var date_sort_desc = function (object1, object2) {
@@ -1006,19 +1159,75 @@ Property = Class.extend({
 	};
 
 
+
+	//$( "#status change" ).click(function() {
+	$( "#select_status" ).change(function(){
+		var status
+		console.log("in selct status")
+		console.log(me.check_property_list)
+		console.log(me)
+		console.log(this)
+
+		result_set= []
+		if($("#select_status").val()=='Deactivate'){
+			console.log(me.check_property_list)
+			
+		}
+		else if($("#select_status").val()=='Sold'){
+			console.log(me.check_property_list)
+		}
+		status=status
+
+		$.each(me.check_property_list, function(i, j) {
+			console.log(j)
+			console.log($("#select_status").val())
+			 frappe.call({
+						method:'propshikari.versions.v1.update_property_status',
+						'async': false,
+						args :{
+							"data":{
+							"property_id": j,
+							"property_status":$("#select_status").val(),
+							"user_id": 'Guest',
+							"sid": 'Guest'
+						  },
+						},
+						callback: function(r,rt) {
+							if(!r.exc) {
+								console.log(r.message)
+								if(i+1==me.check_property_list.length){
+									$('[data-fieldname=search]').trigger("click");	
+								}
+									
+							}
+						},
+				});	
+		})
+		
+
+
+	});
+
+
+	
+
 	},
 
+	
 
 
 	init_for_checkbox: function(){
 		var me = this;
 		me.flag=0
+		var e = document.getElementById("status");
 		$('.cb').click(function(){
 			if ($(this).prop('checked')==true){ 
 				me.property_list.push($(this).parent().attr("id"))
 				if(me.property_list.length==1){
 					$('[data-fieldname=tag]').css('display','block')
 					$('[data-fieldname=share]').css('display','block')
+					e.style.display = 'block';
+
 
 				}
 				
@@ -1031,14 +1240,17 @@ Property = Class.extend({
 				if(me.property_list.length==0){
 					$('[data-fieldname=tag]').css('display','none')
 					$('[data-fieldname=share]').css('display','none')
+					$('[data-fieldname=status]').css('display','none')
+					e.style.display = 'none';
 				}
 
 			}
+			me.check_property_list=me.property_list
 			
 	});
 	
+	
 	},
-
 
 
 	show_unique_properties:function(page,numPages,data,records_per_page,length,flag){
@@ -1092,6 +1304,8 @@ Property = Class.extend({
 		});		
 
 	},
+
+	
 
 
 })
