@@ -14,74 +14,86 @@ STANDARD_USERS = ("Guest", "Administrator")
 
 
 class LeadManagement(Document):
-	def on_update(self):
-		if self.lead_status=='Closed':
-			self.change_enquiry_status(self.name,self.enquiry_id,self.lead_status)
+	pass
+	# def on_update(self):
+	# 	if self.property_type and self.property_subtype and self.property_subtype_option and self.location:
+	# 		pass
+	# 	else:
+	# 		frappe.msgprint("Property Type, Property Subtype, Property Subtype Option and Locations are mandatory to serach property.")
 
-	def change_enquiry_status(self,lead_management,enquiry_id,lead_status):
-		enquiry = frappe.get_doc("Enquiry", enquiry_id)
-		enquiry.enquiry_status = lead_status
-		enquiry.save(ignore_permissions=True)
 
 @frappe.whitelist()
-def make_visit(doc=None,lead=None,lead_name=None,mobile_no=None,address=None,address_details=None,customer=None,customer_contact=None,contact_details=None,
-				customer_contact_no=None,customer_address=None,customer_address_details=None,enquiry_id=None,consultant=None,
-				enquiry_from=None,assign_to=None,property_id=None,property_name=None,area=None,price=None,property_address=None,
-				bhk=None,bathroom=None,posting_date=None,button_name=None,completion_date=None,property_doc=None,location=None):
-	if button_name  == 'SE Visit':
-		doctype = 'Site Visit'
-		name = schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_details,customer,customer_contact,contact_details,
-				customer_contact_no,customer_address,customer_address_details,enquiry_id,consultant,
-				enquiry_from,assign_to,property_id,property_name,area,price,property_address,
-				bhk,bathroom,posting_date,button_name,completion_date,property_doc,location)
-		update_se_status_in_leadform(property_doc,name,assign_to)
-		if name:
-			return name
-	elif button_name == 'ACM Visit':
-		doctype = 'ACM Visit'
-		name = schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_details,customer,customer_contact,contact_details,
-				customer_contact_no,customer_address,customer_address_details,enquiry_id,consultant,
-				enquiry_from,assign_to,property_id,property_name,area,price,property_address,
-				bhk,bathroom,posting_date,button_name,completion_date,property_doc,location)
-		update_acm_status_in_leadform(property_doc,name,assign_to)
-		if name:
-			return name
+def get_se_details(assign_to=None):
+	se_details = frappe.db.sql("""select name, visiter, schedule_date from `tabSite Visit` where
+								visiter='%s' and schedule_date>='%s'"""%(assign_to,nowdate()),as_dict=1)
+	frappe.errprint(se_details)
+	if len(se_details)>0:
+		return se_details
+	else:
+		return {'status':'Available'}
 
 
-def schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_details,customer,customer_contact,contact_details,
-				customer_contact_no,customer_address,customer_address_details,enquiry_id,consultant,
-				enquiry_from,assign_to,property_id,property_name,area,price,property_address,
-				bhk,bathroom,posting_date,button_name,completion_date,property_doc,location):
+
+@frappe.whitelist()
+def get_acm_details(assign_to=None):
+	acm_details = frappe.db.sql("""select name, visiter, schedule_date from `tabACM Visit` where
+								visiter='%s' and schedule_date>='%s'"""%(assign_to,nowdate()),as_dict=1)
+	if len(acm_details)>0:
+		return acm_details
+	else:
+		return {'status':'Available'}
+
+
+
+@frappe.whitelist()
+def make_se_visit(property_list=None,assign_to=None,parent=None,schedule_date=None):
+	property_new = json.loads(property_list)
+	if len(property_new)>0:
+		for i in property_new:
+			frappe.errprint(i)
+			doctype ='Site Visit'
+			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
+			update_se_status_in_leadform(i,name,assign_to,schedule_date)
+			if name:
+				create_to_do(assign_to,name,doctype)
+		return {"Status":'Available'}
+
+
+def schedule_se_visit(child_property,assign_to,parent,doctype,schedule_date):
+	lead_record = frappe.get_doc("Lead Management", parent)
+
+	child_id = frappe.get_doc("Lead Property Details", child_property)
+
 	se_visit = frappe.get_doc({
-		"doctype":doctype ,
-		"lead":lead,
-		"lead_name": lead_name,
-		"mobile_no":mobile_no,
-		"address":address,
-		"address_details":address_details,
-		"customer":customer,
-		"customer_contact":customer_contact,
-		"contact_details":contact_details,
-		"customer_contact_no": customer_contact_no,
-		"customer_address": customer_address,
-		"customer_address_details":customer_address_details,
-		"property_id": property_id,
-		"property_name": property_name,
-		"area": area,
-		"bhk": bhk,
-		"bathroom": bathroom,
-		"price": price,
-		"property_address": property_address,
-		"enquiry_id":enquiry_id,
-		"consultant": consultant,
+		"doctype": doctype ,
+		"lead":lead_record.lead,
+		"lead_name": lead_record.lead_name,
+		"middle_name":lead_record.middle_name,
+		"last_name":lead_record.last_name,
+		"email_id":lead_record.email_id,
+		"references":lead_record.references,
+		"description":lead_record.description,
+		"lead_from":lead_record.lead_from,
+		"mobile_no":lead_record.mobile_no,
+		"address":lead_record.address,
+		"address_details":lead_record.address_details,
+		"property_id": child_id.property_id,
+		"property_name": child_id.property_name,
+		"area": child_id.area,
+		"bhk": child_id.bhk,
+		"bathroom": child_id.bathroom,
+		"price": child_id.price,
+		"property_address": child_id.address,
+		"enquiry_id":lead_record.enquiry_id,
+		"consultant": lead_record.consultant,
 		"form_posting_date":nowdate(),
-		"lead_management_id":doc,
-		"enquiry_from": enquiry_from ,
+		"lead_management_id":parent,
+		"enquiry_from": lead_record.enquiry_from ,
 		"visiter": assign_to,
-		"location": location,
-		"posting_date":posting_date,
-		"child_id":property_doc,
-		"schedule_date": nowdate()#datetime.datetime.strptime(cstr(completion_date),'%d-%m-%Y')
+		"location": child_id.location,
+		"posting_date":lead_record.posting_date,
+		"child_id":child_property,
+		"schedule_date": datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')
 	})
 
 	se_visit.insert(ignore_permissions=True)
@@ -89,18 +101,46 @@ def schedule_se_visit(doctype,doc,lead,lead_name,mobile_no,address,address_detai
 	return se_visit.name
 	
 
-def update_se_status_in_leadform(source_name,se_visit,assign_to):
+def update_se_status_in_leadform(source_name,se_visit,assign_to,schedule_date):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
 	lead_name.se_status = 'Scheduled'
 	lead_name.site_visit = se_visit
 	lead_name.site_visit_assignee = assign_to
+	lead_name.se_date = datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')
 	lead_name.save()
 
-def update_acm_status_in_leadform(source_name,acm_visit,assign_to):
+def create_to_do(assign_to,name,doctype):
+		import datetime
+		today = nowdate()
+		d = frappe.new_doc("ToDo")
+		d.owner = assign_to
+		d.description = doctype
+		d.reference_type = doctype
+		d.reference_name = name
+		d.priority =  'Medium'
+		d.date = today
+		d.assigned_by = frappe.session.user
+		d.save(1)
+
+@frappe.whitelist()
+def make_acm_visit(property_list=None,assign_to=None,parent=None,schedule_date=None):
+	property_new = json.loads(property_list)
+	if len(property_new)>0:
+		for i in property_new:
+			frappe.errprint(i)
+			doctype ='ACM Visit'
+			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
+			update_acm_status_in_leadform(i,name,assign_to,schedule_date)
+			if name:
+				create_to_do(assign_to,name,doctype)
+		return {"Status":'Available'}
+
+def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
 	lead_name.acm_status = 'Scheduled'
 	lead_name.acm_visit = acm_visit
 	lead_name.acm_visit_assignee = assign_to
+	lead_name.acm_date = datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')
 	lead_name.save()
 
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
@@ -112,17 +152,16 @@ def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 			and docstatus < 2
 			and name not in ({standard_users})
 			and user_type != 'Website User'
-			and name in (select parent from `tabUserRole` where role='Sales Executive')
+			and name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
 			and ({key} like %s
 				or concat_ws(' ', first_name, middle_name, last_name) like %s)
-			{mcond}
 		order by
 			case when name like %s then 0 else 1 end,
 			case when concat_ws(' ', first_name, middle_name, last_name) like %s
 				then 0 else 1 end,
 			name asc
 		limit %s, %s""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),
-			key=searchfield, mcond=get_match_cond(doctype)),
+			key=searchfield),
 			tuple(list(STANDARD_USERS) + [txt, txt, txt, txt, start, page_len]))
 
 
@@ -135,17 +174,16 @@ def acm_query(doctype, txt, searchfield, start, page_len, filters):
 			and docstatus < 2
 			and name not in ({standard_users})
 			and user_type != 'Website User'
-			and name in (select parent from `tabUserRole` where role='Account Closure Manager')
+			and name in (select parent from `tabUserRole` where role='Account Closure Manager' and parent!='Administrator' and parent!='Guest')
 			and ({key} like %s
 				or concat_ws(' ', first_name, middle_name, last_name) like %s)
-			{mcond}
 		order by
 			case when name like %s then 0 else 1 end,
 			case when concat_ws(' ', first_name, middle_name, last_name) like %s
 				then 0 else 1 end,
 			name asc
 		limit %s, %s""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),
-			key=searchfield, mcond=get_match_cond(doctype)),
+			key=searchfield),
 			tuple(list(STANDARD_USERS) + [txt, txt, txt, txt, start, page_len]))
 
 
@@ -181,4 +219,39 @@ def create_email(user_id,property_type=None,property_subtype=None,location=None,
 def send_email(email, subject, template, args):
 	frappe.sendmail(recipients=email, sender=None, subject=subject,
 			message=frappe.get_template(template).render(args))
+	
+@frappe.whitelist()
+def update_details(list=None,followup_type=None,followup_date=None):
+	properties = json.loads(list)
+	
+	for i in properties:
+		lead_property = frappe.get_doc("Lead Property Details", i.get('name'))
+		if followup_type=='Follow-Up For Share':
+			lead_property.share_followup_status = i.get('status')
+			lead_property.share_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+		elif followup_type=='Follow-Up For SE':
+			lead_property.se_follow_up_status = i.get('status')
+			lead_property.se_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+		else:
+			lead_property.acm_followup_status = i.get('status')
+			lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+		lead_property.save(ignore_permissions=True)
+
+
+	return True
+
+@frappe.whitelist()
+def update_followup_date(list=None,followup_type=None,followup_date=None):
+	properties = json.loads(list)
+	if len(properties)>0:
+		for i in properties:
+			lead_property = frappe.get_doc("Lead Property Details", i)
+			if followup_type=='Follow-Up For Share':
+				lead_property.share_followup_date = getdate(cstr(followup_date))#datetime.datetime.strptime(cstr(followup_date),'%d-%m-%y')
+			elif followup_type=='Follow-Up For SE':
+				lead_property.se_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+			else:
+				lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+			lead_property.save(ignore_permissions=True)
+
 	

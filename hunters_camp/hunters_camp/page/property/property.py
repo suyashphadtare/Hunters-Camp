@@ -41,9 +41,8 @@ def add_properties_in_lead_management(lead_management=None,property_resultset=No
     share_property =  json.loads(property_resultset)
     user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
     args = { "title":"Property Shared by  {0}" .format(frappe.session.user) , "property_data":share_property ,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
-    send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
-
-    #frappe.msgprint("Property shared successfully..!")
+    if user:
+      send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
   
   return True
 
