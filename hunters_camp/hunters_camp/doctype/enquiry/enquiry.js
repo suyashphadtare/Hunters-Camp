@@ -99,4 +99,3 @@ cur_frm.cscript.customer_contact = function(doc,cdt,cdn){
 
 
 
-
