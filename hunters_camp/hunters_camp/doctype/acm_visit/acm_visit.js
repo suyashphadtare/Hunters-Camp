@@ -6,7 +6,7 @@
 frappe.ui.form.on("ACM Visit", "refresh", function(frm) {
 	if (!frm.doc.__islocal)// && !frm.doc.lead_status=='Closed')
 	{
-		if(frm.doc.acm_status=='Close'){
+		if(frm.doc.acm_status=='Close' && !frm.doc.amount){
 			frm.add_custom_button(__("Book Property"), function() { 
 				pop_up = new frappe.Book_Property();
 			})	

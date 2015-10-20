@@ -20,9 +20,9 @@ class Enquiry(Document):
 
 	def on_update(self):
 		self.create_dictionary()
-		if self.flag == 1:
+		if self.flag==1:
 			self.check_updation_enquiry()
-		self.flag=1
+		self.flag = 1
 
 	def validate_property_id(self):
 		property_id = []
