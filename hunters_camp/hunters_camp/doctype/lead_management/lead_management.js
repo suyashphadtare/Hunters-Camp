@@ -35,7 +35,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 	}
 
 	make_dashboard =  function(doc){
-		if(doc){
+		if(doc.property_type && doc.property_subtype && doc.operation && doc.location){
 			return frappe.call({
 					method:'propshikari.versions.v1.search_property',
 					args :{
@@ -159,6 +159,9 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						}
 					},
 				});
+			}
+			else{
+				frappe.msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE,LOCATION are the mandatory fields to serach criteria please specify it")
 			}
 		}
 

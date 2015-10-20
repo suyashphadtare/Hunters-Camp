@@ -153,7 +153,7 @@ Property = Class.extend({
 			});
 	}
 	else
-		msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE are the amnadatory fields tos erach criteria please specify it")
+		msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE are the mandatory fields to serach criteria please specify it")
 
 	});
 
@@ -948,7 +948,7 @@ Property = Class.extend({
 	
 		
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#property-id").append('<div class="row property-row">'+d['property_id'] ? d['property_id'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#property-id").append('<div class="row property-row"><a class="pv" id="'+d['property_id']+'">'+d['property_id']+'<a></div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#area").append('<div class="row property-row">'+d['carpet_area'] ? d['carpet_area'] : ""+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#location").append('<div class="row property-row">'+d['location'] ? d['location'] : ""+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#price").append('<div class="row property-row">'+d['price'] ? d['price'] : ""+'</div>')
