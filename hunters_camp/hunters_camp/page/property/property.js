@@ -153,7 +153,7 @@ Property = Class.extend({
 			});
 	}
 	else
-		msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE are the mandatory fields to serach criteria please specify it")
+		msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE are the mandatory fields to search criteria please specify it.")
 
 	});
 

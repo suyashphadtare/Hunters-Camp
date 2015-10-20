@@ -161,7 +161,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				});
 			}
 			else{
-				frappe.msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE,LOCATION are the mandatory fields to serach criteria please specify it")
+				frappe.msgprint("OPERATION,PROPERTY TYPE,PROPERTY SUBTYPE,LOCATION are the mandatory fields to search criteria please specify it.")
 			}
 		}
 
