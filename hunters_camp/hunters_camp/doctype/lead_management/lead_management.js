@@ -552,7 +552,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_status=='Visited'){
+					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_status=='Close'){
 
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\

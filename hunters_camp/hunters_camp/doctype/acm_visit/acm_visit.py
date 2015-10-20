@@ -15,7 +15,7 @@ class ACMVisit(Document):
 
 	def change_lead_managemnet_child_status(self,acm_Visit,se_status,child_id):
 		child_entry = frappe.get_doc("Lead Property Details", child_id)
-		child_entry.acm_status = 'Visited'
+		child_entry.acm_status = 'Close'
 		child_entry.save(ignore_permissions=True)
 
 
