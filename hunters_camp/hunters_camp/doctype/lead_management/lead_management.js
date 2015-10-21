@@ -240,10 +240,10 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				// SHARE FOLLOW UP FOR SE ---------------------------------------------
 				if(me.pop_up.fields_dict.type_followup.input.value=='Follow-Up For SE'){
 					
-
+					pd = cur_frm.doc.property_details
 					for(i=0;i<pd.length;i++){
 						if(pd[i].se_followup_date){
-							if(pd[i].se_followup_date.length!=0){
+							if(pd[i].se_followup_date.length!=0 &&  pd[i].site_visit){
 								var past_date=(pd[i].se_followup_date.split("-").reverse().join("-"));
 								me.pop_up.fields_dict.followup_date.input.value = past_date
 							}
@@ -259,11 +259,11 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					var se_list=[]
 
 					for(i=0;i<pd.length;i++){	
-						if(pd[i].share_followup_status =='Intrested' && pd[i].se_status=='Visited'){
+						if(pd[i].share_followup_status =='Intrested' && pd[i].site_visit){
 							se_list.push(pd[i].name)
 					    }
 					}
-
+			
 					if(se_list.length>0){
 							me.append_se_popup_fields(me.pop_up,cur_frm.doc);
 							$(me.pop_up_body.find('.select')).css('display','none')
@@ -293,7 +293,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					
 					for(i=0;i<pd.length;i++){
 						if(pd[i].acm_followup_date){
-							if(pd[i].acm_followup_date.length!=0){
+							if(pd[i].acm_followup_date.length!=0 && pd[i].acm_visit){
 								var past_date=(pd[i].acm_followup_date.split("-").reverse().join("-"));
 								me.pop_up.fields_dict.followup_date.input.value = past_date
 							}
@@ -309,7 +309,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					var acm_list =[]
 
 					for(i=0;i<pd.length;i++){	
-						if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_status=='Close'){
+						if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit){
 							acm_list.push(pd[i].name)
 					    }
 					}
@@ -525,7 +525,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].share_followup_status=='Intrested' && pd[i].se_status=='Visited'){
+					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
@@ -552,7 +552,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_status=='Close'){
+					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit){
 
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
@@ -1025,7 +1025,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		},
 
 		set_acm_visit_details:function(doc,me){
-			cur_frm.reload_doc()
+			//cur_frm.reload_doc()
 			$('#container').remove()
 			acm_final_list =[]
 			var pd = cur_frm.doc.property_details
