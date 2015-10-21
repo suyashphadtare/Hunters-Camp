@@ -26,8 +26,13 @@ def post_property(doc,sid):
 	doc["sid"] = sid
 	doc["amenities"] = doc.get('amenities').split(',') if doc.get("amenities") else []
 	doc["flat_facilities"] = doc.get('flat_facilities').split(',') if doc.get("flat_facilities") else []
-	doc["possession_date"] = "-".join([doc.get("month"),doc.get("year")])
-	doc_rec = api.post_property(doc)
+	if doc.get("possession") == 1:
+		map(lambda x: doc.pop(x,None), ['month','year'])
+	elif doc.get("possession") == 0: 
+		doc["possession_date"] = "-".join([doc.get("month"),doc.get("year")])
+
+	data = json.dumps(doc)
+	doc_rec = api.post_property(data)
 	return doc_rec
 
 
@@ -40,7 +45,6 @@ def view_property(property_id,sid):
 	data = json.dumps(doc)
 	doc = api.get_property_of_given_id(data)
 	doclist = get_mapped_doc(doc["data"],{})
-	print doclist.city
 	doclist.city_link = frappe.db.get_value("City",{"city_name":doclist.city},"name")
 	doclist.location_link = frappe.db.get_value("Area",{"area":doclist.location},"name")
 	return doclist
