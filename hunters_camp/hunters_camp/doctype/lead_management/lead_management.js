@@ -243,7 +243,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					pd = cur_frm.doc.property_details
 					for(i=0;i<pd.length;i++){
 						if(pd[i].se_followup_date){
-							if(pd[i].se_followup_date.length!=0){
+							if(pd[i].se_followup_date.length!=0 &&  pd[i].site_visit){
 								var past_date=(pd[i].se_followup_date.split("-").reverse().join("-"));
 								me.pop_up.fields_dict.followup_date.input.value = past_date
 							}
@@ -293,7 +293,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					
 					for(i=0;i<pd.length;i++){
 						if(pd[i].acm_followup_date){
-							if(pd[i].acm_followup_date.length!=0){
+							if(pd[i].acm_followup_date.length!=0 && pd[i].acm_visit){
 								var past_date=(pd[i].acm_followup_date.split("-").reverse().join("-"));
 								me.pop_up.fields_dict.followup_date.input.value = past_date
 							}
@@ -1025,7 +1025,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		},
 
 		set_acm_visit_details:function(doc,me){
-			cur_frm.reload_doc()
+			//cur_frm.reload_doc()
 			$('#container').remove()
 			acm_final_list =[]
 			var pd = cur_frm.doc.property_details
