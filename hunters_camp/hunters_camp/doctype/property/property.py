@@ -6,6 +6,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
 import propshikari.propshikari.propshikari_api as api
+import propshikari.propshikari.property_update_api as update_api
 from hunters_camp.hunters_camp.mapper import get_mapped_doc
 import json
 
@@ -59,8 +60,9 @@ def update_tag(doc,sid,tag):
 	data["property_id"] = doc["property_id"]
 	data["fields"] = ["tag"]
 	data = json.dumps(data)
-	doc_rec = api.update_tags_of_property(data)
-	tags = api.get_property_details(data)
+	doc_rec = update_api.update_tags_of_property(data)
+	tags = update_api.get_property_details(data)
+	print tags["data"]["tag"]	
 	tag = ",".join(tags["data"]["tag"]) if tags else []
 	return doc_rec,tag
 
@@ -75,5 +77,5 @@ def update_status(doc,sid,status):
 	data["fields"] = ["status"]
 	data = json.dumps(data)
 	doc_rec = api.update_property_status(data)
-	status = api.get_property_details(data)
+	status = update_api.get_property_details(data)
 	return doc_rec,status["data"]["status"]

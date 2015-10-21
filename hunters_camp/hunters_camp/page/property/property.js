@@ -197,20 +197,20 @@ Property = Class.extend({
 			fields=d.fields_dict
 			$('[data-fieldname=submit]').css('display','none')
 
-			fields.property_type.input.value=me.filters.property_type.$input.val()
-			fields.property_subtype.input.value=me.filters.property_subtype.$input.val()
-			fields.operation.input.value=me.filters.operation.$input.val()
-			fields.minimum_budget.input.value=me.filters.budget_min.$input.val()
-			fields.maximum_budget.input.value=me.filters.budget_max.$input.val()
+			fields.property_type.input.value = me.filters.property_type.$input.val()
+			fields.property_subtype.input.value = me.filters.property_subtype.$input.val()
+			fields.operation.input.value = me.filters.operation.$input.val()
+			fields.minimum_budget.input.value = me.filters.budget_min.$input.val()
+			fields.maximum_budget.input.value = me.filters.budget_max.$input.val()
 
 			$('[data-fieldname=submit]').css('display','block')
 			d.show();
 
 			values = ['property_type','property_subtype','operation','transaction_type','age_of_property','listed_by']
-			final_result=[]
+			final_result = []
 			$(fields.submit.input).click(function() {
-				this.filter_object={}
-				var me1=this
+				this.filter_object = {}
+				var me1 = this
 
 				$.each(values, function(i, d) {
 					if(fields[d].input.value)
@@ -851,7 +851,7 @@ Property = Class.extend({
 			       </div>\
 			       <div class='row row-id'>\
 			        <div class='col-md-6 row'>\
-			       <div class='row property-row'><b>Security Deposite :</b></div>\
+			       <div class='row property-row'><b>Security Deposit :</b></div>\
 			       </div>\
 			       <div class='col-md-6 row'>\
 			        <div class='row property-row' id='deposite'></div>\

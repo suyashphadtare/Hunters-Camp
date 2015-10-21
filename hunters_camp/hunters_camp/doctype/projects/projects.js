@@ -57,8 +57,12 @@ project.operations = {
 				callback: function(r) {
 					if (!r.exec){
 						frappe.msgprint(r.message.message)
-						frm.doc.property_id = r.message.property_id
-						refresh_field("property_id")
+						frm.doc.project_id = r.message.project_id
+						refresh_field("project_id")
+						if (frm.doc.project_id){
+							frm.page.clear_primary_action();
+							me.enable_project_editing(frm)
+						}
 					}
 				},
 				always: function() {
@@ -111,7 +115,7 @@ project.operations = {
 	},
 	enable_project_editing:function(frm){
 		var me = this;
-		me.manage_primary_operations_for_update(frm)
+		//me.manage_primary_operations_for_update(frm)
 		//me.add_status_and_tag_to_menu(frm)
 	},
 	add_status_and_tag_to_menu:function(frm){

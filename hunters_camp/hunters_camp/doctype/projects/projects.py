@@ -24,4 +24,4 @@ def post_project(doc,sid):
 	doc["amenities"] = doc.get('amenities').split(',') if doc.get("amenities") else []
 	doc["flat_facilities"] = doc.get('flat_facilities').split(',') if doc.get("flat_facilities") else []
 	doc_rec = api.post_project(doc)
-	frappe.errprint(doc_rec)
+	return doc_rec
