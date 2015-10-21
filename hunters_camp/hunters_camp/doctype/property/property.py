@@ -27,8 +27,10 @@ def post_property(doc,sid):
 	doc["amenities"] = doc.get('amenities').split(',') if doc.get("amenities") else []
 	doc["flat_facilities"] = doc.get('flat_facilities').split(',') if doc.get("flat_facilities") else []
 	doc["possession_date"] = "-".join([doc.get("month"),doc.get("year")])
-	doc_rec = api.post_property(doc)
-	return doc_rec
+	#doc_rec = api.post_property(doc)
+	print doc
+	return "hello"
+	#return doc_rec
 
 
 @frappe.whitelist(allow_guest=True)

@@ -112,4 +112,16 @@ def get_data():
 				
 			]
 		},
+		{
+			"label": _("Report"),
+			"icon": "icon-table",
+			"items": [
+				{
+					"type": "report",
+					"name":"Followup Log",
+					"doctype": "Lead Management",
+					"is_query_report": True,
+				},
+			]
+		},
 	]
