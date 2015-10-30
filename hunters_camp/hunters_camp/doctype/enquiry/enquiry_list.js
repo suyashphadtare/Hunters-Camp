@@ -64,11 +64,16 @@ enquiry.Composer = Class.extend({
 		form_values = me.dialog.get_values(),
 		btn = me.dialog.get_primary_btn();
 		if(!form_values) return;
-		if(count < parseInt(form_values['allocate_enquiry_no']))
-			msgprint("Allocate enquiry number must be less than the total no of not allocated enquiry")
-		else
-			me.make_enquiry_allocation(count,parseInt(form_values['allocate_enquiry_no']))
-			me.dialog.hide();
+		if(parseInt(form_values['allocate_enquiry_no'])>0){
+			if(count < parseInt(form_values['allocate_enquiry_no']))
+				msgprint("No. of enquiry must be less than the total no of not allocated enquiry")
+			else
+				me.make_enquiry_allocation(count,parseInt(form_values['allocate_enquiry_no']))
+				me.dialog.hide();
+		}
+		else{
+			msgprint("Valuse shoud be a positive number")
+		}
 		
 	},
 

@@ -213,7 +213,7 @@ def create_email(user_id,property_type=None,property_subtype=None,location=None,
 	
 	user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
 	args = { "title":"Property Search Criteria Shared By  {0}" .format(frappe.session.user) , "property_type":property_type ,"property_subtype":property_subtype,"budget_maximum":budget_maximum,"budget_minimum":budget_minimum,"area_minimum":area_minimum,"area_maximum":area_maximum,"location":location,"operation":operation,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
-	send_email(user_id, "Property Serach Criteria Shared With you", "/templates/search_criteria_shared.html", args)
+	send_email(user_id, "Property Search Criteria Shared With you", "/templates/search_criteria_shared.html", args)
 	return True
 
 def send_email(email, subject, template, args):

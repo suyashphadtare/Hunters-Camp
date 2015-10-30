@@ -14,6 +14,7 @@ cur_frm.add_fetch('lead', 'mobile_no', 'mobile_no');
 
 
 
+
 //Return query for getting contact name in link field
 cur_frm.fields_dict['address'].get_query = function(doc) {
 	return {
@@ -52,6 +53,15 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc) {
 		}
 	}
 }
+
+cur_frm.cscript.lead = function(doc,cdt,cdn){
+	console.log("n lead")
+	// doc.address=null
+	// doc.address_details=null
+	// refresh_fields(['address','address_details'])
+
+}
+
 
 cur_frm.cscript.address = function(doc,cdt,cdn){
 	frappe.call({

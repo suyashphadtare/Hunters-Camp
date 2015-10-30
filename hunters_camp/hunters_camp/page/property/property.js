@@ -52,18 +52,21 @@ Property = Class.extend({
 		me.filters.location = me.wrapper.page.add_field({
 					fieldname: "location",
 					label: __("Location"),
-					fieldtype: "Data"
+					fieldtype: "Link",
+					options:"Area"
 		});
 		
 		me.filters.budget_min = me.wrapper.page.add_field({
 					fieldname: "budget_min",
 					label: __("Budget Minimum"),
-					fieldtype: "Data"
+					fieldtype: "Currency",
+					options:'Company:company:default_currency'
 		});
 		me.filters.budget_max = me.wrapper.page.add_field({
 					fieldname: "budget_max",
 					label: __("Budget Maximum"),
-					fieldtype: "Data"
+					fieldtype: "Currency",
+					options:'Company:company:default_currency'
 		});
 		me.filters.area_min = me.wrapper.page.add_field({
 					fieldname: "area_min",
@@ -138,12 +141,15 @@ Property = Class.extend({
 					  },
 					},
 					callback: function(r,rt) {
+						console.log(r.message)
 						if(!r.exc) {
 							if(r.message['total_records']>0){
-								console.log(r.message['data'])
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
+								$("#property").remove();
+								$("#buttons").remove();
+								$("#sorting").remove();
 								msgprint("Property is not available related to search criteria which you have specified.")
 							}		
 					}
@@ -753,7 +759,7 @@ Property = Class.extend({
 				</div></ul></div>\
 			    </ul>\
 			    <div id='mytable' class='tab-content' style='background-color=#fafbfc;'>\
-			      <div role='tabpanel' class='tab-pane fade active in' id='general"+""+i+"' aria-labelledby='home-tab'>\
+			      <div role='tabpanel' class='tab-pane fade active in' style='overflow:auto;height: 110px;' id='general"+""+i+"' aria-labelledby='home-tab'>\
 			       <div class='col-md-6' style='background-color=#fafbfc;'>\
 			        <div class='row row-id'>\
 			        <div class='col-md-6 row'>\
@@ -823,13 +829,13 @@ Property = Class.extend({
 			       </div>\
 			       </div>\
 			       </div>\
-			      <div role='tabpanel' class='tab-pane fade' style='height=100%'  id='more"+""+i+"' aria-labelledby='profile-tab'>\
+			      <div role='tabpanel' class='tab-pane fade' style='overflow:auto;height: 110px;' id='more"+""+i+"' aria-labelledby='profile-tab'>\
 			      <div class='col-md-6' style='background-color=#fafbfc;'>\
 			        <div class='row row-id'>\
 			        <div class='col-md-6 row'>\
 			       <div class='row property-row'><b>Property Ownership :</b></div>\
 			       </div>\
-			       <div class='col-md-6 row'>\
+			       <div class='col-md-6 row' style='margin-left: 10px'>\
 			        <div class='row property-row' id='property-ownership'></div>\
 			        </div>\
 			       </div>\
@@ -837,15 +843,15 @@ Property = Class.extend({
 			        <div class='col-md-6 row'>\
 			       <div class='row property-row'><b>Number Of Floors :</b></div>\
 			       </div>\
-			       <div class='col-md-6 row'>\
+			       <div class='col-md-6 row main-row'style='margin-left: 10px'>\
 			        <div class='row property-row' id='floors'></div>\
 			        </div>\
 			       </div>\
 			       <div class='row row-id'>\
-			        <div class='col-md-6 row'>\
+			        <div class='col-md-6 row '>\
 			       <div class='row property-row'><b>Maintenance :</b></div>\
 			       </div>\
-			       <div class='col-md-6 row'>\
+			       <div class='col-md-6 row main-row' style='margin-left: 10px'>\
 			        <div class='row property-row' id='maintainance'></div>\
 			        </div>\
 			       </div>\
@@ -853,7 +859,7 @@ Property = Class.extend({
 			        <div class='col-md-6 row'>\
 			       <div class='row property-row'><b>Security Deposit :</b></div>\
 			       </div>\
-			       <div class='col-md-6 row'>\
+			       <div class='col-md-6 row main-row' style='margin-left: 10px'>\
 			        <div class='row property-row' id='deposite'></div>\
 			        </div>\
 			       </div>\
