@@ -43,7 +43,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						"operation": doc.operation,
 						"property_type": doc.property_type,
 						"property_subtype": doc.property_subtype,
-						"location": doc.location_name,
+						"location": doc.location,
 						"budget_minimum": doc.budget_minimum,
 						"budget_maximum": doc.budget_maximum,
 						"area_minimum": doc.area_minimum,
@@ -86,7 +86,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
-													"location": doc.location_name,
+													"location": doc.location,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
@@ -104,7 +104,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 															"property_type": doc.property_type,
 															"property_subtype": doc.property_subtype,
 															"operation":doc.operation,
-															"location": doc.location_name,
+															"location": doc.location,
 															"budget_minimum": doc.budget_minimum,
 															"budget_maximum": doc.budget_maximum,
 															"area_minimum": doc.area_minimum,
@@ -125,7 +125,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
-													"location": doc.location_name,
+													"location": doc.location,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
@@ -144,7 +144,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"property_type": doc.property_type,
 										"property_subtype": doc.property_subtype,
 										"operation":doc.operation,
-										"location": doc.location_name,
+										"location": doc.location,
 										"budget_minimum": doc.budget_minimum,
 										"budget_maximum": doc.budget_maximum,
 										"area_minimum": doc.area_minimum,
@@ -342,22 +342,30 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				}
 
 				$(me.pop_up_body.find('.select_dropdown')).change(function(){
+					var property_details_list = []
 					row = $(this).parent().parent();
 					var cdn = row.find("input#cdn").val();
 					cdoc = locals["Lead Property Details"][cdn]
-
-					if(row.find("#followup_status").val()==''){
-						$(row.find('input#_select')).css('display','none')
-						property_details_list.pop(row.find("input#cdn").val())
+					if(row.find('input#_select').is(':checked')){
+						property_details_list.push({
+							"name":row.find("input#cdn").val(),
+							"status": row.find('#followup_status').val()
+						})
 					}
-					else
-						$(row.find('input#_select')).css('display','block')
+					else{
+						// remove the voucher_id from list
+						property_details_list.pop({
+							"name":row.find("input#cdn").val(),
+							"status": row.find('#followup_status').val()
+						})
+
+					}
 
 				})
 
-				// $("input#check_all").click(function(){
-				// 	me.check_all_jvs();
-				// });
+				$("input#check_all").click(function(){
+					me.check_all_jvs();
+				});
 
 				$(me.pop_up_body).find(".select").click(function(){
 					$('input#check_all').prop('checked', false);
@@ -372,7 +380,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						})
 					}
 					else{
-						// remove the voucher_id from list
 						property_details_list.pop({
 							"name":row.find("input#cdn").val(),
 							"status": row.find('#followup_status').val()
@@ -380,7 +387,11 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					}
 				});
 
+				
+
 			});
+			
+
 			
 			$(".modal-dialog").css("width","800px");
 			$(".modal-content").css("max-height","600px");

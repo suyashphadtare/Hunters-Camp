@@ -63,6 +63,25 @@ def get_data():
 					"label": _("Post Project"),
 					"description": _("Post Project"),
 				},
+				{
+					"type": "page",
+					"name": "project",
+					"label": _("Project Search"),
+					"icon": "icon-bar-chart",
+				},
+			]
+		},
+
+		{
+			"label": _("Project"),
+			"icon": "icon-star",
+			"items": [
+				{
+					"type": "page",
+					"name": "project",
+					"label": _("Project Search"),
+					"icon": "icon-bar-chart",
+				},
 			]
 		},
 		{

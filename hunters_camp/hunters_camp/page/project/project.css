@@ -1,13 +1,19 @@
 .property-div{
     margin-top: 20px;
+    margin-right: 5px;
+    margin-left: 0px;
 }
+.prop-row{
+    padding-left: 20px;
+    padding-right: 0px;
+}
+/*.column{
+    margin-left: -6px;
+    padding-left: 38px;
+}*/
 
 .button-div{
     margin-top: 20px;
-}
-
-.tag-row{
-    margin-left: -110px;
 }
 
 

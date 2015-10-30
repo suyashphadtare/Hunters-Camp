@@ -206,6 +206,8 @@ def consultant_allocation(count,allocation_count):
 					
 	if len(enquiry_list)>0:
 		allocate_enquiry_randomly(enquiry_list)
+
+	frappe.msgprint("Lead Allocation Completed Successfully.")
 	return True
 				
 def consultant_assignment(consultant_details,enquiry_form):
@@ -222,7 +224,7 @@ def consultant_assignment(consultant_details,enquiry_form):
 def allocate_enquiry_randomly(enquiry_list):
 	consultant_details={}
 	consultant_name=frappe.db.sql("""select parent from `tabUserRole` where role='Consultant' and parent!='Administrator' and parent!='Guest'""",as_list=1)
-	if consultant_name:
+	if len(consultant_name)>0:
 		for i in consultant_name:
 			lead_count = frappe.db.sql("""select count(name) from `tabLead Management` where consultant='%s' and lead_status!='Closed'
 												"""%i[0],as_list=1)
@@ -231,6 +233,8 @@ def allocate_enquiry_randomly(enquiry_list):
 		if consultant_details:
 			for name in enquiry_list:
 				consultant_assignment(consultant_details,name)
+	else:
+		frappe.msgprint("User having role Consultant is not available in system.",raise_exception=1)
 
 
 def create_lead_management(source_name,assign_to,target_doc=None,ignore_permissions=True):
@@ -267,7 +271,7 @@ def cretae_to_do(assign_to,lead_management):
 	today = nowdate()
 	d = frappe.new_doc("ToDo")
 	d.owner = assign_to
-	d.description = 'Lead Managemnet Form'
+	d.description = 'Lead Management Form'
 	d.reference_type = 'Lead Management'
 	d.reference_name = lead_management
 	d.priority =  'Medium'
