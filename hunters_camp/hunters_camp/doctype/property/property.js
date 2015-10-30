@@ -138,7 +138,12 @@ property.operations = {
 		$.each(frappe.meta.docfield_list["Property"] || [], function(i, docfield) {
 			var df = frappe.meta.get_docfield(doc.doctype,
 				docfield.fieldname, frm.doc.name);
-			frm.doc[docfield.fieldname] = doc[0][docfield.fieldname]
+			if (docfield.fieldname == 'tag' && Array.isArray(doc[0][docfield.fieldname])){
+				frm.doc[docfield.fieldname] = doc[0][docfield.fieldname].join(',')
+			}
+			else{
+				frm.doc[docfield.fieldname] = doc[0][docfield.fieldname]
+			}	
 			refresh_field(docfield.fieldname)
 		});
 	},

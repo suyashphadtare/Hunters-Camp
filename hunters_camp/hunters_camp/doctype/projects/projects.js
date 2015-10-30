@@ -28,11 +28,6 @@ project.operations = {
 	},
 	set_mm_yy_format_for_posssession:function(frm){
 		console.log(cur_frm.get_field("possession_date").$input)
-		/*$input = cur_frm.get_field("possession_date").$input
-		console.log([$input,"ss"])
-		*//*$($input.find('[data-fieldtype="date"]' )).datepicker({
-						dateFormat: 'MM yy'
-		})*/
 	},
 	enable_project_posting:function(frm){
 		var me = this;
@@ -180,7 +175,6 @@ process_images = function(frm,file_data){
 					show_list = (frm.doc.photo_names).split(',')
 					show_list.push(file_data["file_name"])
 					frm.doc.photo_names = show_list.join(',')
-
 			}
 			else {
 				img_list = []
@@ -227,7 +221,7 @@ display_thumbnail =function(frm){
 
 frappe.ui.form.on("Project Details", {
     "property_details_add": function(frm,cdt,cdn) {
-      	var d =locals[cdt][cdn]
+      	var d = locals[cdt][cdn]
       	d.property_type = frm.doc.project_type
       	d.property_subtype = frm.doc.project_subtype
       	refresh_field["property_details"]
