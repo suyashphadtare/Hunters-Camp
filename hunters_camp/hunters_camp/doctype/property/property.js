@@ -21,6 +21,24 @@ frappe.ui.form.on("Property", "possession", function(frm) {
 	
 });
 
+frappe.ui.form.on("Property", "operation", function(frm) {
+	var me = this;
+	frm.toggle_reqd("month", frm.doc.operation==="Buy");
+	frm.toggle_reqd("year", frm.doc.operation==="Buy");
+});
+frappe.ui.form.on("Property", "railway_station", function(frm) {
+	map = frm.doc.distance_from_imp_locations
+	console.log([frm.doc.railway_station,typeof map])
+	map["railway_station"] = frm.doc.railway_station
+	console.log(map["railway_station"])
+});
+frappe.ui.form.on("Property", "central_bus_stand", function(frm) {
+	map = frm.distance_from_imp_locations
+});
+frappe.ui.form.on("Property", "airport", function(frm) {
+	map = frm.distance_from_imp_locations
+});
+
 property.operations = {
 	init:function(frm){
 		var me = this;

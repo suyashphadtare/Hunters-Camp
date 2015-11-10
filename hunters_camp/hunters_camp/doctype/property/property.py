@@ -32,6 +32,7 @@ def post_property(doc,sid):
 		map(lambda x: doc.pop(x,None), ['month','year'])
 	elif doc.get("possession") == 0: 
 		doc["possession_date"] = "-".join([doc.get("month"),doc.get("year")])
+	#doc["distance_from_imp_locations"] = map(lambda x: doc.pop(x,None), ["railway_station",'central_bus_stand',"airport"])
 
 	data = json.dumps(doc)
 	doc_rec = api.post_property(data)
