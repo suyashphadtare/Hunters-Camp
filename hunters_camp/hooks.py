@@ -78,23 +78,12 @@ fixtures = ["Custom Field"]
 # Scheduled Tasks
 # ---------------
 
-# scheduler_events = {
-# 	"all": [
-# 		"hunters_camp.tasks.all"
-# 	],
-# 	"daily": [
-# 		"hunters_camp.tasks.daily"
-# 	],
-# 	"hourly": [
-# 		"hunters_camp.tasks.hourly"
-# 	],
-# 	"weekly": [
-# 		"hunters_camp.tasks.weekly"
-# 	]
-# 	"monthly": [
-# 		"hunters_camp.tasks.monthly"
-# 	]
-# }
+scheduler_events = {
+	"daily": [
+		"hunters_camp.hunters_camp.doctype.agent.agent.revoke_package_access",
+		"hunters_camp.hunters_camp.doctype.agent.agent.send_email_notification"
+	]
+}
 
 # Testing
 # -------

@@ -124,6 +124,7 @@ property.operations = {
 		frm.page.add_menu_item(__("Set as Discounted"),function(){ me.update_tag("Discounted",frm) },"icon-file-alt");
 		frm.page.add_menu_item(__("Set as Verified"),function(){ me.update_tag("Verified",frm) },"icon-file-alt");
 		frm.page.add_menu_item(__("Set as Invested"),function(){ me.update_tag("Invested",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Activate Property"),function(){ me.update_status("Active",frm) },"icon-file-alt");
 		frm.page.add_menu_item(__("Deactivate Property"),function(){ me.update_status("Deactivated",frm) },"icon-file-alt");
 		frm.page.add_menu_item(__("Set as Sold"),function(){ me.update_status("Sold",frm) },"icon-file-alt");
 	},

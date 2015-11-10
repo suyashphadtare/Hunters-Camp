@@ -22,6 +22,7 @@ def post_property(doc,sid):
 		2. Create json doc for uploading
 		3. Return Response
 	"""
+	agent_flag = get_user_roles()
 	doc = json.loads(doc)
 	doc["user_id"] = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
 	doc["sid"] = sid
@@ -34,8 +35,24 @@ def post_property(doc,sid):
 
 	data = json.dumps(doc)
 	doc_rec = api.post_property(data)
+	update_agent_package() if agent_flag else ""
 	return doc_rec
 
+
+def get_user_roles():
+	user_roles = frappe.get_roles(frappe.session.user)
+	if "Agent" in user_roles:
+		ag = frappe.db.get_value("Agent Package", frappe.session.user, ["posting_allowed", "property_posted"], as_dict=True)
+		if not ag.get("posting_allowed") - ag.get("property_posted"):
+			frappe.throw("Posting Limit is Exhausted.Please renew your package subscription.")
+		return "True"	
+	return "False"	
+
+
+def update_agent_package():
+	ap = frappe.get_doc("Agent Package", frappe.session.user)
+	ap.property_posted = ap.property_posted + 1
+	ap.save(ignore_permissions=True)
 
 @frappe.whitelist(allow_guest=True)
 def view_property(property_id,sid):

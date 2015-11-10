@@ -70,6 +70,17 @@ def send_email(email, subject, template, args):
 def get_sorted_list(resultset=None):
 	final_list = json.loads(resultset)
 
+
+@frappe.whitelist()
+def get_agent_properties():
+    pass
+
+
+
+
+
+
+
 @frappe.whitelist()
 def get_property(args=None):
 	return {"data": [

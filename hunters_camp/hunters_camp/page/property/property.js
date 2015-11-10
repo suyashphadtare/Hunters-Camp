@@ -100,6 +100,13 @@ Property = Class.extend({
 						icon: "icon-filter"
 		});
 
+		me.agent_prop = me.wrapper.page.add_field({
+						fieldname: "agent_properties",
+						label: __("Get My Properties"),
+						fieldtype: "Button",
+						icon: "icon-tag"
+		});
+
 		me.share = me.wrapper.page.add_field({
 						fieldname: "share",
 						label: __("Share"),
@@ -114,6 +121,7 @@ Property = Class.extend({
 						icon: "icon-tag"
 		});
 
+		me.show_agent_properties()
 		$('[data-fieldname=tag]').css('display','none')
 		$('[data-fieldname=share]').css('display','none')
 		$('[data-fieldname=lead_management]').css('display','none')
@@ -611,6 +619,19 @@ Property = Class.extend({
 	// });
 
 	},
+	show_agent_properties:function(){
+		if ( !in_list(user_roles, "Agent")){
+			$('[data-fieldname=agent_properties]').css('display','none')
+		}
+		frappe.call({
+			method:"",
+			args:"",
+			callback:function(){
+				
+			}
+		})
+	},
+
 	refresh: function() {
 		var me = this;
 		
