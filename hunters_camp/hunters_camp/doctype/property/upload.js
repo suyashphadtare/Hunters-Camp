@@ -79,26 +79,40 @@ hc.upload = {
 			msgprint(__("Please attach a file or set a URL"));
 			return;
 		}
-
-		var dataurl = null;
+		// console.log("in upload file")
+		// console.log(fileobj)
+		// console.log(opts.args)
+		// console.log(opts)
+		file_data = [] 
+		$.each($(cur_dialog.body).find("img"), function(index, data){
+			this.file_dict = {}
+			this.file_dict["file_data"] = data.src
+			this.file_dict["file_ext"] = data.src.split(",")[0].split(":")[1].split(";")[0].split("/")[1];
+			this.file_dict["file_name"] = data.title
+			file_data.push(this.file_dict) 		
+		})
+		// console.log(file_data)
+		attobj = opts.callback(file_data);
+		// var dataurl = null;
 		
-		var freader = new FileReader();
-		file_data = {}
-		freader.onload = function() {
-			args.filename = fileobj.name;
-			file_data["file_name"] = fileobj.name;
-			if(opts.options && opts.options.toLowerCase()=="image") {
-				if(!frappe.utils.is_image_file(args.filename)) {
-					msgprint(__("Only image extensions (.gif, .jpg, .jpeg, .tiff, .png, .svg) allowed"));
-					return;
-				}
-			}
-			dataurl = freader.result;
-			file_data["file_data"] = freader.result;
-			file_data["file_ext"] = freader.result.split(",")[0].split(":")[1].split(";")[0].split("/")[1];
-			attobj = opts.callback(file_data);
-		};
-		freader.readAsDataURL(fileobj);
+		// var freader = new FileReader();
+		// file_data = {}
+		// freader.onload = function() {
+		// 	args.filename = fileobj.name;
+		// 	file_data["file_name"] = fileobj.name;
+		// 	if(opts.options && opts.options.toLowerCase()=="image") {
+		// 		console.log(args.filename)
+		// 		if(!(/\.(gif|jpg|jpeg|tiff|png|svg)$/i).test(args.filename)) {
+		// 			msgprint(__("Only image extensions (.gif, .jpg, .jpeg, .tiff, .png, .svg) allowed"));
+		// 			return;
+		// 		}
+		// 	}
+		// 	dataurl = freader.result;
+		// 	file_data["file_data"] = freader.result;
+		// 	file_data["file_ext"] = freader.result.split(",")[0].split(":")[1].split(";")[0].split("/")[1];
+		// 	attobj = opts.callback(file_data);
+		// };
+		// freader.readAsDataURL(fileobj);
 		 
 	}
 }

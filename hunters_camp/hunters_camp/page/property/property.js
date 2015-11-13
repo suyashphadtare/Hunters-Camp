@@ -27,13 +27,15 @@ Property = Class.extend({
 					fieldname: "property_type",
 					label: __("Property Type"),
 					fieldtype: "Link",
-					options: "Property Type"
+					options: "Property Type",
+					default:"Residential"
 		});
 		me.filters.property_subtype = me.wrapper.page.add_field({
 					fieldname: "property_subtype",
 					label: __("Property Subtype"),
 					fieldtype: "Link",
 					options: "Property Subtype",
+					default :"Residential Apartment",
 					"get_query": function() {
 				return {
 					"doctype": "Property Subtype",
@@ -47,7 +49,8 @@ Property = Class.extend({
 					fieldname: "operation",
 					label: __("Operation"),
 					fieldtype: "Select",
-					options: "\nBuy\nRent"
+					options: "\nBuy\nRent",
+					default:"Buy"
 		});
 		me.filters.location = me.wrapper.page.add_field({
 					fieldname: "location",

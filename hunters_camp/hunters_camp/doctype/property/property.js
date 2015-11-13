@@ -9,9 +9,15 @@ frappe.provide("property")
 	else it should have post property button.
 */
 
+
+cur_frm.add_fetch("amenity_name", "icon", "image")
+cur_frm.add_fetch("facility_name", "icon", "image")
+
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
-	property.operations.init(frm);
+	console.log("refresh")
+	$(cur_frm.get_field("attachment_display").wrapper).empty()
+	new prop_operations(frm)
 	
 });
 frappe.ui.form.on("Property", "possession", function(frm) {
@@ -26,20 +32,22 @@ frappe.ui.form.on("Property", "operation", function(frm) {
 	frm.toggle_reqd("month", frm.doc.operation==="Buy");
 	frm.toggle_reqd("year", frm.doc.operation==="Buy");
 });
-frappe.ui.form.on("Property", "railway_station", function(frm) {
-	map = frm.doc.distance_from_imp_locations
-	console.log([frm.doc.railway_station,typeof map])
-	map["railway_station"] = frm.doc.railway_station
-	console.log(map["railway_station"])
-});
-frappe.ui.form.on("Property", "central_bus_stand", function(frm) {
-	map = frm.distance_from_imp_locations
-});
-frappe.ui.form.on("Property", "airport", function(frm) {
-	map = frm.distance_from_imp_locations
-});
+// frappe.ui.form.on("Property", "railway_station", function(frm) {
+// 	map = frm.doc.distance_from_imp_locations
+// 	console.log([frm.doc.railway_station,typeof map])
+// 	map["railway_station"] = frm.doc.railway_station
+// 	console.log(map["railway_station"])
+// });
+// frappe.ui.form.on("Property", "central_bus_stand", function(frm) {
+// 	map = frm.distance_from_imp_locations
+// });
+// frappe.ui.form.on("Property", "airport", function(frm) {
+// 	map = frm.distance_from_imp_locations
+// });
 
-property.operations = {
+
+
+prop_operations = Class.extend({
 	init:function(frm){
 		var me = this;
 		this.doc = frm.doc
@@ -49,6 +57,7 @@ property.operations = {
 		else {
 			me.enable_property_posting(frm)
 		}
+		new SearchProperty(frm)
 	},
 	enable_property_posting:function(frm){
 		var me = this;
@@ -64,6 +73,7 @@ property.operations = {
 	},
 	post_property:function(frm,doc){
 		var me = this
+		console.log("post property")
 		if(me.check_mandatory(frm)) {
 			frappe.call({
 				freeze: true,
@@ -74,10 +84,9 @@ property.operations = {
 					if (!r.exec){
 						frappe.msgprint(r.message.message)
 						frm.doc.property_id = r.message.property_id
-						refresh_field("property_id")
+						refresh_field(["property_id"])
 						if (frm.doc.property_id){
-							frm.page.clear_primary_action();
-							me.enable_property_editing(frm)
+							me.reload_doc(frm)
 						}
 					}
 				},
@@ -89,42 +98,64 @@ property.operations = {
 			$(btn).prop("disabled", false);
 		}	
 	},
+	reload_doc:function(frm){
+	var me = this
+	return frappe.call({
+				type: 'GET',
+				method:'hunters_camp.hunters_camp.doctype.property.property.view_property',
+				args: {
+					'property_id':frm.doc.property_id,
+					'sid':frappe.get_cookie('sid')
+				},
+				freeze_message:"Reloading Property details, Please Wait..",
+				freeze: true,
+				callback: function(r) {
+					if(!r.exc) {
+						var doc = frappe.model.sync(r.message);
+						frm.page.clear_primary_action();
+						me.enable_property_editing(frm, doc)
+					}
+				}
+		})
+	},
 	remove_menu_operations:function(frm){
 		frm.page.clear_menu();
 	},
 	check_mandatory :function(frm) {
+		console.log("check_mandatory")
 		var me = this;
 		var has_errors = false;
 		frm.scroll_set = false;
 
-		
 		$.each(frappe.model.get_all_docs(frm.doc), function(i, doc) {
+			if (i != frappe.model.get_all_docs(frm.doc).length - 1){
+				var error_fields = [];
+				var folded = false;
+				$.each(frappe.meta.docfield_list[doc.doctype] || [], function(i, docfield) {
+					if(docfield.fieldname) {
+						var df = frappe.meta.get_docfield(doc.doctype,
+							docfield.fieldname, frm.doc.name);
+						if(df.fieldtype==="Fold") {
+							folded = frm.layout.folded;
+						}
+						if(df.reqd && ! (frappe.model.has_value(doc.doctype, doc.name, df.fieldname)) ) {
+							console.log(df.fieldname)
+							console.log(frappe.model.has_value(doc.doctype, doc.name, df.fieldname))
+							has_errors = true;
+							error_fields[error_fields.length] = __(df.label);
 
-			var error_fields = [];
-			var folded = false;
-
-			$.each(frappe.meta.docfield_list[doc.doctype] || [], function(i, docfield) {
-				if(docfield.fieldname) {
-					var df = frappe.meta.get_docfield(doc.doctype,
-						docfield.fieldname, frm.doc.name);
-					if(df.fieldtype==="Fold") {
-						folded = frm.layout.folded;
-					}
-					if(df.reqd && !frappe.model.has_value(doc.doctype, doc.name, df.fieldname)) {
-						has_errors = true;
-						error_fields[error_fields.length] = __(df.label);
-
-						if(folded) {
-							frm.layout.unfold();
-							folded = false;
+							if(folded) {
+								frm.layout.unfold();
+								folded = false;
+							}
 						}
 					}
-				}
-			});
-			if(error_fields.length)
-				msgprint(__('Mandatory fields required in {0}', [(doc.parenttype
-					? (__(frappe.meta.docfield_map[doc.parenttype][doc.parentfield].label) + ' ('+ __("Table") + ')')
-					: __(doc.doctype))]) + '\n' + error_fields.join('\n'));
+				});
+				if(error_fields.length)
+					msgprint(__('Mandatory fields required in {0}', [(doc.parenttype
+						? (__(frappe.meta.docfield_map[doc.parenttype][doc.parentfield].label) + ' ('+ __("Table") + ')')
+						: __(doc.doctype))]) + '\n' + error_fields.join('\n'));
+			}
 		});
 		return !has_errors;
 	},
@@ -132,9 +163,34 @@ property.operations = {
 		var me = this;
 		if (doc){
 			me.add_data_to_form(frm,doc)
+			me.display_property_photo(frm, doc)
 		}
 		me.manage_primary_operations_for_update(frm)
 		me.add_status_and_tag_to_menu(frm)
+		me.add_possession_status(frm, doc)
+
+	},
+	add_possession_status : function(frm, doc){
+		if (doc.possession){
+			cur_frm.doc.possession = 1			
+		}
+		else{
+			po_list = cur_frm.doc.possession_status.split('-')
+			cur_frm.doc.month = po_list[0]  
+			cur_frm.doc.year =  po_list[1]
+		}
+		refresh_field(["month","year","possession"])
+	},
+	display_property_photo:function(frm, doc){
+		wrapper = $(cur_frm.get_field("attachment_display").wrapper)
+		wrapper.empty()
+		thumbnails_list = frm.doc.thumbnails.split(',')
+		$.each(thumbnails_list ,function(index, thumbnail){
+			$("<img></img>",{
+	 				class : "imageThumb",
+	 				src : thumbnail
+	 			}).appendTo(wrapper);
+		})
 
 	},
 	add_status_and_tag_to_menu:function(frm){
@@ -149,22 +205,54 @@ property.operations = {
 	manage_primary_operations_for_update:function(frm){
 		var me = this;
 		frm.disable_save();
-		/*frm.page.set_primary_action(__("Update Property"), function() {
-			me.post_property(frm,frm.doc)		
-		});*/
+		frm.page.set_primary_action(__("Update Property"), function() {
+			me.update_property(frm)		
+		});
+	},
+	update_property:function(frm){
+		var me = this
+		if(me.check_mandatory(frm)) {
+				frappe.call({
+					freeze: true,
+					freeze_message:"Updating Property,Please Wait..",
+					method:"hunters_camp.hunters_camp.doctype.property.property.update_property",
+					args:{doc: frm.doc, sid:frappe.get_cookie('sid')},
+					callback: function(r) {	
+						frm.doc.property_photos = []
+						refresh_field(["property_photos"])
+						msgprint(r.message.message)
+						me.reload_doc(frm)
+
+					},
+					always: function() {
+						frappe.ui.form.is_saving = false;
+					}	
+				})
+			}
 	},
 	add_data_to_form:function(frm,doc){
 		$.each(frappe.meta.docfield_list["Property"] || [], function(i, docfield) {
 			var df = frappe.meta.get_docfield(doc.doctype,
 				docfield.fieldname, frm.doc.name);
-			if (docfield.fieldname == 'tag' && Array.isArray(doc[0][docfield.fieldname])){
+			if (in_list(['tag', 'thumbnails', 'full_size_images'], docfield.fieldname ) && Array.isArray(doc[0][docfield.fieldname])){
 				frm.doc[docfield.fieldname] = doc[0][docfield.fieldname].join(',')
 			}
 			else{
 				frm.doc[docfield.fieldname] = doc[0][docfield.fieldname]
-			}	
+			}
+
 			refresh_field(docfield.fieldname)
 		});
+		this.add_distance_from_imp_loc(frm,doc)
+	},
+	add_distance_from_imp_loc: function(frm, doc){
+		if (doc[0]["distance_from_imp_locations"]){
+			frm.doc["airport"] = doc[0]["distance_from_imp_locations"].airport
+			frm.doc["railway_station"] = doc[0]["distance_from_imp_locations"].railway_station
+			frm.doc["central_bus_stand"] = doc[0]["distance_from_imp_locations"].central_bus_stand
+			refresh_field(["airport", "railway_station", "central_bus_stand"])
+		}
+		
 	},
 	update_tag:function(tag,frm){
 		var me = this;
@@ -205,7 +293,7 @@ property.operations = {
 		})
 	}
 
-}
+})
 
 frappe.ui.form.on("Property", "add_amenities", function(frm) {
 	var me = this;
@@ -263,6 +351,8 @@ frappe.ui.form.on("Property", "attach_image", function(frm) {
 			msgprint(__("Please attach a file or set a URL"));
 		},
 		callback: function(file_data) {
+			console.log("in callback")
+			// console.log(file_data)
 			me.process_images(frm,file_data)
 			me.display_thumbnail(frm)
 			me.dialog.hide();
@@ -283,21 +373,22 @@ process_images = function(frm,file_data){
 			image_list = frm.doc.property_photos
 			show_list = []
 			if (image_list){
-				image_list.push(file_data)
+				image_list.push.apply(image_list, file_data)
 				frm.doc.property_photos = image_list
-				if (frm.doc.photo_names)
+				if (frm.doc.photo_names){
 					show_list = (frm.doc.photo_names).split(',')
-					show_list.push(file_data["file_name"])
-					frm.doc.photo_names = show_list.join(',')
-
-			}
-			else {
-				img_list = []
-				img_list.push(file_data)
-				frm.doc.property_photos = img_list
-				show_list.push(file_data["file_name"])
-				frm.doc.photo_names = show_list.join(',')
-			}
+				}
+			}	
+			else{
+					img_list = []
+					console.log(file_data)
+					img_list.push.apply(img_list, file_data)
+					console.log(img_list)
+					frm.doc.property_photos = img_list
+				}
+			console.log(frm.doc.property_photos)
+			show_list.push.apply(show_list, $.map(file_data, function(d){ return d.file_name }))
+			frm.doc.photo_names = show_list.join(',')
 			refresh_field(["property_photos","photo_names"])
 		}
 	}
@@ -317,21 +408,32 @@ display_thumbnail =function(frm){
 			});
 		}
 	}
+	display_existing_images(frm,wrapper)
+}
+
+display_existing_images = function(frm, wrapper){
+	thumbnails_list = frm.doc.thumbnails.split(',')
+	$.each(thumbnails_list ,function(index, thumbnail){
+			$("<img></img>",{
+	 				class : "imageThumb",
+	 				src : thumbnail
+	 			}).appendTo(wrapper);
+		})
 }
 
 
 check_file_exists = function(frm,file_data){
 	var res = true
-	if (frm.doc.property_photos){
-		image_list = frm.doc.property_photos
-		if(image_list){
-			$.each(image_list,function(i,img){
-				if (img["file_name"] == file_data["file_name"]){
-					res = false
-				}
-			});
-		}
-	}
+	// if (frm.doc.property_photos){
+	// 	image_list = frm.doc.property_photos
+	// 	if(image_list){
+	// 		$.each(image_list,function(i,img){
+	// 			if (img["file_name"] == file_data["file_name"]){
+	// 				res = false
+	// 			}
+	// 		});
+	// 	}
+	// }
 	return res
 }
 
@@ -342,3 +444,110 @@ cur_frm.fields_dict.property_subtype.get_query = function(doc) {
 		}
 	}
 }
+
+
+
+SearchProperty = Class.extend({
+	init:function(frm){
+		this.frm = frm
+		this.init_for_search_property()
+	},
+	init_for_search_property:function(){
+		var me = this
+		cur_frm.add_custom_button(__('Search Property'),function() {
+				me.render_dialog_for_property_search() },"btn-primary");
+	},
+	render_dialog_for_property_search: function(){
+		this.dialog = new frappe.ui.Dialog({
+		title: __(__("Search Individual Property")),
+		fields: [
+			{"fieldtype": "Data", "label": __("Enter Property ID"), "fieldname": "property", "reqd":1},
+			{"fieldtype": "Button", "label": __("View Property"), "fieldname": "search"},
+			]
+		});
+		this.dialog.show();
+		this.get_property_data()
+		this.make_search_property()
+	},																																	
+	init_for_autocomplete: function(){
+		var me = this
+		$(this.dialog.body).find("input[data-fieldname=property]").attr("property_data", JSON.stringify(this.property_data))
+		$(this.dialog.body).find("input[data-fieldname=property]").autocomplete({
+     		 source: me.init_search,
+     		 focus: function( event, ui ) {
+		        $(me.dialog.body).find("input[data-fieldname=property]").val( ui.item.property_id );
+		        return false;
+		      },
+		      select: function( event, ui ) {
+		        $(me.dialog.body).find("input[data-fieldname=property]").val( ui.item.property_id );		     
+		        return false;
+		      }
+    	}).autocomplete( "instance" )._renderItem = function( ul, property ) {
+      			return $( "<li>" ).append( "<a><b>" + property.property_id + "</b><br>" + property.property_title + "</a>" ).appendTo( ul );
+    		};
+	},
+	get_property_data:function(){
+		var me = this
+		frappe.call({
+			method:"hunters_camp.hunters_camp.doctype.property.property.get_all_properties",
+			args:{sid:frappe.get_cookie('sid')},
+			callback:function(r){
+				me.property_data = r.message.data
+				me.init_for_autocomplete()
+			}
+		})
+	},
+	init_search:function(request, response) {
+        var me = this
+        this.property_data = JSON.parse($(this.bindings[0]).attr("property_data"))
+        function hasMatch(s) {
+	           	if (s){
+	           		return s.toLowerCase().indexOf(request.term.toLowerCase())!==-1;	
+	           		}          	
+       		 }
+        var matches = [];
+
+        if (request.term==="") {
+		    response([]);
+            return;
+        }
+         
+        $.each(me.property_data, function(index, obj){
+         	if (hasMatch(obj.property_id) || hasMatch(obj.property_title)) {
+                matches.push(obj);
+            }
+        })  
+        response(matches);
+    },
+    make_search_property:function(){
+    	var me = this
+    	$(this.dialog.fields_dict.search.input).click(function(){
+    		prop_id = me.dialog.fields_dict.property.input.value
+    		if(prop_id){
+		    		return frappe.call({
+						type: 'GET',
+						method:'hunters_camp.hunters_camp.doctype.property.property.view_property',
+						args: {
+							'property_id':prop_id,
+							'sid':frappe.get_cookie('sid')
+						},
+						freeze_message:"Reloading Property details, Please Wait..",
+						freeze: true,
+						callback: function(r) {
+							if(!r.exc) {
+									var doc = frappe.model.sync(r.message);
+									frappe.route_options = {"doc":doc};
+									frappe.set_route("Form",'Property','Property');
+									cur_frm.reload_doc()
+									me.dialog.hide()
+								}
+							}
+					})
+				}
+				else{
+					msgprint("Please Select Property Id First")	
+				}
+    	})
+    }
+
+})
