@@ -46,7 +46,6 @@ def map_doc(source_doc, target_doc, table_map, source_parent=None):
 def map_fields(source_doc, target_doc, table_map, source_parent):
 	no_copy_fields = set(list(["amenities","flat_facilities"]))
 	#no_copy_fields = []
-	print source_doc
 	for df in target_doc.meta.get("fields"):
 		# print df
 		if df.fieldname not in no_copy_fields:

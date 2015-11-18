@@ -1,6 +1,7 @@
 frappe.provide("frappe.ui.form");
 frappe.provide("property")
 {% include 'hunters_camp/hunters_camp/doctype/property/upload.js' %};
+{% include 'hunters_camp/hunters_camp/doctype/property/get_lat_lon.js' %};
 /*
 	Page to Manage Property posting and view property
 	data will be saved on Elastic search and shown by calling api
@@ -18,8 +19,26 @@ frappe.ui.form.on("Property", "refresh", function(frm) {
 	console.log("refresh")
 	$(cur_frm.get_field("attachment_display").wrapper).empty()
 	new prop_operations(frm)
+	cur_frm.cscript.render_google_map(frm)
 	
+			
 });
+
+
+cur_frm.cscript.render_google_map = function(frm){
+	$(frm.fields_dict['search_location'].wrapper).html("<input type='text' class='form-control' id='search-input'\
+		placeholder='Search Location' style='width:200px;margin-top:10px'><div id='my_map' style='width:400px;height:300px'></div>")
+	this.my_map = document.getElementById('my_map')
+	this.search_input = document.getElementById('search-input')
+	gmap = new GoogleMap(this.my_map, this.search_input)
+	gm = new GeoCodeManager(gmap, frm)
+
+}
+
+
+
+
+
 frappe.ui.form.on("Property", "possession", function(frm) {
 	var me = this;
 	frm.toggle_reqd("month", frm.doc.possession===0);
@@ -381,9 +400,7 @@ process_images = function(frm,file_data){
 			}	
 			else{
 					img_list = []
-					console.log(file_data)
 					img_list.push.apply(img_list, file_data)
-					console.log(img_list)
 					frm.doc.property_photos = img_list
 				}
 			console.log(frm.doc.property_photos)
@@ -412,13 +429,15 @@ display_thumbnail =function(frm){
 }
 
 display_existing_images = function(frm, wrapper){
-	thumbnails_list = frm.doc.thumbnails.split(',')
-	$.each(thumbnails_list ,function(index, thumbnail){
+	if(frm.doc.thumbnails){
+		thumbnails_list = frm.doc.thumbnails.split(',')
+		$.each(thumbnails_list ,function(index, thumbnail){
 			$("<img></img>",{
 	 				class : "imageThumb",
 	 				src : thumbnail
 	 			}).appendTo(wrapper);
-		})
+		})		
+	}
 }
 
 

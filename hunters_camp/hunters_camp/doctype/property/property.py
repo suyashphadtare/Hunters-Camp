@@ -47,8 +47,11 @@ def validate_for_possesion_date(doc):
 def get_user_roles():
 	user_roles = frappe.get_roles(frappe.session.user)
 	if "Agent" in user_roles:
-		ag = frappe.db.get_value("Agent Package", frappe.session.user, ["posting_allowed", "property_posted"], as_dict=True)
-		if not ag.get("posting_allowed") - ag.get("property_posted"):
+		ag = frappe.db.sql(""" select * from `tabAgent Package` 
+								where name = '{0}' and end_date >= CURDATE() """.format(frappe.session.user),as_dict=True)
+		if not ag:
+			frappe.throw("Please subscribe to Property posting package.")
+		elif not ag[0].get("posting_allowed") - ag[0].get("property_posted"):
 			frappe.throw("Posting Limit is Exhausted.Please renew your package subscription.")
 		return True	
 	return False	
@@ -87,6 +90,8 @@ def view_property(property_id,sid):
 			})
 	doclist.city_link = frappe.db.get_value("City",{"city_name":doclist.city},"name")
 	doclist.location_link = frappe.db.get_value("Area",{"area":doclist.location},"name")
+	print "property doclist"
+	print type(doclist)
 	return doclist
 
 @frappe.whitelist(allow_guest=True)
