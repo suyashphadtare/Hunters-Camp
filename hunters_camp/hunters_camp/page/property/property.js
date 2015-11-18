@@ -596,8 +596,8 @@ Property = Class.extend({
 									"property_id": j,
 									"tags": Object.keys(tag_list),
 									"discount_percentage": parseInt(fields.discount_percentage.$input.val()),
-									"user_id": 'Guest',
-									"sid": 'Guest'
+									"user_id": frappe.get_cookie('user_id'),
+									"sid": frappe.get_cookie('sid')
 								  },
 								},
 								callback: function(r,rt) {
@@ -1218,8 +1218,8 @@ Property = Class.extend({
 							"data":{
 							"property_id": j,
 							"property_status":$("#select_status").val(),
-							"user_id": 'Guest',
-							"sid": 'Guest'
+							"user_id": frappe.get_cookie('user_id'),
+							"sid": frappe.get_cookie('sid')
 						  },
 						},
 						callback: function(r,rt) {
