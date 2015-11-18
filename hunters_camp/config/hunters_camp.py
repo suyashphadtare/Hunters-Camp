@@ -126,6 +126,36 @@ def get_data():
 			]
 		},
 		{
+			"label": _("Agent"),
+			"icon": "icon-table",
+			"items": [
+				{
+					"type": "doctype",
+					"name": "Agent",
+					"label": _("Agent"),
+					"description": _("Agent Details"),
+				},
+				{
+					"type": "doctype",
+					"name": "Agent Package",
+					"label": _("Agent Package"),
+					"description": _("Agent Package Details"),
+				},
+				{
+					"type": "report",
+					"name":"Agent Properties",
+					"doctype": "Agent",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name":"Agent Location Report",
+					"doctype": "Agent",
+					"is_query_report": True
+				},
+			]
+		},
+		{
 			"label": _("Report"),
 			"icon": "icon-table",
 			"items": [
@@ -137,4 +167,5 @@ def get_data():
 				},
 			]
 		},
+
 	]
