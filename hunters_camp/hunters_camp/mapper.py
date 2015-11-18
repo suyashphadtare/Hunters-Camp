@@ -13,7 +13,7 @@ def get_mapped_doc(source_doc, table_maps, target_doc=None):
 
 	target_doc = frappe.new_doc("Property")
 	for i in target_doc.meta.get_table_fields():
-		print i.fieldname
+		pass
 		
 	p_table_maps = {}
 	map_doc(source_doc, target_doc, p_table_maps)
@@ -44,16 +44,15 @@ def map_doc(source_doc, target_doc, table_map, source_parent=None):
 
 
 def map_fields(source_doc, target_doc, table_map, source_parent):
-	print source_doc
 	no_copy_fields = set(list(["amenities","flat_facilities"]))
 	#no_copy_fields = []
 	for df in target_doc.meta.get("fields"):
-		print df.fieldname
+		# print df
 		if df.fieldname not in no_copy_fields:
 			# map same fields
 			val = source_doc.get(df.fieldname)
 			if val not in (None, ""):
-				if isinstance(val,list):
+				if isinstance(val, list):
 					target_doc.set(df.fieldname, val,as_value=True)
 				else:
 					target_doc.set(df.fieldname, val)
@@ -100,7 +99,6 @@ def map_fetch_fields(target_doc, df, no_copy_fields):
 				target_doc.set(fetch_df.fieldname, val)
 
 def map_child_doc(source_d, target_parent, table_map, source_parent=None):
-	print source_d
 	target_child_doctype = table_map["doctype"]
 	target_parentfield = target_parent.get_parentfield_of_doctype(target_child_doctype)
 	target_d = frappe.new_doc(target_child_doctype, target_parent, target_parentfield)

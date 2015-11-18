@@ -442,6 +442,31 @@ Project = Class.extend({
 		}
 					
 	})
+	
+
+	$('.pv').click(function(){
+		return frappe.call({
+			type: "GET",
+			method:"hunters_camp.hunters_camp.doctype.projects.projects.view_project",
+			args: {
+				"project_id":$(this).attr('id'),
+				"sid":frappe.get_cookie("sid")
+			},
+			freeze: true,
+			callback: function(r) {
+				console.log("in callback")
+				if(!r.exc) {
+					console.log(r.message)
+					var doc = frappe.model.sync(r.message);
+					console.log(doc)
+					frappe.route_options = {"doc":doc};
+					frappe.set_route("Form",'Projects','Projects');
+				}
+			}
+		})
+	})
+
+
 
 	$('#btn_prev').click(function(){
 		if (page > 1) {

@@ -56,19 +56,7 @@ def get_data():
 					"name": "Property",
 					"label": _("Post Property"),
 					"description": _("Post Property"),
-				},
-				{
-					"type": "doctype",
-					"name": "Projects",
-					"label": _("Post Project"),
-					"description": _("Post Project"),
-				},
-				{
-					"type": "page",
-					"name": "project",
-					"label": _("Project Search"),
-					"icon": "icon-bar-chart",
-				},
+				}
 			]
 		},
 
@@ -82,6 +70,12 @@ def get_data():
 					"label": _("Project Search"),
 					"icon": "icon-bar-chart",
 				},
+				{
+					"type": "doctype",
+					"name": "Projects",
+					"label": _("Post Project"),
+					"description": _("Post Project"),
+				}
 			]
 		},
 		{
