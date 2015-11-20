@@ -109,6 +109,11 @@ def get_data():
 				},
 				{
 					"type": "doctype",
+					"name": "Property Subtype Option",
+					"description": _("Sub Type Option of Properties"),
+				},
+				{
+					"type": "doctype",
 					"name": "Amenities",
 					"description": _("Amenities for property"),
 				},
