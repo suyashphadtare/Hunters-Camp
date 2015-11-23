@@ -1,3 +1,6 @@
+frappe.require("assets/hunters_camp/agent_sharing.css");
+
+
 frappe.pages['property'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -743,7 +746,7 @@ Property = Class.extend({
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
 			if(d['property_photo'])
-				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+"/ style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
+				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
 			// else
 			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
