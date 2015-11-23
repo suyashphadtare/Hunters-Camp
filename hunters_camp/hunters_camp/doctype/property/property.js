@@ -194,23 +194,28 @@ prop_operations = Class.extend({
 			cur_frm.doc.possession = 1			
 		}
 		else{
-			po_list = cur_frm.doc.possession_status.split('-')
-			cur_frm.doc.month = po_list[0]  
-			cur_frm.doc.year =  po_list[1]
+			if (cur_frm.doc.possession_status){
+				po_list = cur_frm.doc.possession_status.split('-')
+				cur_frm.doc.month = po_list[0]  
+				cur_frm.doc.year =  po_list[1]
+				refresh_field(["month","year","possession"])
+			}
+
 		}
-		refresh_field(["month","year","possession"])
+		
 	},
 	display_property_photo:function(frm, doc){
 		wrapper = $(cur_frm.get_field("attachment_display").wrapper)
 		wrapper.empty()
-		thumbnails_list = frm.doc.thumbnails.split(',')
-		$.each(thumbnails_list ,function(index, thumbnail){
+		if (frm.doc.thumbnails){
+			thumbnails_list = frm.doc.thumbnails.split(',')
+			$.each(thumbnails_list ,function(index, thumbnail){
 			$("<img></img>",{
 	 				class : "imageThumb",
 	 				src : thumbnail
 	 			}).appendTo(wrapper);
-		})
-
+			})			
+		}
 	},
 	add_status_and_tag_to_menu:function(frm){
 		var me = this;
