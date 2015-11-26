@@ -72,7 +72,7 @@ enquiry.Composer = Class.extend({
 				me.dialog.hide();
 		}
 		else{
-			msgprint("Valuse shoud be a positive number")
+			msgprint("Valuse shoud be a greater than 0")
 		}
 		
 	},
