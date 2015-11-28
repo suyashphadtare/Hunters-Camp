@@ -108,4 +108,11 @@ def delete_photo(doc, sid, img_url):
 		response = update_api.delete_project_photo(doc, img_url)
 	except Exception,e:
 		frappe.throw(e)
-	return response		
+	return response
+
+
+@frappe.whitelist(allow_guest=True)
+def get_all_projects(sid):
+	user_id = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
+	data = json.dumps({"user_id":user_id, "sid":sid})
+	return update_api.get_all_projects(data)		

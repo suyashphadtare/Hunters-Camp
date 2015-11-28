@@ -61,6 +61,7 @@ project.operations = {
 		else {
 			me.enable_project_posting(frm)
 		}
+		new SearchProperty(frm)
 		//me.set_mm_yy_format_for_posssession(frm)
 	},
 	set_mm_yy_format_for_posssession:function(frm){
@@ -474,15 +475,15 @@ SearchProperty = Class.extend({
 	},
 	init_for_search_property:function(){
 		var me = this
-		cur_frm.add_custom_button(__('Search Property'),function() {
+		cur_frm.add_custom_button(__('Search Project'),function() {
 				me.render_dialog_for_property_search() },"btn-primary");
 	},
 	render_dialog_for_property_search: function(){
 		this.dialog = new frappe.ui.Dialog({
-		title: __(__("Search Individual Property")),
+		title: __(__("Search Individual Project")),
 		fields: [
-			{"fieldtype": "Data", "label": __("Enter Property ID"), "fieldname": "property", "reqd":1},
-			{"fieldtype": "Button", "label": __("View Property"), "fieldname": "search"},
+			{"fieldtype": "Data", "label": __("Enter Project ID"), "fieldname": "property", "reqd":1},
+			{"fieldtype": "Button", "label": __("View Project"), "fieldname": "search"},
 			]
 		});
 		this.dialog.show();
@@ -495,21 +496,21 @@ SearchProperty = Class.extend({
 		$(this.dialog.body).find("input[data-fieldname=property]").autocomplete({
      		 source: me.init_search,
      		 focus: function( event, ui ) {
-		        $(me.dialog.body).find("input[data-fieldname=property]").val( ui.item.property_id );
+		        $(me.dialog.body).find("input[data-fieldname=property]").val( ui.item.project_id );
 		        return false;
 		      },
 		      select: function( event, ui ) {
-		        $(me.dialog.body).find("input[data-fieldname=property]").val( ui.item.property_id );		     
+		        $(me.dialog.body).find("input[data-fieldname=property]").val( ui.item.project_id );		     
 		        return false;
 		      }
     	}).autocomplete( "instance" )._renderItem = function( ul, property ) {
-      			return $( "<li>" ).append( "<a><b>" + property.property_id + "</b><br>" + property.property_title + "</a>" ).appendTo( ul );
+      			return $( "<li>" ).append( "<a><b>" + property.project_id + "</b><br>" + property.overview + "</a>" ).appendTo( ul );
     		};
 	},
 	get_property_data:function(){
 		var me = this
 		frappe.call({
-			method:"hunters_camp.hunters_camp.doctype.property.property.get_all_properties",
+			method:"hunters_camp.hunters_camp.doctype.projects.projects.get_all_projects",
 			args:{sid:frappe.get_cookie('sid')},
 			callback:function(r){
 				me.property_data = r.message.data
@@ -533,7 +534,7 @@ SearchProperty = Class.extend({
         }
          
         $.each(me.property_data, function(index, obj){
-         	if (hasMatch(obj.property_id) || hasMatch(obj.property_title)) {
+         	if (hasMatch(obj.project_id) || hasMatch(obj.overview)) {
                 matches.push(obj);
             }
         })  
@@ -546,18 +547,18 @@ SearchProperty = Class.extend({
     		if(prop_id){
 		    		return frappe.call({
 						type: 'GET',
-						method:'hunters_camp.hunters_camp.doctype.property.property.view_property',
+						method:'hunters_camp.hunters_camp.doctype.projects.projects.view_project',
 						args: {
-							'property_id':prop_id,
+							'project_id':prop_id,
 							'sid':frappe.get_cookie('sid')
 						},
-						freeze_message:"Reloading Property details, Please Wait..",
+						freeze_message:"Reloading Project details, Please Wait..",
 						freeze: true,
 						callback: function(r) {
 							if(!r.exc) {
 									var doc = frappe.model.sync(r.message);
 									frappe.route_options = {"doc":doc};
-									frappe.set_route("Form",'Property','Property');
+									frappe.set_route("Form",'Projects','Projects');
 									cur_frm.reload_doc()
 									me.dialog.hide()
 								}
@@ -565,7 +566,7 @@ SearchProperty = Class.extend({
 					})
 				}
 				else{
-					msgprint("Please Select Property Id First")	
+					msgprint("Please Select Project Id First")	
 				}
     	})
     }

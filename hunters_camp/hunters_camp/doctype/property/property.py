@@ -32,8 +32,11 @@ def post_property(doc,sid):
 	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}
 
 	data = json.dumps(doc)
-	doc_rec = api.post_property(data)
-	update_agent_package() if agent_flag else ""
+	try:
+		doc_rec = api.post_property(data)
+		update_agent_package() if agent_flag else ""
+	except Exception,e:
+		frappe.throw(e)
 	return doc_rec
 
 
@@ -139,7 +142,10 @@ def update_property(doc ,sid):
 	validate_for_possesion_date(doc)
 	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}
 	doc.pop("doc", None)
-	response = update_api.update_property(json.dumps({"property_id":doc.get("property_id"), "fields":doc }))
+	try:
+		response = update_api.update_property(json.dumps({"property_id":doc.get("property_id"), "fields":doc }))
+	except Exception,e:
+		frappe.throw(e)
 	return response
 
 
