@@ -28,7 +28,10 @@ def post_project(doc,sid):
 	doc["amenities"] = [ amenity.get("amenity_name") for amenity in doc.get("amenities") if amenity.get("status") == "Yes" ]
 	doc["distance_from_imp_locations"] = { "airport": doc.get("airport"), "railway_station":doc.get("railway_station") , "central_bus_stand":doc.get("central_bus_stand")  }
 	validate_for_possesion_date(doc)
-	doc_rec = api.post_project(doc)
+	try:
+		doc_rec = api.post_project(doc)
+	except Exception,e:
+		frappe.throw(e)
 	return doc_rec
 
 
