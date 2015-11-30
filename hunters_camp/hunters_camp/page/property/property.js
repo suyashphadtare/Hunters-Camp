@@ -462,6 +462,9 @@ Property = Class.extend({
 						},
 					});	
 				}
+				else if (in_list(user_roles, "Agent")){
+					new AgentPropertyShare()
+				}
 				else{
 					//alert("popup for sharing property for user")
 					var d = new frappe.ui.Dialog({
@@ -757,7 +760,7 @@ Property = Class.extend({
 			      <li role='presentation' class=''><a href='#amenities"+""+i+"' role='tab' id='profile-tab' data-toggle='tab'  style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-building'></i>&nbsp;&nbsp;Amenities</a></li>\
 			      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-user'></i>&nbsp;&nbsp;Contacts</a></li>\
 			      <li role='presentation' class=''><a href='#tag"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-tag'></i>&nbsp;&nbsp;Tags</a></li>\
-			      <div id="+d['property_id']+" style='float:right;'>\
+			      <div id="+d['property_id']+" style='float:right;' >\
 				<input type='checkbox' class='cb' />\
 				</div></ul></div>\
 			    </ul>\
@@ -1316,5 +1319,119 @@ Property = Class.extend({
 
 	
 
+
+})
+
+
+
+AgentPropertyShare = Class.extend({
+	init:function(){
+		this.render_dialog()	
+	},
+	render_dialog:function(){
+		this.dialog = new frappe.ui.Dialog({
+						title: __("Shared properties to Agent"),
+						fields: [
+							{fieldtype:"Link", label:__("Agent"), reqd:1, fieldname:"agent", "options":"Agent"},
+							{fieldtype:"Small Text",fieldname:"agents", label:"Email ID"},
+							{fieldtype:"HTML", fieldname:"share_html"},
+							{fieldtype:"Button", label:__("Share Property"), fieldname:"share_prop"}		
+						]
+					});
+
+		this.fields=this.dialog.fields_dict
+		this.dialog.show();
+		$(this.dialog.body).find("textarea[data-fieldname='agents']").css("height", "50px")
+		$(this.dialog.body).find("textarea[data-fieldname='agents']").attr("disabled",true)
+		this.render_property_table();
+		this.init_for_agent_selection() 
+		this.init_for_share_property()
+	},
+	render_property_table:function(){
+		this.prop_ids = this.get_checked_property_id()
+		this.render_prop_table()
+	},
+	get_checked_property_id:function(){
+		var me = this
+		this.checked_prop = $(".cb:checkbox:checked")
+		this.prop_list = []
+		$.each(this.checked_prop, function(index, property){
+			prop_dict = {}
+			prop_dict["property_id"] =  $(property).parent().attr("id")
+			me.prop_list.push(prop_dict)
+		})
+		console.log(this.prop_list)
+		return this.prop_list
+	},
+	render_prop_table:function(){
+		console.log()
+		$(this.dialog.body).find("[data-fieldname='share_html']").html(this.get_table_html())
+	},
+	get_table_html:function(){
+		table_html = "<table class='table table-fixed' id='prop_table' style='margin-top:20px'><thead ><th class='col-xs-5'>Property Id</th><th class='col-xs-4'>Comments</th><th class='col-xs-3'>Property Through</th></thead><tbody>"
+		$.each(this.prop_ids, function(i,property){
+			select_html = '<select class="form-control prop_through"><option></option><option>Direct</option><option>Through 1</option><option>Through 2</option><option>Through 3+</option></select>'
+			values = { "property_id":property["property_id"], "select":select_html}
+			row = repl("<tr><td class='col-xs-5 p_id' >%(property_id)s</td><td class='col-xs-4'><textarea type='text' class='comments' style='width:170px'></textarea></td><td class='col-xs-3'>%(select)s</td></tr>", values)
+			table_html += row
+		})
+		table_html += "</tbody>"
+		return table_html
+	},
+	init_for_agent_selection:function(){
+		var me = this
+		$(this.dialog.body).find("input[data-fieldname='agent']").change(function(){
+			agents = $(me.dialog.body).find("textarea[data-fieldname='agents']").val()
+			if(agents){
+				agent_values = agents.split(',')
+				agent_values.push($(this).val())
+				agent_values = agent_values.join(",")
+			}else{
+				agent_values = $(this).val()
+			}
+			$(me.dialog.body).find("textarea[data-fieldname='agents']").val(agent_values)
+
+		})
+	},
+	init_for_share_property:function(){
+		var me = this
+		console.log($(this.dialog.body).find("button[data-fieldname='share_prop']"))
+		$(this.dialog.body).find("button[data-fieldname='share_prop']").click(function(){
+			if(me.check_for_mandatory_fields()){
+				comment_list = me.get_property_object()
+				agents_list = $(me.dialog.body).find("textarea[data-fieldname='agents']").val()
+				me.dialog.hide()
+				frappe.call({
+					freeze:true,
+					freeze_message:"Share property opertaion is in progress........",
+					method:"hunters_camp.hunters_camp.page.property.property.share_property_to_agents",
+					args:{"email_id":agents_list, "comments":comment_list, "sid":frappe.get_cookie("sid"), "user_id":frappe.get_cookie("user_id")},
+					callback:function(r){
+						frappe.msgprint(r.message.message)
+					}
+				})
+			}
+		})	
+	},
+	check_for_mandatory_fields:function(){
+		var me = this
+		if (! $(me.dialog.body).find("textarea[data-fieldname='agents']").val()){
+			frappe.msgprint("Agent Email Ids are mandatory for property sharing.")
+			return false
+		}
+		return true
+	},
+	get_property_object:function(){
+		comments_list = []
+		var me = this
+		$.each($(me.dialog.body).find("#prop_table tbody tr"), function(i, row){
+			prop_dict = {}
+			prop_dict["property_id"] = $(row).find(".p_id").text()
+			prop_dict["comment"] = $(row).find(".comments").val()
+			prop_dict["prop_through"] = $(row).find(".prop_through").val()
+			comments_list.push(prop_dict)
+		})
+		return comments_list
+	}
 
 })
