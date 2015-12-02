@@ -1,6 +1,6 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "field:property_subtype_option", 
  "creation": "2015-11-18 15:01:07.255926", 
@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_subtype_option", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -58,7 +62,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-11-20 19:37:47.095321", 
+ "modified": "2015-11-30 15:20:22.155805", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Property Subtype Option", 

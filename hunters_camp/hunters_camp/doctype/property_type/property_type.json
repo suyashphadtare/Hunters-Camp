@@ -1,6 +1,6 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "field:property_type", 
  "creation": "2015-09-02 11:32:16.802014", 
@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_type", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -37,7 +39,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-02 13:32:34.871205", 
+ "modified": "2015-11-30 15:19:37.000066", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Property Type", 

@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "user", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "1", 
    "fieldname": "allowed", 
    "fieldtype": "Data", 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "posted", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -79,7 +85,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-09-09 15:14:34.196593", 
+ "modified": "2015-11-27 16:34:49.204400", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "User Subscription", 

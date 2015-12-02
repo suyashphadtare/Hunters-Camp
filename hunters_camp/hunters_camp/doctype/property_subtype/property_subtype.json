@@ -1,6 +1,6 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "field:property_subtype", 
  "creation": "2015-09-02 11:34:10.399933", 
@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_type", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "property_subtype", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "operation", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -72,6 +78,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "buy", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -92,6 +100,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "rent", 
    "fieldtype": "Check", 
    "hidden": 0, 
@@ -118,7 +128,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-11-18 15:24:41.115332", 
+ "modified": "2015-11-30 15:19:57.139792", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Property Subtype", 
