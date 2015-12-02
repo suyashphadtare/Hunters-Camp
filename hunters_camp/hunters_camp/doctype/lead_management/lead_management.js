@@ -33,7 +33,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 
 		}
 	}
-
+	// cur_frm.set_df_property("property_details", "read_only", true)
 	make_dashboard =  function(doc){
 		if(doc.property_type && doc.property_subtype && doc.operation && doc.location){
 			return frappe.call({
@@ -215,7 +215,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					if(share_list.length>0){
 							me.append_popup_fields(me.pop_up,cur_frm.doc);
 							$(me.pop_up_body.find('.select')).css('display','none')
-							me.append_share_property_details(cur_frm.doc);
+							me.append_share_property_details(cur_frm.doc, me.pop_up);
+							me.set_another_follow_up_date(cur_frm.doc, me.pop_up)
 					}
 
 					else{
@@ -268,6 +269,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							me.append_se_popup_fields(me.pop_up,cur_frm.doc);
 							$(me.pop_up_body.find('.select')).css('display','none')
 							me.append_se_property_details(cur_frm.doc);
+							me.set_another_follow_up_date(cur_frm.doc, me.pop_up)
 					}
 					else{
 						$('[data-fieldname=followup_date]').css('display','none')
@@ -417,9 +419,10 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				primary_action_label: "Done",
 				primary_action: function(doc) {
 					// _me = this;
+					console.log("in primary_action")
 					doc=cur_frm.doc
 					var pd = doc.property_details;
-					if(me.pop_up.fields_dict.type_followup.input.value){
+					if(me.pop_up.fields_dict.type_followup.input.value && me.pop_up.fields_dict.followup_date.input.value){
 						if(!property_details_list.length && (me.flag==1 || me.flag1==1 || me.flag2==1)){
 							for(i=0;i<pd.length;i++){
 								property_details_list.push(pd[i].name)
@@ -459,13 +462,13 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						}
 
 						else{
-							msgprint("select property to update it")
+							msgprint("Select Property Id to update it")
 						}	
 
 					}
 					else{
 
-						msgprint("Type of followup and schedule date is mandatory.")
+						msgprint("Type of followup and Schedule date is mandatory.")
 					}
 						
 				}
@@ -503,7 +506,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 
 		},
 
-		append_share_property_details: function(doc){
+		append_share_property_details: function(doc, pop_up){
 			
 			var pd = doc.property_details;
 
@@ -518,17 +521,24 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<option value=''></option>\
 							<option value='Intrested'>Intrested</option>\
 							<option value='Not Intrested'> Not Intrested</option>\
-							<option value='Anothe Follow Up'>Another Follow Up</option>\
-							<option value='Intrested In Revisit'>Intrested In Revisit</option>\
+							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
+	
 					}
 					
 				}	
 			};
 
 		},
-
+		set_another_follow_up_date:function(doc, pop_up){
+			$(pop_up.body).find("#followup_status").change(function(){
+				if ($(this).val() == 'Another Follow Up'){
+					$(pop_up.body).find("input[data-fieldname=followup_date]").val("")	
+				}	
+				
+			})
+		},
 		append_se_property_details: function(doc){
 			
 			var pd = doc.property_details;
@@ -546,7 +556,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<option value=''></option>\
 							<option value='Intrested'>Intrested</option>\
 							<option value='Not Intrested'> Not Intrested</option>\
-							<option value='Anothe Follow Up'>Another Follow Up</option>\
+							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
 						
@@ -1117,7 +1127,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		append_pop_up_dialog_body: function(pop_up,doc){
 			this.fd = pop_up.fields_dict;
 			this.pop_up_body = $("<div id='container' style='overflow: auto;max-height: 300px;'><table class='table table-bordered table-hover' id='property_details'><thead>\
-			<th width='inherit'></th><th><b>Property ID</b></th>\
+			<th width='inherit'></th><th><b>Property ID</b></th><th><b>Property Name</b></th>\
 			<th><b>Follow Up Status</b></th></thead><tbody></tbody></table></div>").appendTo($(this.fd.followup.wrapper));
 
 		},
@@ -1130,6 +1140,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					if(pd[i].se_follow_up_status =='Intrested' && !pd[i].acm_visit){
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
+							<td align='center' id ='property_name'>"+ pd[i].property_name +"</td>\
 							<td align='center' id='status'>"+pd[i].se_follow_up_status+"</td>\
 							</tr>").appendTo($("#property_details tbody"));
 					}
