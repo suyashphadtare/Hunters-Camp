@@ -145,19 +145,7 @@ def get_data():
 					"name": "Agent Package",
 					"label": _("Agent Package"),
 					"description": _("Agent Package Details"),
-				},
-				{
-					"type": "report",
-					"name":"Agent Properties",
-					"doctype": "Agent",
-					"is_query_report": True
-				},
-				{
-					"type": "report",
-					"name":"Agent Location Report",
-					"doctype": "Agent",
-					"is_query_report": True
-				},
+				}
 			]
 		},
 		{
@@ -169,6 +157,24 @@ def get_data():
 					"name":"Followup Log",
 					"doctype": "Lead Management",
 					"is_query_report": True,
+				},
+				{
+					"type": "report",
+					"name":"Agent Location Report",
+					"doctype": "Agent",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name":"Agent Properties",
+					"doctype": "Agent",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name":"User Visit Log",
+					"doctype": "Show Contact Property",
+					"is_query_report": True
 				},
 			]
 		},
