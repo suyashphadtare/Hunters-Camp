@@ -591,7 +591,7 @@ Property = Class.extend({
 									"property_id": j,
 									"tags": Object.keys(tag_list),
 									"discount_percentage": parseInt(fields.discount_percentage.$input.val()),
-									"user_id": frappe.get_cookie('user_id'),
+									"user_id": frappe.get_cookie('hc_user_id'),
 									"sid": frappe.get_cookie('sid')
 								  },
 								},
@@ -749,7 +749,7 @@ Property = Class.extend({
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
 			if(d['property_photo'])
-				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
+				$("<a class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
 			// else
 			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
@@ -1200,7 +1200,7 @@ Property = Class.extend({
 							"data":{
 							"property_id": j,
 							"property_status":$("#select_status").val(),
-							"user_id": frappe.get_cookie('user_id'),
+							"user_id": frappe.get_cookie('hc_user_id'),
 							"sid": frappe.get_cookie('sid')
 						  },
 						},
@@ -1405,7 +1405,7 @@ AgentPropertyShare = Class.extend({
 					freeze:true,
 					freeze_message:"Share property opertaion is in progress........",
 					method:"hunters_camp.hunters_camp.page.property.property.share_property_to_agents",
-					args:{"email_id":agents_list, "comments":comment_list, "sid":frappe.get_cookie("sid"), "user_id":frappe.get_cookie("user_id")},
+					args:{"email_id":agents_list, "comments":comment_list, "sid":frappe.get_cookie("sid"), "user_id":frappe.get_cookie("hc_user_id")},
 					callback:function(r){
 						frappe.msgprint(r.message.message)
 					}
