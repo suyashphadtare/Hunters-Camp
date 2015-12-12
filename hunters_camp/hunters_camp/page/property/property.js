@@ -966,7 +966,7 @@ Property = Class.extend({
 		$($(me.body).find("#"+d['property_id']+"")).find("#price").append('<div class="row property-row">'+d['price'] ? d['price'] : ""+'</div>')
 		
 		$($(me.body).find("#"+d['property_id']+"")).find("#property-name").append('<div class="row property-row">'+d['property_title'] ? d['property_title'] : ""+'</div>')
-		$($(me.body).find("#"+d['property_id']+"")).find("#bhk").append('<div class="row property-row">'+d['bhk'] ? d['bhk'] :" "+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#bhk").append('<div class="row property-row">'+d['bhk'] ? d['property_subtype_option'] :" "+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#posting_date").append('<div class="row property-row">'+d['posting_date'] ? d['posting_date'] : ""+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#bathroom").append('<div class="row property-row">'+d['no_of_bathroom'] ? d['no_of_bathroom'] : ""+'</div>')
 

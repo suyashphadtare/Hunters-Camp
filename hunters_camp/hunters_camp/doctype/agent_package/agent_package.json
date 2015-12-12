@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "agent", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "package_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "package_posting_allowed", 
    "fieldtype": "Int", 
    "hidden": 0, 
@@ -73,6 +79,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "description": "in no of days.", 
    "fieldname": "package_validity", 
    "fieldtype": "Int", 
@@ -94,6 +102,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "Today", 
    "fieldname": "start_date", 
    "fieldtype": "Date", 
@@ -116,6 +126,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "end_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -136,6 +148,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_5", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -155,6 +169,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "0", 
    "fieldname": "posting_allowed", 
    "fieldtype": "Int", 
@@ -176,6 +192,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "default": "0", 
    "fieldname": "property_posted", 
    "fieldtype": "Int", 
@@ -197,6 +215,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "status", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -218,6 +238,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "package_status", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -245,7 +267,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-11-16 13:31:24.079075", 
+ "modified": "2015-12-03 12:37:44.317717", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Agent Package", 

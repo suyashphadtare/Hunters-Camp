@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "user", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "user_id", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -43,7 +47,7 @@
    "permlevel": 0, 
    "precision": "", 
    "print_hide": 0, 
-   "read_only": 1, 
+   "read_only": 0, 
    "report_hide": 0, 
    "reqd": 0, 
    "search_index": 0, 
@@ -52,6 +56,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_21", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -71,6 +77,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "agent_status", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -92,6 +100,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "personal_details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -112,6 +122,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "first_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -132,6 +144,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "last_name", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -152,6 +166,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "contact_no", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -172,6 +188,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_7", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -191,6 +209,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "whats_app_no", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -211,6 +231,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "description", 
    "fieldtype": "Small Text", 
    "hidden": 0, 
@@ -231,6 +253,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "area_of_operations", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -251,6 +275,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "hjk", 
    "fieldtype": "Table", 
    "hidden": 0, 
@@ -272,6 +298,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "package_details", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -292,6 +320,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "package_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -313,6 +343,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "status", 
    "fieldtype": "Select", 
    "hidden": 0, 
@@ -334,6 +366,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "posting_allowed", 
    "fieldtype": "Int", 
    "hidden": 0, 
@@ -354,6 +388,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "column_break_14", 
    "fieldtype": "Column Break", 
    "hidden": 0, 
@@ -373,6 +409,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "total_posted", 
    "fieldtype": "Int", 
    "hidden": 0, 
@@ -393,6 +431,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "start_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -413,6 +453,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "end_date", 
    "fieldtype": "Date", 
    "hidden": 0, 
@@ -439,7 +481,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-11-05 21:00:54.412513", 
+ "modified": "2015-12-03 17:24:35.711069", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Agent", 
