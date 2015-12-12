@@ -15,12 +15,12 @@ class ACMVisit(Document):
 
 	def change_lead_managemnet_child_status(self,acm_Visit,se_status,child_id):
 		child_entry = frappe.get_doc("Lead Property Details", child_id)
-		child_entry.acm_status = 'Close'
+		child_entry.acm_status = self.acm_status
 		child_entry.save(ignore_permissions=True)
 
 
 @frappe.whitelist()
-def add_book_property_details(bank=None,cheque_no=None,payer=None,cheque_date=None,amount=None,description=None,name=None,lead_management_id=None):
+def add_book_property_details(bank=None,cheque_no=None,payer=None,cheque_date=None,amount=None,description=None,name=None,lead_management_id=None, property_id=None):
 	acm = frappe.get_doc('ACM Visit',name)
 	acm.bank = bank
 	acm.cheque_no = cheque_no
@@ -30,11 +30,11 @@ def add_book_property_details(bank=None,cheque_no=None,payer=None,cheque_date=No
 	acm.amount = amount
 	acm.description = description
 	acm.save(ignore_permissions=True)
-	update_lead_management_book_details(bank,cheque_no,payer,cheque_date,amount,description,name,lead_management_id)
+	update_lead_management_book_details(bank,cheque_no,payer,cheque_date,amount,description,name,lead_management_id, property_id)
 	return True
 
 
-def update_lead_management_book_details(bank=None,cheque_no=None,payer=None,cheque_date=None,amount=None,description=None,name=None,lead_management_id=None):
+def update_lead_management_book_details(bank=None,cheque_no=None,payer=None,cheque_date=None,amount=None,description=None,name=None,lead_management_id=None, property_id=None):
 	lm =frappe.get_doc('Lead Management',lead_management_id)
 	lm.bank = bank
 	lm.cheque_no = cheque_no
@@ -43,4 +43,5 @@ def update_lead_management_book_details(bank=None,cheque_no=None,payer=None,cheq
 		lm.cheque_date = datetime.datetime.strptime(cstr(cheque_date),'%d-%m-%Y')
 	lm.amount = amount
 	lm.description = description
+	lm.purchased_property_id = property_id
 	lm.save(ignore_permissions=True)

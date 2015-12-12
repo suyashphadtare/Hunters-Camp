@@ -5,6 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from  propshikari.propshikari.property_update_api import get_agent_properties
 import json
+import re
 from frappe import _
 
 def execute(filters=None):
@@ -55,7 +56,8 @@ def get_my_properties(doctype, txt, searchfield, start, page_len, filters):
 		request_data = json.dumps({"user_id":user_id})
 		response = get_agent_properties(request_data)
 		for prop in response.get("data"):
-			res_list.append([prop.get("property_id"),prop.get("property_title")])
+			if re.search(txt, prop.get("property_id"), re.IGNORECASE) or re.search(txt, prop.get("property_title"), re.IGNORECASE): 
+				res_list.append([prop.get("property_id"),prop.get("property_title")])
 	return res_list
 
 
@@ -63,4 +65,3 @@ def get_agent_list(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_value("Agent", frappe.session.user, "name"):
 		return [[frappe.session.user]]
 	return frappe.get_all("Agent",fields= ['name'], as_list=1)
-

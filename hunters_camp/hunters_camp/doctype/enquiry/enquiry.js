@@ -11,8 +11,11 @@ cur_frm.add_fetch('lead', 'reference', 'reference');
 cur_frm.add_fetch('lead', 'description', 'description');
 cur_frm.add_fetch('lead', 'mobile_no', 'mobile_no');
 
-
-
+frappe.ui.form.on("Enquiry", {
+	refresh: function(frm) {
+			cur_frm.set_df_property("lead", "read_only", frm.doc.__islocal != true)
+	}
+});
 
 
 //Return query for getting contact name in link field

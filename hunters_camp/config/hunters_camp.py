@@ -176,6 +176,12 @@ def get_data():
 					"doctype": "Show Contact Property",
 					"is_query_report": True
 				},
+				{
+					"type": "report",
+					"name":"Builder Properties",
+					"doctype": "User",
+					"is_query_report": True
+				},
 			]
 		},
 

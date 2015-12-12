@@ -112,13 +112,13 @@ table{
 }
 
 
-.table-fixed thead {
-  width: 97%;
+.table-fixed {
+  table-layout: fixed
 }
 .table-fixed tbody {
   height: 200px;
   overflow-y: auto;
-  width: 100%;
+  overflow-x:hidden; 
 }
 .table-fixed thead, .table-fixed tbody, .table-fixed tr, .table-fixed td, .table-fixed th {
   display: block;
@@ -135,4 +135,14 @@ textarea {
 
 select.form-control {
     -webkit-appearance: menulist;
+}
+
+span.glyphicon.glyphicon-minus{
+    font-size: 10px;
+    display: block;
+    color: #131212
+}
+
+.my_amenity{
+    margin-top:5px;
 }

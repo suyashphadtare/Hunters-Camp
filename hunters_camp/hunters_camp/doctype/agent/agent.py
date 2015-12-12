@@ -57,4 +57,8 @@ def send_email_notification():
 				message=frappe.get_template(template).render(args), cc=["suyash.p@indctranstech.com", "anand.pawar@indictranstech.com"])
 		except Exception,e:
 			pass	
-		
+
+
+def get_agent_list(doctype, txt, searchfield, start, page_len, filters):
+	print "in agent"
+	return frappe.get_all("Agent",fields= ['name'], as_list=1)

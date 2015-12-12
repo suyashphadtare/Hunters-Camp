@@ -27,7 +27,12 @@ cur_frm.cscript.assign_package = function(){
 	});
 }
 
+cur_frm.fields_dict.user.get_query = function(doc){
+	return {
+		method:"hunters_camp.hunters_camp.doctype.agent.agent.get_agent_list"
+	}
 
+}
 
 
 
