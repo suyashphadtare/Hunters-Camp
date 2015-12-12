@@ -1,6 +1,8 @@
 [
  {
   "allow_on_submit": 0, 
+  "collapsible": 0, 
+  "collapsible_depends_on": null, 
   "default": null, 
   "depends_on": null, 
   "description": null, 
@@ -32,6 +34,8 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "collapsible": 0, 
+  "collapsible_depends_on": null, 
   "default": null, 
   "depends_on": null, 
   "description": null, 
@@ -63,6 +67,8 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "collapsible": 0, 
+  "collapsible_depends_on": null, 
   "default": null, 
   "depends_on": null, 
   "description": null, 
@@ -94,6 +100,8 @@
  }, 
  {
   "allow_on_submit": 0, 
+  "collapsible": 0, 
+  "collapsible_depends_on": null, 
   "default": null, 
   "depends_on": "eval:doc.user_type=='System User'", 
   "description": null, 

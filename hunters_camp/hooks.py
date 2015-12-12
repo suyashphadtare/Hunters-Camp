@@ -35,7 +35,7 @@ app_include_js = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDO87KWhu8luH
 # Generators
 # ----------
 
-fixtures = ["Custom Field"]
+fixtures = ["Custom Field", "Role"]
 # automatically create page for each record of this doctype
 # website_generators = ["Web Page"]
 
