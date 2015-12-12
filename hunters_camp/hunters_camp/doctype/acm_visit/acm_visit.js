@@ -29,7 +29,7 @@ frappe.ui.form.on("ACM Visit", "refresh", function(frm) {
 
 					{label:__("Payer"), fieldtype:"Data", fieldname:"payer"},
 
-					{label:__("Amount"), fieldtype:"Data", fieldname:"amount",reqd:1},
+					{label:__("Amount"), fieldtype:"Int", fieldname:"amount",reqd:1},
 
 					{fieldtype: "Column Break","name":"cc_sec"},
 
@@ -44,11 +44,12 @@ frappe.ui.form.on("ACM Visit", "refresh", function(frm) {
 				primary_action_label: "Done",
 				primary_action: function() {
 					// Update Clearance Date of the checked vouchers
-					console.log(d.fields_dict.bank.$input.val())
+					console.log(frm.doc.property_id)
 					if(d.fields_dict.bank.$input.val() && d.fields_dict.amount.$input.val()){
 						return frappe.call({
 							method: "hunters_camp.hunters_camp.doctype.acm_visit.acm_visit.add_book_property_details",
 							args: {
+								"property_id":frm.doc.property_id,
 								"bank":d.fields_dict.bank.$input.val(),
 								"cheque_no": d.fields_dict.cheque_no.$input.val(),
 								"payer":d.fields_dict.payer.$input.val(),
@@ -68,6 +69,9 @@ frappe.ui.form.on("ACM Visit", "refresh", function(frm) {
 								}
 							}
 					});
+					}
+					else{
+						msgprint("Bank & Amount fields are mandatory")
 					}
 				}
 

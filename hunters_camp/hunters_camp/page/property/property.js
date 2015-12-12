@@ -1,4 +1,5 @@
 frappe.require("assets/hunters_camp/agent_sharing.css");
+frappe.require("assets/hunters_camp/multiselect.js");
 
 
 frappe.pages['property'].on_page_load = function(wrapper) {
@@ -55,8 +56,7 @@ Property = Class.extend({
 		me.filters.location = me.wrapper.page.add_field({
 					fieldname: "location",
 					label: __("Location"),
-					fieldtype: "Link",
-					options:"Area"
+					fieldtype: "Data"
 		});
 		
 		me.filters.budget_min = me.wrapper.page.add_field({
@@ -120,7 +120,7 @@ Property = Class.extend({
 		$('[data-fieldname=tag]').css('display','none')
 		$('[data-fieldname=share]').css('display','none')
 		$('[data-fieldname=lead_management]').css('display','none')
-
+		this.init_for_multiple_location()
 		// SEARCH CLICK
 		me.search.$input.on("click", function() {
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
@@ -169,268 +169,111 @@ Property = Class.extend({
 	
 	// ADVANCE FILTERING...................................................................................
 	me.advance_filters.$input.on("click", function() {
-		if(me.prop_list){
-			var d = new frappe.ui.Dialog({
+		var d = new frappe.ui.Dialog({
 
-				title: __("Add Advance filters"),
-						fields: [
-							{fieldtype:"Link", label:__("Property Type"),
-								options:"Property Type", reqd:1, fieldname:"property_type"},
-							{fieldtype:"Select", label:__("Operation"),
-								options:"\nBuy\nRent", reqd:1, fieldname:"operation"},
-							{fieldtype:"Select", label:__("Minimum Budget"),options:"\n0\n25Lac\n50Lac\n75Lac\n1Cr",
-							 reqd:0, fieldname:"minimum_budget"},
-							{fieldtype:"Select", label:__("Transaction Type")
-								,options:"\nResale\nSale\nNew",reqd:0, fieldname:"transaction_type"},
-							{fieldtype:"Select", label:__("Age Of Property"),
-							 options:"\n1 Year\n2 Years\n3 Years\n4 Years",reqd:0, fieldname:"age_of_property"},
-							{fieldtype:"Data", label:__("Amenities"),
-								options:"\nOwner\nBroker",reqd:0, fieldname:"amenities"},
-							{fieldtype:"Column Break",
-								reqd:0, fieldname:"cl"},
-							{fieldtype:"Link", label:__("Property Sub Type"),
-							options:"Property Subtype", reqd:1, fieldname:"property_subtype"},
-							{fieldtype:"Date", label:__("Posted Date"),
-								reqd:0, fieldname:"posting_date"},
-							{fieldtype:"Select", label:__("Maximum Budget"),options:"\n25Lac\n50Lac\n75Lac\n1Cr", reqd:0, fieldname:"maximum_budget"},
-							{fieldtype:"Select", label:__("Possession"),
-							 options:"\nReady\n5 Months\n6 Months",reqd:0, fieldname:"possession"},
-							{fieldtype:"Select", label:__("Listed By"),
-								options:"\nOwner\nBroker",reqd:0, fieldname:"listed_by"},
-							{fieldtype:"Button", label:__("Submit"),
-							 fieldname:"submit"}			
+			title: __("Add Advance filters"),
+					fields: [
+						{fieldtype:"Link", label:__("Property Type"),
+							options:"Property Type", reqd:1, fieldname:"property_type"},
+						{fieldtype:"Select", label:__("Operation"),
+							options:"\nBuy\nRent", reqd:1, fieldname:"operation"},
+						{fieldtype:"Int", label:__("Min Area"),
+						 fieldname:"min_area"},	
+						{fieldtype:"Select", label:__("Minimum Budget"),options:"\n0\n25Lac\n50Lac\n75Lac\n1Cr\n2Cr\n3Cr\n4Cr\n5Cr\n10Cr",
+						 reqd:0, fieldname:"min_budget"},
+						{fieldtype:"Select", label:__("Transaction Type")
+							,options:"\nResale\nNew Booking",reqd:0, fieldname:"transaction_type"},
+						{fieldtype:"Select", label:__("Age Of Property"),
+						 options:"\nUnder Construction\n0-1 Years\n1-5 Years\n5-10 Years\n10+ Years",reqd:0, fieldname:"property_age"},
+						{fieldtype:"Data", label:__("Amenities"),
+							options:"Amenities",reqd:0, fieldname:"amenities"},
+						{fieldtype:"HTML",fieldname:"amenity_html"},	
+						{fieldtype:"Column Break",
+							reqd:0, fieldname:"cl"},
+						{fieldtype:"Link", label:__("Property Sub Type"),
+						options:"Property Subtype", reqd:1, fieldname:"property_subtype"},
+						{fieldtype:"Data", label:__("Property SubType option"),
+							fieldname:"property_subtype_option"},
+						{fieldtype:"Int", label:__("Max Area"),
+						 fieldname:"max_area"},	
+						{fieldtype:"Select", label:__("Maximum Budget"),options:"\n0\n25Lac\n50Lac\n75Lac\n1Cr\n2Cr\n3Cr\n4Cr\n5Cr\n10Cr", reqd:0, fieldname:"max_budget"},
+						{fieldtype:"Date", label:__("Posted Date"),
+							reqd:0, fieldname:"posting_date"},
+						{fieldtype:"Data", label:__("Possession"),
+						fieldname:"possession"},
+						{fieldtype:"Select", label:__("Listed By"),
+							options:"\nOwner\nBroker",reqd:0, fieldname:"listed_by"},	
+						{fieldtype:"Section Break",
+							reqd:0, fieldname:"sb"},
+						{fieldtype:"Button", label:__("Search Property"),
+						 fieldname:"submit"}			
 
-						]			
-			});
-			
-			fields=d.fields_dict
-			$('[data-fieldname=submit]').css('display','none')
+					]			
+		});
+		
+		fields=d.fields_dict
+		$('[data-fieldname=submit]').css('display','none')
 
-			fields.property_type.input.value = me.filters.property_type.$input.val()
-			fields.property_subtype.input.value = me.filters.property_subtype.$input.val()
-			fields.operation.input.value = me.filters.operation.$input.val()
-			fields.minimum_budget.input.value = me.filters.budget_min.$input.val()
-			fields.maximum_budget.input.value = me.filters.budget_max.$input.val()
+		fields.property_type.input.value = me.filters.property_type.$input.val()
+		fields.property_subtype.input.value = me.filters.property_subtype.$input.val()
+		fields.operation.input.value = me.filters.operation.$input.val()
+		fields.min_budget.input.value = me.filters.budget_min.$input.val()
+		fields.max_budget.input.value = me.filters.budget_max.$input.val()
 
-			$('[data-fieldname=submit]').css('display','block')
-			d.show();
-
-			values = ['property_type','property_subtype','operation','transaction_type','age_of_property','listed_by']
-			final_result = []
-			$(fields.submit.input).click(function() {
-				this.filter_object = {}
-				var me1 = this
-
-				$.each(values, function(i, d) {
-					if(fields[d].input.value)
-						me1.filter_object[d]=fields[d].input.value
-				})
-
-				this.filter_length=Object.keys(this.filter_object).length
-				var arrByID = me.prop_list.filter(filterByID);
-				function filterByID(obj) {
-					var flag=0
-				 	$.each(me1.filter_object, function(k,v) {
-						if(v!=obj[k])
-							return false
-						else
-							flag+=1
-							
-					})
-					if(flag==me1.filter_length){
-						return true
-					}
-					else
-						return false
-	 	 	}
-
- 			var date=fields.posting_date.input.value
-	 	 	var newdate2 = date.split("-").reverse().join("-");
-			var date2 = new Date(newdate2)
-
-			posting_list=[]
-	 	 	//POSTING DATE FILTER.....................
-	 	 	if(fields.posting_date.input.value){
-	 	 		$.each(arrByID, function(k,v) {
-	 	 			var newdate1 = v['posting_date'].split("-").reverse().join("-")
-				 	date1 = new Date(newdate1)
-	 	 			if(date1>date2){
-	 	 				posting_list.push(v)
-	 	 			}
-	 	 			
-				});
-				final_result=posting_list
-	 	 	}
-	 	 	else{
-	 	 		final_result=arrByID
-	 	 	}
-
-	 	 	budget_final_result=[]
-	 	 	// FOR MIN MAX BUDGET........................
-	 	 	if(fields.minimum_budget.input.value && !fields.maximum_budget.input.value){
-	 	 		if(fields.minimum_budget.input.value=='25Lac' || fields.minimum_budget.input.value=='50Lac' || fields.minimum_budget.input.value=='75Lac' ||fields.minimum_budget.input.value=='0'){
-	 	 			var amount=(fields.minimum_budget.input.value.split("Lac")[0]*100000)
-		 	 		$.each(final_result, function(k,v) {
-		 	 			if(v['price']>=amount)
-		 	 				budget_final_result.push(v)
-		 	 		})
-		 	 		final_result=budget_final_result
-		 	 	}
-		 	 	else{
-		 	 		amount=10000000
-		 	 		$.each(final_result, function(k,v) {
-		 	 			if(v['price']>=amount)
-		 	 				budget_final_result.push(v)
-		 	 		})
-		 	 		final_result=budget_final_result
-		 	 	}
-	 	 	}
-	 	 	else if(!fields.minimum_budget.input.value && fields.maximum_budget.input.value){
-	 	 		if(fields.maximum_budget.input.value=='25Lac' || fields.maximum_budget.input.value=='50Lac' || fields.maximum_budget.input.value=='75Lac'){
-	 	 			amount=(fields.maximum_budget.input.value.split("Lac")[0]*100000)
-		 	 		$.each(final_result, function(k,v) {
-		 	 			if(v['price']<amount)
-		 	 				budget_final_result.push(v)
-		 	 		})
-		 	 		final_result=budget_final_result
-		 	 	}
-		 	 	else{
-		 	 		amount=10000000
-		 	 		$.each(final_result, function(k,v) {
-		 	 			if(v['price']<amount)
-		 	 				budget_final_result.push(v)
-		 	 		})
-		 	 		final_result=budget_final_result
-		 	 	}
-	 	 	}
-	 	 	else if(fields.minimum_budget.input.value && fields.maximum_budget.input.value){
-	 	 		if(fields.minimum_budget.input.value=='25Lac' || fields.minimum_budget.input.value=='50Lac' || fields.minimum_budget.input.value=='75Lac' ||fields.minimum_budget.input.value=='0'){
-	 	 			min_amount=fields.minimum_budget.input.value.split("Lac")[0]*100000
-	 	 		}
-	 	 		else{
-	 	 			min_amount=10000000
-	 	 		}
-	 	 		if(fields.maximum_budget.input.value=='25Lac' || fields.maximum_budget.input.value=='50Lac' || fields.maximum_budget.input.value=='75Lac'){
-	 	 			max_amount=fields.maximum_budget.input.value.split("Lac")[0]*100000
-	 	 		}
-	 	 		else{
-	 	 			max_amount=10000000
-	 	 		}
-	 	 		$.each(final_result, function(k,v) {
-	 	 			if(v['price']>=min_amount && v['price']<max_amount)
-	 	 				budget_final_result.push(v)
-	 	 		})
-	 	 		final_result=budget_final_result
-	 	 	}
-	 	 	else{
-	 	 		final_result=final_result
-	 	 	}
-
-	 	 	// POSSESSION DATE FILTER
-	 	 	possession_list=[]
-	 	 	var today = new Date();
-				var dd = today.getDate();
-				var mm = today.getMonth()+1; //January is 0!
-				var yyyy = today.getFullYear();
-
-				if(dd<10) {
-				    dd='0'+dd
-				} 
-
-				if(mm<10) {
-				    mm='0'+mm
-				} 
-
-				today = dd+'-'+mm+'-'+yyyy;
-
-	 	 	if(fields.possession.input.value){
-	 	 		if(fields.possession.input.value=='Ready'){
-	 	 			$.each(final_result, function(k,v) {
-	 	 				if(v['possession_status']=='Immediate')
-	 	 					possession_list.push(v)
-	 	 		});
-	 	 		final_result=possession_list
-	 	 	}
-	 	 	else if(fields.possession.input.value=='5 Months'){
-	 	 		$.each(final_result, function(k,v) {
-	 	 			if(v['possession_date']){
-		 	 			var today_date=new Date(today.split("-").reverse().join("-"));//Remember, months are 0 based in JS
-						var past_date=new Date(v['possession_date'].split("-").reverse().join("-"));
-						var months = past_date.getMonth() - today_date.getMonth() + (12 * (past_date.getFullYear() - today_date.getFullYear()));
-						if(months<5)
-							possession_list.push(v)
-					}
-					final_result=possession_list
-	 	 		})
-	 	 	}
-	 	 	else if(fields.possession.input.value=='6 Months'){
-	 	 		$.each(final_result, function(k,v) {
-	 	 			if(v['possession_date']){
-		 	 			var today_date=new Date(today.split("-").reverse().join("-"));//Remember, months are 0 based in JS
-						var past_date=new Date(v['possession_date'].split("-").reverse().join("-"));
-						var months = past_date.getMonth() - today_date.getMonth() + (12 * (past_date.getFullYear() - today_date.getFullYear()));
-						if(months<5)
-							possession_list.push(v)
-					}
-					final_result=possession_list
-	 	 		})
-	 	 	}
-	 	 	else{
-	 	 		final_result=final_result
-	 	 	}
-	 	 }
-	 	 else
-	 	 	final_result=final_result
+		$('[data-fieldname=submit]').css('display','block')
+		d.show();
+		$(d.body).find("input[data-fieldname=possession]").datepicker({ dateFormat: 'mm-yy' });
+		me.init_for_property_type_change(d, fields)
 
 
-	 	//FILTER FOR AMENITIES.....................
-	 	amenities_list=[]
-	 	if(fields.amenities.input.value){
-	 		filter_ammenities=fields.amenities.input.value.split(",")
-	 		x=[]
-			$.each(filter_ammenities, function(i,n) {
-			    x.push(n);
-			});
-	 		$.each(final_result, function(k, v) {
-	 			flag_new=0
-	 			amenities=[]
-				$.each(v['amenities'], function(i, j) {
-						amenities.push(j['name'])
-				})
-				$.each(filter_ammenities, function(k,f) {
-					
-					$.each(amenities, function(k,a) {
-						if(f.toLowerCase()==a.toLowerCase()){
-							flag_new+=1
-						}
-					})
-					
-				})
-				if(flag_new==filter_ammenities.length)
-						amenities_list.push(v)
+
+		
+
+    	
+
+		
+		values = ['property_type','property_subtype','operation','transaction_type','age_of_property','listed_by']
+		final_result = []
+		$(d.body).find("input[data-fieldname=amenities]").change(function(){
+			$(d.body).find("#select_amenity").append("<div class='row'><div class='col-xs-6'>{0}</div>\
+				<div class='col-xs-6 my_amenity'><button type='button' class='btn btn-default btn-sm'><span class='glyphicon glyphicon-minus'></span></button></div></div>".replace("{0}",$(this).val()))
+		})
+
+		$(d.body).find("[data-fieldname=amenity_html]").append("<div id='select_amenity'></div>")
+
+		search_fields = ["property_type", "property_subtype", "operation", "property_subtype_option", "property_age",
+							"possession", "posting_date", "listed_by", "amenities", "transaction_type", "min_budget",
+							"max_budget", "min_area", "max_area"]
+		$(fields.submit.input).click(function() {
+			search_dict = {}
+			$.each(search_fields,function(index, field){
+				value = fields[field].$input.val()
+				if (value){
+					search_dict[field]= value
+				}
 			})
-			final_result=amenities_list
-	 	}
-	 	else{
-	 		final_result=final_result
-	 	}
+			console.log(search_dict)
+			search_dict["user_id"] = frappe.get_cookie("hc_user_id")
+			search_dict["sid"] = frappe.get_cookie("sid")
+			frappe.call({
+				method:"hunters_camp.hunters_camp.page.property.property.search_property_with_advanced_criteria",
+				args:{"property_dict":search_dict},
+				callback:function(r){
+					if(r.message['total_records']>0){
+						me.render(r.message['data'],r.message['total_records'])
+					}
+					else{
+							$("#property").remove();
+							$("#buttons").remove();
+							$("#sorting").remove();
+							msgprint("Property is not available related to search criteria which you have specified.")
+						}
+					d.hide()			
+				}
+			})
+        	
+    	});
 
-	 	 	//return original result
-			if(final_result.length>0)
-				me.render(final_result,final_result.length)
-			else{
-				$("#property").remove();
-				$("#buttons").remove();
-				$("#sorting").remove();
-				me.prop_list=[]
-			}
-			d.hide();
-            	
-        	});
-		}
-
-		else
-			msgprint("There is no any property is available to filter it further")
 
 	});
 
@@ -591,7 +434,7 @@ Property = Class.extend({
 									"property_id": j,
 									"tags": Object.keys(tag_list),
 									"discount_percentage": parseInt(fields.discount_percentage.$input.val()),
-									"user_id": frappe.get_cookie('user_id'),
+									"user_id": frappe.get_cookie('hc_user_id'),
 									"sid": frappe.get_cookie('sid')
 								  },
 								},
@@ -616,6 +459,74 @@ Property = Class.extend({
 	// 	});
 	// });
 
+	},
+	init_for_multiple_location:function(){
+		var me = this
+		frappe.call({
+			method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
+			callback:function(r){
+				new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
+			}
+		})	
+	},
+	init_for_property_type_change:function(dialog, dialog_fields){
+		var amenity_obj = ''
+		var subtype_obj = ''
+		$(dialog.body).find("input[data-fieldname=property_type]").change(function(){
+			$(dialog.body).find("input[data-fieldname=amenities]").val("")
+			$(dialog.body).find("input[data-fieldname=property_subtype_option]").val("")
+			frappe.call({
+				method:"hunters_camp.hunters_camp.page.property.property.get_amenities",
+				args:{"property_type":$(this).val()},
+				callback:function(r){
+					console.log(r.message)
+					if (!amenity_obj && !subtype_obj){
+						console.log("in if")
+						amenity_obj = new Multiselect($(dialog.body).find("input[data-fieldname=amenities]"), r.message.amenities)		
+						subtype_obj = new Multiselect($(dialog.body).find("input[data-fieldname=property_subtype_option]"), r.message.subtype_options)
+					}
+					else{
+						console.log("in else")
+						amenity_obj.source = r.message.amenities
+						subtype_obj.source = r.message.subtype_options
+					}
+					
+				}
+			})
+		})
+	},
+	init_for_multiselect:function(availableTags, autocomplete_field){
+		autocomplete_field.autocomplete({
+	        minLength: 0,
+	        source: function( request, response ) {
+	          // delegate back to autocomplete, but extract the last term
+	          response( $.ui.autocomplete.filter(
+	            availableTags, extractLast( request.term ) ) );
+	        },
+	        focus: function() {
+	          // prevent value inserted on focus
+	          return false;
+	        },
+	        select: function( event, ui ) {
+	          console.log(this.value)
+	          var terms = split( this.value );
+	          // remove the current input
+	          terms.pop();
+	          // add the selected item
+	          terms.push( ui.item.value );
+	          // add placeholder to get the comma-and-space at the end
+	          terms.push( "" );
+	          this.value = terms.join( "," );
+	          return false;
+	        }
+      	});
+
+      	function split( val ) {
+  			return val.split( /,\s*/ );
+		}
+    	function extractLast( term ) {
+      		return split( term ).pop();
+    	}
 	},
 	refresh: function() {
 		var me = this;
@@ -749,7 +660,7 @@ Property = Class.extend({
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
 			if(d['property_photo'])
-				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
+				$("<a class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
 			// else
 			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
@@ -1200,7 +1111,7 @@ Property = Class.extend({
 							"data":{
 							"property_id": j,
 							"property_status":$("#select_status").val(),
-							"user_id": frappe.get_cookie('user_id'),
+							"user_id": frappe.get_cookie('hc_user_id'),
 							"sid": frappe.get_cookie('sid')
 						  },
 						},
@@ -1341,6 +1252,8 @@ AgentPropertyShare = Class.extend({
 
 		this.fields=this.dialog.fields_dict
 		this.dialog.show();
+		console.log($(this.dialog.body))
+		$(".modal-dialog").css("width","750px");
 		$(this.dialog.body).find("textarea[data-fieldname='agents']").css("height", "50px")
 		$(this.dialog.body).find("textarea[data-fieldname='agents']").attr("disabled",true)
 		this.render_property_table();
@@ -1368,11 +1281,15 @@ AgentPropertyShare = Class.extend({
 		$(this.dialog.body).find("[data-fieldname='share_html']").html(this.get_table_html())
 	},
 	get_table_html:function(){
-		table_html = "<table class='table table-fixed' id='prop_table' style='margin-top:20px'><thead ><th class='col-xs-5'>Property Id</th><th class='col-xs-4'>Comments</th><th class='col-xs-3'>Property Through</th></thead><tbody>"
+		table_html = "<table class='table table-fixed' id='prop_table' style='margin-top:20px'><thead ><tr class='row'><th class='col-xs-4 text-center'>Property Id</th>\
+				<th class='col-xs-4'>Comments</th><th class='col-xs-2'>Property Through</th><th class='col-xs-2'>Doc Available</th></tr></thead><tbody>"
 		$.each(this.prop_ids, function(i,property){
-			select_html = '<select class="form-control prop_through"><option></option><option>Direct</option><option>Through 1</option><option>Through 2</option><option>Through 3+</option></select>'
-			values = { "property_id":property["property_id"], "select":select_html}
-			row = repl("<tr><td class='col-xs-5 p_id' >%(property_id)s</td><td class='col-xs-4'><textarea type='text' class='comments' style='width:170px'></textarea></td><td class='col-xs-3'>%(select)s</td></tr>", values)
+			select_html = '<select class="form-control prop_through"><option></option><option>Direct</option><option>Through 1</option>\
+							<option>Through 2</option><option>Through 3+</option></select>'
+			doc_select = '<select class="form-control doc_available"><option></option><option>Yes</option><option>No</option></select>'
+			values = { "property_id":property["property_id"], "select":select_html, "doc_select":doc_select}
+			row = repl("<tr class='row'><td class='col-xs-4 p_id text-center' >%(property_id)s</td><td class='col-xs-4'><textarea type='text' class='comments'></textarea></td>\
+				<td class='col-xs-2'>%(select)s</td><td class='col-xs-2'>%(doc_select)s</td></tr>", values)
 			table_html += row
 		})
 		table_html += "</tbody>"
@@ -1395,7 +1312,6 @@ AgentPropertyShare = Class.extend({
 	},
 	init_for_share_property:function(){
 		var me = this
-		console.log($(this.dialog.body).find("button[data-fieldname='share_prop']"))
 		$(this.dialog.body).find("button[data-fieldname='share_prop']").click(function(){
 			if(me.check_for_mandatory_fields()){
 				comment_list = me.get_property_object()
@@ -1405,7 +1321,7 @@ AgentPropertyShare = Class.extend({
 					freeze:true,
 					freeze_message:"Share property opertaion is in progress........",
 					method:"hunters_camp.hunters_camp.page.property.property.share_property_to_agents",
-					args:{"email_id":agents_list, "comments":comment_list, "sid":frappe.get_cookie("sid"), "user_id":frappe.get_cookie("user_id")},
+					args:{"email_id":agents_list, "comments":comment_list, "sid":frappe.get_cookie("sid"), "user_id":frappe.get_cookie("hc_user_id")},
 					callback:function(r){
 						frappe.msgprint(r.message.message)
 					}
@@ -1429,6 +1345,7 @@ AgentPropertyShare = Class.extend({
 			prop_dict["property_id"] = $(row).find(".p_id").text()
 			prop_dict["comment"] = $(row).find(".comments").val()
 			prop_dict["prop_through"] = $(row).find(".prop_through").val()
+			prop_dict["doc_available"] = $(row).find(".doc_available").val()
 			comments_list.push(prop_dict)
 		})
 		return comments_list

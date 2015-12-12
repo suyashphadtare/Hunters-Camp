@@ -98,23 +98,32 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 												frappe.set_route("property", "Hunters Camp");
 												}
 												else {
-													return frappe.call({
-														method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
-														args :{
-															"property_type": doc.property_type,
-															"property_subtype": doc.property_subtype,
-															"operation":doc.operation,
-															"location": doc.location,
-															"budget_minimum": doc.budget_minimum,
-															"budget_maximum": doc.budget_maximum,
-															"area_minimum": doc.area_minimum,
-															"area_maximum": doc.area_maximum,
-														},
-														callback: function(r,rt) {
-															msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
-															
-														},
-													})
+												
+													if (doc.email_sent == 'No'){
+														return frappe.call({
+															method:'hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_administartor',
+															args :{
+																"property_type": doc.property_type,
+																"property_subtype": doc.property_subtype,
+																"operation":doc.operation,
+																"location": doc.location,
+																"budget_minimum": doc.budget_minimum,
+																"budget_maximum": doc.budget_maximum,
+																"area_minimum": doc.area_minimum,
+																"area_maximum": doc.area_maximum,
+															},
+															callback: function(r,rt) {
+																doc.email_sent = 'Yes'
+																cur_frm.refresh_fields(["email_sent"])
+																msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
+																
+															},
+														})	
+													}
+													else{	
+														msgprint("There is no any properties found against the specified criteria.")
+													}
+
 												}
 												
 										  }
@@ -166,14 +175,14 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		}
 
 
-	var property_details_list = []
+	// var property_details_list = []
 
 	frappe.SetFollowUps = Class.extend({
 		init: function() {
+			property_details_list = [];
 			this.make();
 		},
 		make: function() {
-			property_details_list = []
 			var me = this;
 			doc=cur_frm.doc
 			var pd = doc.property_details;
@@ -268,7 +277,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					if(se_list.length>0){
 							me.append_se_popup_fields(me.pop_up,cur_frm.doc);
 							$(me.pop_up_body.find('.select')).css('display','none')
-							me.append_se_property_details(cur_frm.doc);
+							me.append_se_property_details(cur_frm.doc, me.pop_up);
 							me.set_another_follow_up_date(cur_frm.doc, me.pop_up)
 					}
 					else{
@@ -344,23 +353,29 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				}
 
 				$(me.pop_up_body.find('.select_dropdown')).change(function(){
-					var property_details_list = []
 					row = $(this).parent().parent();
 					var cdn = row.find("input#cdn").val();
 					cdoc = locals["Lead Property Details"][cdn]
+					
 					if(row.find('input#_select').is(':checked')){
+
+						flag = false
+						position = 0
+						$.each(property_details_list, function( index,d ) {
+		 					if (d['name'] == row.find("input#cdn").val()){
+		 						flag = true
+		 						position = index
+		 					}
+						});
+					
+
+						if (flag){
+							property_details_list.splice(position, 1);
+						}
 						property_details_list.push({
 							"name":row.find("input#cdn").val(),
 							"status": row.find('#followup_status').val()
 						})
-					}
-					else{
-						// remove the voucher_id from list
-						property_details_list.pop({
-							"name":row.find("input#cdn").val(),
-							"status": row.find('#followup_status').val()
-						})
-
 					}
 
 				})
@@ -372,17 +387,21 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				$(me.pop_up_body).find(".select").click(function(){
 					$('input#check_all').prop('checked', false);
 					row = $(this).parent().parent();
-					var cdn = row.find("input#cdn").val();
-					cdoc = locals["Lead Property Details"][cdn]
 					// check if check box is checked or Not
 					if(row.find('input#_select').is(':checked')){
+						flag = false
+						position = 0
+						$.each(property_details_list, function( index,d ) {
+		 					if (d['name'] == row.find("input#cdn").val()){
+		 						flag = true
+		 						position = index
+		 					}
+						});
+
+						if (flag) {
+							property_details_list.splice(position, 1);
+						}
 						property_details_list.push({
-							"name":row.find("input#cdn").val(),
-							"status": row.find('#followup_status').val()
-						})
-					}
-					else{
-						property_details_list.pop({
 							"name":row.find("input#cdn").val(),
 							"status": row.find('#followup_status').val()
 						})
@@ -431,7 +450,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 								return frappe.call({
 								method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_followup_date',
 								args: {
-									"list":property_details_list,
+									"prop_list":property_details_list,
 									"followup_type":me.pop_up.fields_dict.type_followup.input.value,
 									"followup_date":me.pop_up.fields_dict.followup_date.input.value
 								},
@@ -445,25 +464,27 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							}
 						}
 							//msgprint("Please first select the property to set followup");
-						else if(property_details_list.length>0 && (me.flag==0 || me.flag1==0 || me.flag2==0)){
-							return frappe.call({
-								method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_details',
-								args: {
-									"list":property_details_list,
-									"followup_type":me.pop_up.fields_dict.type_followup.input.value,
-									"followup_date":me.pop_up.fields_dict.followup_date.input.value
-								},
-								callback: function(r) {
-									me.pop_up.hide();
-									cur_frm.reload_doc()
-									setTimeout(function(){},1000)
-								}
-							});
-						}
+						else if(me.check_for_status_property_id(property_details_list) && (me.flag==0 || me.flag1==0 || me.flag2==0)){
+							if (property_details_list.length){
+								return frappe.call({
+									method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_details',
+									args: {
+										"prop_list":property_details_list,
+										"followup_type":me.pop_up.fields_dict.type_followup.input.value,
+										"followup_date":me.pop_up.fields_dict.followup_date.input.value
+									},
+									callback: function(r) {
+										me.pop_up.hide();
+										cur_frm.reload_doc()
+										setTimeout(function(){},1000)
+									}
+								});								
+							}
+							else{
+								msgprint("Select Property Id to update it")
+							}	
 
-						else{
-							msgprint("Select Property Id to update it")
-						}	
+						}
 
 					}
 					else{
@@ -474,6 +495,18 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				}
 			});
 
+		},
+		check_for_status_property_id:function(property_details_list){
+			status_flag = true
+			$.each($(cur_dialog.body).find("#property_details tbody tr"), function(index, value){
+				if ( $(this).find('input#_select').is(':checked') && !$(this).find("#followup_status").val()){
+					msgprint("Mandatory field status not set against property id {0}".replace("{0}",$(this).find("#property_id").text()))
+					status_flag = false
+					return false
+				}
+			})
+			return status_flag
+		
 		},
 
 		append_popup_fields: function(pop_up,doc){
@@ -520,11 +553,12 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<td align='center' id='status'><select class='select_dropdown' id='followup_status'>\
 							<option value=''></option>\
 							<option value='Intrested'>Intrested</option>\
-							<option value='Not Intrested'> Not Intrested</option>\
+							<option value='Not Intrested' > Not Intrested</option>\
 							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
-	
+						console.log($(pop_up.body).find("#property_details tbody tr").last().find("#followup_status"))
+						$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").val(pd[i].share_followup_status)
 					}
 					
 				}	
@@ -539,7 +573,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				
 			})
 		},
-		append_se_property_details: function(doc){
+		append_se_property_details: function(doc, pop_up){
 			
 			var pd = doc.property_details;
 
@@ -559,7 +593,11 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
-						
+						if(pd[i].se_status == 'Cancelled By SE' || pd[i].se_status == 'Cancelled By Client'){
+							console.log("in if")
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
+						}
+						console.log("ajdskljla")
 					}
 				}
 			};
@@ -660,7 +698,12 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						$('[data-fieldname=cc_sec]').css('display','block')
 						$('[data-fieldname=assign_to]').css('display','block')
 						$('[data-fieldname=date]').css('display','block')
-						me.pop_up.fields_dict.assign_to.get_query = "hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query";
+						me.pop_up.fields_dict.assign_to.get_query = function(){
+							return {
+									"query":"hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query",	
+									"filters":{"location":cur_frm.doc.location}
+								}	
+							} 
 					}
 					else{
 						$('[data-fieldname=cc_sec]').css('display','none')
@@ -707,14 +750,17 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				primary_action_label: "Schedule SE",
 				primary_action: function() {
 					// Update Clearance Date of the checked vouchers
+					console.log(property_details_list)
 					if(!property_details_list.length)
 						msgprint("Please first select the property to schedule SE");
 					else{
 						if(me.assign_to.length>0 && me.pop_up.fields_dict.date.$input.val()){
+							new_prop_list = property_details_list
+							property_details_list = []
 							return frappe.call({
 								method: "hunters_camp.hunters_camp.doctype.lead_management.lead_management.make_se_visit",
 								args: {
-									"property_list":property_details_list,
+									"property_list":new_prop_list,
 									"assign_to": me.assign_to,
 									"parent":cur_frm.doc.name,
 									"schedule_date":me.pop_up.fields_dict.date.$input.val()
@@ -1155,3 +1201,17 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		});
 
 	});
+
+frappe.ui.form.on("Lead Management", "onload", function(frm) {
+	frm.doc.email_sent = 'No'
+	cur_frm.refresh_fields(["email_sent"])
+})
+
+
+cur_frm.fields_dict['property_subtype'].get_query = function(doc,cdt,cdn) {
+	return{
+		filters:{
+			'property_type': doc.property_type,
+		}
+	}
+}
