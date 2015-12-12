@@ -60,7 +60,7 @@ fixtures = ["Custom Field"]
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Lead Management": "hunters_camp.hunters_camp.doctype.lead_management.lead_management.has_permission",
 # }
 
 # Document Events

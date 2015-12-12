@@ -179,6 +179,7 @@ project.operations = {
 	
 	},
 	make_property_details_read_only:function(frm){
+		console.log("in property_details")
 		cur_frm.set_df_property("property_details", "read_only", true)
 		$.each([2,3,4,5,6,7,8,9], function(index , value){
 			cur_frm.get_field("property_details").grid.docfields[value].read_only = 1
@@ -572,3 +573,17 @@ SearchProperty = Class.extend({
     }
 
 })
+
+
+cur_frm.fields_dict.project_by.get_query = function(doc) {
+	return {
+			query:"hunters_camp.hunters_camp.doctype.projects.projects.get_builders",
+		}
+}
+
+
+cur_frm.fields_dict.project_tieup_by.get_query = function(doc) {
+	return {
+			query:"hunters_camp.hunters_camp.doctype.projects.projects.get_consultant",
+		}
+}

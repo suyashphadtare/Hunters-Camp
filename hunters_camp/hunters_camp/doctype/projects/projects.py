@@ -115,4 +115,22 @@ def delete_photo(doc, sid, img_url):
 def get_all_projects(sid):
 	user_id = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
 	data = json.dumps({"user_id":user_id, "sid":sid})
-	return update_api.get_all_projects(data)		
+	return update_api.get_all_projects(data)
+
+@frappe.whitelist()
+def get_builders(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
+		from `tabUser` usr
+		where usr.name not in ("Guest", "Administrator")
+			and usr.user_type != 'Website User'
+			and usr.name in (select parent from `tabUserRole` where role='Builder' and parent!='Administrator' and parent!='Guest') 
+		""")
+
+@frappe.whitelist()
+def get_consultant(doctype, txt, searchfield, start, page_len, filters):
+	return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
+		from `tabUser` usr
+		where usr.name not in ("Guest", "Administrator")
+			and usr.user_type != 'Website User'
+			and usr.name in (select parent from `tabUserRole` where role='Consultant' and parent!='Administrator' and parent!='Guest') 
+		""")

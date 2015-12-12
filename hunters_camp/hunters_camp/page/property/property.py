@@ -1,9 +1,11 @@
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+from frappe.utils import nowdate, cstr, flt, now, getdate, add_months, validate_email_add
 import datetime
 import json
+from collections import Counter
 import propshikari.propshikari.property_update_api as update_api
+import propshikari.propshikari.propshikari_api as api
 
 
 
@@ -56,11 +58,26 @@ def send_email(email, subject, template, args):
 
 @frappe.whitelist()
 def share_property_to_user(property_resultset=None,user=None,comments=None):
-	share_property =  json.loads(property_resultset)
-	user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
-	args = { "title":"Property Shared by  {0}" .format(frappe.session.user) , "property_data":share_property ,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
-	send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
-	return True
+  share_property =  json.loads(property_resultset)
+  user = check_for_duplicate_email_id(user)
+  user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
+  args = { "title":"Property Shared by  {0}" .format(frappe.session.user) , "property_data":share_property ,"first_name":user_name.get("first_name"), "last_name":user_name.get("last_name")}
+  send_email(user, "Propshikari properties shared with you", "/templates/share_property_template.html", args)
+  return True
+
+def check_for_duplicate_email_id(user):
+  email_ids = user.split(',')
+  email_ids = [email for email in email_ids if email]
+  if email_ids:
+    email_count = Counter(email_ids)
+    for email_id, count in email_count.items():
+      validate_email_add(email_id, True)
+      if count > 1:
+        frappe.throw("Email Id {0} has been added {1} times".format(email_id, count))
+    return email_ids
+  else:
+    frappe.throw("Email Id is mandatory field")      
+
 
 
 
@@ -83,3 +100,39 @@ def share_property_to_agents(email_id, comments, sid, user_id):
   comments_dict = {"email_id":email_id.split(','), "comments":eval(comments), "user_id":user_id, "sid":sid}
   return update_api.share_property_to_agents(comments_dict)
 
+
+
+@frappe.whitelist()
+def get_amenities(property_type):
+  amenities = frappe.db.sql(" select amenity_name from `tabAmenities` where property_type='{0}' ".format(property_type), as_list=1)
+  subtype_options = frappe.db.sql(" select property_subtype_option from `tabProperty Subtype Option` where property_type='{0}' ".format(property_type), as_list=1)
+  response_dict = {}
+  response_dict["amenities"] = [amenity[0] for amenity in amenities if amenity]
+  response_dict["subtype_options"] = [option[0] for option in subtype_options if option]
+  return response_dict
+
+
+@frappe.whitelist()
+def get_location_list():
+  location = frappe.db.sql(" select name as location_id,area as location_name, city_name from `tabArea`",as_dict=1)
+  return location
+
+@frappe.whitelist()
+def search_property_with_advanced_criteria(property_dict):
+  property_dict = json.loads(property_dict)
+  budget_mapper =  {"0":0, "25Lac":2500000, "50Lac":5000000, "75Lac":7500000, "1Cr":10000000, 
+                    "2Cr":20000000, "3Cr":30000000, "4Cr":40000000, "5Cr":50000000, "10Cr":100000000}
+  amenities_list = [amenity for amenity in property_dict.get("amenities","").split(',') if amenity]        
+  property_dict["amenities"] = amenities_list
+  property_dict["min_budget"] = budget_mapper.get(property_dict.get("min_budget", ""),0)
+  property_dict["max_budget"] = budget_mapper.get(property_dict.get("max_budget", ""),0)
+  property_dict["records_per_page"] = 10
+  property_dict["page_number"] = 1
+  property_dict["request_source"] = "Hunterscamp"
+  property_dict["min_area"] = int(property_dict.get("min_area",0))
+  property_dict["max_area"] = int(property_dict.get("max_area",0))
+  print property_dict
+  try:
+    return api.search_property(json.dumps(property_dict))
+  except Exception,e:
+    frappe.throw(e)  
