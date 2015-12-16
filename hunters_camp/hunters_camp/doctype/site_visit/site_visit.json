@@ -994,7 +994,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-10-19 15:51:50.672793", 
+ "modified": "2015-11-27 13:03:09.725401", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Site Visit", 
@@ -1005,10 +1005,10 @@
    "amend": 0, 
    "apply_user_permissions": 0, 
    "cancel": 0, 
-   "create": 1, 
-   "delete": 1, 
+   "create": 0, 
+   "delete": 0, 
    "email": 1, 
-   "export": 1, 
+   "export": 0, 
    "if_owner": 0, 
    "import": 0, 
    "permlevel": 1, 
@@ -1019,7 +1019,7 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
-   "write": 1
+   "write": 0
   }, 
   {
    "amend": 0, 

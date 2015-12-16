@@ -55,10 +55,9 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc) {
 }
 
 cur_frm.cscript.lead = function(doc,cdt,cdn){
-	console.log("n lead")
-	// doc.address=null
-	// doc.address_details=null
-	// refresh_fields(['address','address_details'])
+	doc.address=""
+	doc.address_details=""
+	refresh_field(['address','address_details'])
 
 }
 

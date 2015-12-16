@@ -42,7 +42,7 @@ enquiry.Composer = Class.extend({
 
 				{fieldtype: "Section Break","name":"cc_sec"},
 
-				{label:__("Allocate Enquiry"), fieldtype:"Data", reqd: 1, fieldname:"allocate_enquiry_no"}
+				{label:__("Allocate Enquiry"), fieldtype:"Int", reqd: 1, fieldname:"allocate_enquiry_no"}
 				
 			],
 			primary_action_label: "Allocate",
@@ -50,13 +50,14 @@ enquiry.Composer = Class.extend({
 				me.allocate_lead(count);
 			}
 		});
-		
-		$('#count').html("<b>" +	'Not Allocated Enquiry Count'	+"	:  "  +count)
-		if(count>0)
+		if(count>0){
+			var count_wrapper = $(this.dialog.fields_dict.enquiry_count.wrapper).find("#count");
+			$('<b>Not Allowed Enquiry Count  :'+count+'</b>').appendTo(count_wrapper);
 			this.dialog.show();
-		else
+		}
+		else{
 			msgprint("All enquiries are allocated...!!")
-
+		}	
 	},
 
 	allocate_lead: function(count) {

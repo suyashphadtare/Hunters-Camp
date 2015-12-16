@@ -141,7 +141,6 @@ prop_operations = Class.extend({
 		frm.page.clear_menu();
 	},
 	check_mandatory :function(frm) {
-		console.log("check_mandatory")
 		var me = this;
 		var has_errors = false;
 		frm.scroll_set = false;
