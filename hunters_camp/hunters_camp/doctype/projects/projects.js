@@ -478,6 +478,8 @@ SearchProperty = Class.extend({
 		var me = this
 		cur_frm.add_custom_button(__('Search Project'),function() {
 				me.render_dialog_for_property_search() },"btn-primary");
+		cur_frm.add_custom_button(__('Clear form'),function() {
+				me.clear_form() },"btn-primary");
 	},
 	render_dialog_for_property_search: function(){
 		this.dialog = new frappe.ui.Dialog({
@@ -570,7 +572,10 @@ SearchProperty = Class.extend({
 					msgprint("Please Select Project Id First")	
 				}
     	})
-    }
+    },
+    clear_form: function(){
+		frappe.ui.toolbar.clear_cache()
+	}
 
 })
 
@@ -585,5 +590,11 @@ cur_frm.fields_dict.project_by.get_query = function(doc) {
 cur_frm.fields_dict.project_tieup_by.get_query = function(doc) {
 	return {
 			query:"hunters_camp.hunters_camp.doctype.projects.projects.get_consultant",
+		}
+}
+
+cur_frm.fields_dict.property_details.grid.get_field("property_subtype_option").get_query = function(doc) {
+	return {
+			filters:{"property_type":doc.project_type},
 		}
 }

@@ -131,8 +131,14 @@ def search_property_with_advanced_criteria(property_dict):
   property_dict["request_source"] = "Hunterscamp"
   property_dict["min_area"] = int(property_dict.get("min_area",0))
   property_dict["max_area"] = int(property_dict.get("max_area",0))
-  print property_dict
+  get_location_subtype_options(property_dict)
   try:
     return api.search_property(json.dumps(property_dict))
   except Exception,e:
-    frappe.throw(e)  
+    frappe.throw(e)
+
+
+def get_location_subtype_options(property_dict):
+  property_dict["location"] = ','.join([loc for loc in property_dict.get("location","").split(',') if loc])
+  property_dict["property_subtype_option"] = ','.join([option for option in property_dict.get("property_subtype_option","").split(',') if option])  
+
