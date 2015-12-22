@@ -7,11 +7,11 @@ from frappe import _
 from frappe.utils import cstr
 from frappe.model import default_fields
 
-def get_mapped_doc(source_doc, table_maps, target_doc=None):
+def get_mapped_doc(source_doc, table_maps, target_doctype, target_doc=None):
 
 	# main
 
-	target_doc = frappe.new_doc("Property")
+	target_doc = frappe.new_doc(target_doctype)
 	for i in target_doc.meta.get_table_fields():
 		pass
 		
@@ -19,16 +19,16 @@ def get_mapped_doc(source_doc, table_maps, target_doc=None):
 	map_doc(source_doc, target_doc, p_table_maps)
 
 	row_exists_for_parentfield = {}
-
-	# # children
+	# # # children
 	for df in target_doc.meta.get_table_fields():
+
 		table_map = table_maps.get(df.fieldname)
 
 		if table_map:
 			for source_d in source_doc.get(df.fieldname):
+		 		target_child_doctype = table_map["doctype"]
+		 		target_parentfield = target_doc.get_parentfield_of_doctype(target_child_doctype)
 
-				target_child_doctype = table_map["doctype"]
-				target_parentfield = target_doc.get_parentfield_of_doctype(target_child_doctype)
 
 				# does row exist for a parentfield?
 				if target_parentfield not in row_exists_for_parentfield:
@@ -44,7 +44,7 @@ def map_doc(source_doc, target_doc, table_map, source_parent=None):
 
 
 def map_fields(source_doc, target_doc, table_map, source_parent):
-	no_copy_fields = set(list(["amenities","flat_facilities"]))
+	no_copy_fields = set(list(["amenities","flat_facilities","property_details"]))
 	#no_copy_fields = []
 	for df in target_doc.meta.get("fields"):
 		# print df

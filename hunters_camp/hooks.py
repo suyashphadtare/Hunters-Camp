@@ -35,7 +35,7 @@ app_include_js = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDO87KWhu8luH
 # Generators
 # ----------
 
-fixtures = ["Custom Field"]
+fixtures = ["Custom Field", "Role"]
 # automatically create page for each record of this doctype
 # website_generators = ["Web Page"]
 
@@ -60,7 +60,7 @@ fixtures = ["Custom Field"]
 # }
 #
 # has_permission = {
-# 	"Event": "frappe.desk.doctype.event.event.has_permission",
+# 	"Lead Management": "hunters_camp.hunters_camp.doctype.lead_management.lead_management.has_permission",
 # }
 
 # Document Events

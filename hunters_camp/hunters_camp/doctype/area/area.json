@@ -11,6 +11,8 @@
  "fields": [
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "state_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -32,6 +34,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "city_name", 
    "fieldtype": "Link", 
    "hidden": 0, 
@@ -53,6 +57,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "area", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -73,6 +79,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "lattitude", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -93,6 +101,8 @@
   }, 
   {
    "allow_on_submit": 0, 
+   "bold": 0, 
+   "collapsible": 0, 
    "fieldname": "longitude", 
    "fieldtype": "Data", 
    "hidden": 0, 
@@ -119,7 +129,7 @@
  "is_submittable": 0, 
  "issingle": 0, 
  "istable": 0, 
- "modified": "2015-08-31 17:41:52.900724", 
+ "modified": "2015-12-21 15:40:45.186354", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Area", 

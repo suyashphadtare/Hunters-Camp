@@ -20,22 +20,22 @@ def execute(filters=None):
 
 
 def get_columns():
-	return [ _("Property ID") + "::200",_("Lead") + ":Link/Lead:130",_("Lead Name") + "::130", 
+	return [ _("Property ID") + "::200",_("Property Name") + "::200",_("Lead Management") + ":Link/Lead Management:150",_("Lead") + ":Link/Lead:130",_("Lead Name") + "::130", 
 			_("Email ID") + "::100", _("Mobile No") + "::100"]
 
 def get_followup_details(filters):
 	if filters.get("type_followup") == 'Follow Up For Share':
-		return frappe.db.sql("""select pd.property_id,lm.lead,lm.lead_name,lm.email_id,lm.mobile_no from `tabLead Property Details` as pd,
+		return frappe.db.sql("""select pd.property_id,pd.property_name,lm.name,lm.lead,lm.lead_name,lm.email_id,lm.mobile_no from `tabLead Property Details` as pd,
 			`tabLead Management` as lm where pd.share_followup_date ='%s'
 					and pd.parent=lm.name"""%filters.get("followup_date"))
 
 	elif filters.get("type_followup") == 'Follow Up For SE':
-		return frappe.db.sql("""select pd.property_id,lm.lead,lm.lead_name,lm.email_id,lm.mobile_no from `tabLead Property Details` as pd,
+		return frappe.db.sql("""select pd.property_id,pd.property_name,lm.name,lm.lead,lm.lead_name,lm.email_id,lm.mobile_no from `tabLead Property Details` as pd,
 			`tabLead Management` as lm where pd.se_followup_date ='%s'
 					and pd.parent=lm.name"""%filters.get("followup_date"))
 
 	elif filters.get("type_followup") == 'Follow Up For ACM':
-		return frappe.db.sql("""select pd.property_id,lm.lead,lm.lead_name,lm.email_id,lm.mobile_no from `tabLead Property Details` as pd,
+		return frappe.db.sql("""select pd.property_id,pd.property_name,lm.name,lm.lead,lm.lead_name,lm.email_id,lm.mobile_no from `tabLead Property Details` as pd,
 			`tabLead Management` as lm where pd.acm_followup_date ='%s'
 					and pd.parent=lm.name"""%filters.get("followup_date"))
 

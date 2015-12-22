@@ -29,11 +29,14 @@ def post_property(doc,sid):
 	doc["amenities"] = [ amenity.get("amenity_name") for amenity in doc.get("amenities") if amenity.get("status") == "Yes" ]
 	doc["flat_facilities"] = [ facility.get("facility_name") for facility in doc.get("flat_facilities") if facility.get("status") == "Yes" ]
 	validate_for_possesion_date(doc)
-	#doc["distance_from_imp_locations"] = map(lambda x: doc.pop(x,None), ["railway_station",'central_bus_stand',"airport"])
+	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}
 
 	data = json.dumps(doc)
-	doc_rec = api.post_property(data)
-	update_agent_package() if agent_flag else ""
+	try:
+		doc_rec = api.post_property(data)
+		update_agent_package() if agent_flag else ""
+	except Exception,e:
+		frappe.throw(e)
 	return doc_rec
 
 
@@ -87,11 +90,9 @@ def view_property(property_id,sid):
 						"image":"image"
 					}
 				}
-			})
+			}, "Property")
 	doclist.city_link = frappe.db.get_value("City",{"city_name":doclist.city},"name")
 	doclist.location_link = frappe.db.get_value("Area",{"area":doclist.location},"name")
-	print "property doclist"
-	print type(doclist)
 	return doclist
 
 @frappe.whitelist(allow_guest=True)
@@ -141,7 +142,10 @@ def update_property(doc ,sid):
 	validate_for_possesion_date(doc)
 	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}
 	doc.pop("doc", None)
-	response = update_api.update_property(json.dumps({"property_id":doc.get("property_id"), "fields":doc }))
+	try:
+		response = update_api.update_property(json.dumps({"property_id":doc.get("property_id"), "fields":doc }))
+	except Exception,e:
+		frappe.throw(e)
 	return response
 
 
@@ -149,4 +153,18 @@ def update_property(doc ,sid):
 def get_all_properties(sid):
 	user_id = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
 	data = json.dumps({"user_id":user_id, "sid":sid})
-	return update_api.get_all_properties(data) 
+	return update_api.get_all_properties(data)
+
+
+
+@frappe.whitelist(allow_guest=True)
+def delete_photo(doc, sid, img_url):
+	doc = json.loads(doc)
+	doc["user_id"] = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
+	doc["full_size_images"] = doc.get("full_size_images").split(',') if doc.get("full_size_images") else []
+	doc["thumbnails"] = doc.get("thumbnails").split(',') if doc.get("thumbnails") else []
+	try:
+		response = update_api.delete_property_photo(doc, img_url)
+	except Exception,e:
+		frappe.throw(e)
+	return response	 

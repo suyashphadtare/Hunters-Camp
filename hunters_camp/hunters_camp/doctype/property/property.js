@@ -16,9 +16,8 @@ cur_frm.add_fetch("facility_name", "icon", "image")
 
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
-	console.log("refresh")
 	$(cur_frm.get_field("attachment_display").wrapper).empty()
-	new prop_operations(frm)
+	prop_operations.init(frm);
 	cur_frm.cscript.render_google_map(frm)
 	
 			
@@ -41,9 +40,8 @@ cur_frm.cscript.render_google_map = function(frm){
 
 frappe.ui.form.on("Property", "possession", function(frm) {
 	var me = this;
-	frm.toggle_reqd("month", frm.doc.possession===0);
-	frm.toggle_reqd("year", frm.doc.possession===0);
-	
+	frm.toggle_reqd("month", frm.doc.possession == 0);
+	frm.toggle_reqd("year", frm.doc.possession == 0);
 });
 
 frappe.ui.form.on("Property", "operation", function(frm) {
@@ -51,6 +49,8 @@ frappe.ui.form.on("Property", "operation", function(frm) {
 	frm.toggle_reqd("month", frm.doc.operation==="Buy");
 	frm.toggle_reqd("year", frm.doc.operation==="Buy");
 });
+
+
 // frappe.ui.form.on("Property", "railway_station", function(frm) {
 // 	map = frm.doc.distance_from_imp_locations
 // 	console.log([frm.doc.railway_station,typeof map])
@@ -66,7 +66,7 @@ frappe.ui.form.on("Property", "operation", function(frm) {
 
 
 
-prop_operations = Class.extend({
+prop_operations = {
 	init:function(frm){
 		var me = this;
 		this.doc = frm.doc
@@ -144,9 +144,9 @@ prop_operations = Class.extend({
 		var me = this;
 		var has_errors = false;
 		frm.scroll_set = false;
-
+		prop_flag = false;
 		$.each(frappe.model.get_all_docs(frm.doc), function(i, doc) {
-			if (i != frappe.model.get_all_docs(frm.doc).length - 1){
+			if (doc.doctype != 'Property' || prop_flag == false){
 				var error_fields = [];
 				var folded = false;
 				$.each(frappe.meta.docfield_list[doc.doctype] || [], function(i, docfield) {
@@ -157,8 +157,7 @@ prop_operations = Class.extend({
 							folded = frm.layout.folded;
 						}
 						if(df.reqd && ! (frappe.model.has_value(doc.doctype, doc.name, df.fieldname)) ) {
-							console.log(df.fieldname)
-							console.log(frappe.model.has_value(doc.doctype, doc.name, df.fieldname))
+
 							has_errors = true;
 							error_fields[error_fields.length] = __(df.label);
 
@@ -169,11 +168,16 @@ prop_operations = Class.extend({
 						}
 					}
 				});
+
 				if(error_fields.length)
 					msgprint(__('Mandatory fields required in {0}', [(doc.parenttype
 						? (__(frappe.meta.docfield_map[doc.parenttype][doc.parentfield].label) + ' ('+ __("Table") + ')')
 						: __(doc.doctype))]) + '\n' + error_fields.join('\n'));
+				if (doc.doctype == "Property"){
+					prop_flag = true
+				}
 			}
+
 		});
 		return !has_errors;
 	},
@@ -189,8 +193,8 @@ prop_operations = Class.extend({
 
 	},
 	add_possession_status : function(frm, doc){
-		if (doc.possession){
-			cur_frm.doc.possession = 1			
+		if (cur_frm.doc.possession == 1){
+					
 		}
 		else{
 			if (cur_frm.doc.possession_status){
@@ -209,11 +213,9 @@ prop_operations = Class.extend({
 		if (frm.doc.thumbnails){
 			thumbnails_list = frm.doc.thumbnails.split(',')
 			$.each(thumbnails_list ,function(index, thumbnail){
-			$("<img></img>",{
-	 				class : "imageThumb",
-	 				src : thumbnail
-	 			}).appendTo(wrapper);
-			})			
+			$("<div class='img-wrap'> <span class='close'>&times;</span><img class='imageThumb prj_img' src="+thumbnail+" ></div>").appendTo(wrapper);
+			})
+			this.init_delete_property_photo(frm)			
 		}
 	},
 	add_status_and_tag_to_menu:function(frm){
@@ -314,9 +316,59 @@ prop_operations = Class.extend({
 				frappe.ui.form.is_saving = false;
 			}
 		})
+	},
+	init_delete_property_photo:function(frm){
+		var me = this
+		$(".close").click(function(){
+			console.log($(this).siblings())
+			var inner_me = this
+			frappe.confirm(__("Are you sure you want to delete Property Photo"), function() {
+				console.log("yes")
+				if ($(inner_me).siblings().hasClass("prj_img")){
+					console.log("in if")
+					me.delete_property_photo(frm, inner_me)
+				}else{
+					console.log("in else")
+					img_src = $(inner_me).siblings().attr("src")
+					index = 0
+					$.each(frm.doc.property_photos, function(i,value){
+						if (value.file_data == img_src){
+							index = i
+							return false
+						}
+					})
+					frm.doc.property_photos.splice(index, 1)
+					refresh_field(["property_photos"])
+					photo_names = $.map(frm.doc.property_photos, function(d){ return d.file_name })
+					frm.doc.photo_names = photo_names.join(',')
+					refresh_field(["photo_names"])
+					$(inner_me).parent().remove()
+				}
+			});			
+
+		})
+
+	},
+	delete_property_photo:function(frm, cur_img){
+		img_src = $(cur_img).siblings().attr("src") 
+		return frappe.call({
+			freeze:true,
+			freeze_message:"Deleting Property Photo Please wait.........",
+			method:"hunters_camp.hunters_camp.doctype.property.property.delete_photo",
+			args: {doc: frm.doc, sid:frappe.get_cookie('sid'), img_url:img_src},
+			callback: function(r) {
+				console.log(r.message)
+				frappe.msgprint(r.message.message)
+				frm.doc.full_size_images = r.message.full_size
+				frm.doc.thumbnails = r.message.thumbnails
+				frm.doc.property_photo = r.message.photo 
+				refresh_field(["full_size_images", "thumbnails", "property_photo"])
+				$(cur_img).parent().remove()	
+			}
+		});
 	}
 
-})
+}
 
 frappe.ui.form.on("Property", "add_amenities", function(frm) {
 	var me = this;
@@ -421,11 +473,7 @@ display_thumbnail =function(frm){
 		image_list = frm.doc.property_photos
 		if(image_list){
 			$.each(image_list,function(i,img){
-				$("<img></img>",{
-	 				class : "imageThumb",
-	 				src : img["file_data"],
-	 				title : img["file_name"]
-	 			}).appendTo(wrapper);
+				$("<div class='img-wrap'> <span class='close'>&times;</span><img class='imageThumb' title="+img["file_name"]+"  src="+img["file_data"]+" ></div>").appendTo(wrapper);
 			});
 		}
 	}
@@ -436,11 +484,9 @@ display_existing_images = function(frm, wrapper){
 	if(frm.doc.thumbnails){
 		thumbnails_list = frm.doc.thumbnails.split(',')
 		$.each(thumbnails_list ,function(index, thumbnail){
-			$("<img></img>",{
-	 				class : "imageThumb",
-	 				src : thumbnail
-	 			}).appendTo(wrapper);
-		})		
+			$("<div class='img-wrap'> <span class='close'>&times;</span><img class='imageThumb prj_img' src="+thumbnail+" ></div>").appendTo(wrapper);
+		})
+		prop_operations.init_delete_property_photo(frm)		
 	}
 }
 

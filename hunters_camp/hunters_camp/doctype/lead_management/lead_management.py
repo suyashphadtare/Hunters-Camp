@@ -7,6 +7,7 @@ import frappe
 from frappe.model.document import Document
 from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
 from frappe.model.mapper import get_mapped_doc
+from frappe.utils import validate_email_add
 import datetime
 import json
 
@@ -14,19 +15,22 @@ STANDARD_USERS = ("Guest", "Administrator")
 
 
 class LeadManagement(Document):
-	pass
-	# def on_update(self):
-	# 	if self.property_type and self.property_subtype and self.property_subtype_option and self.location:
-	# 		pass
-	# 	else:
-	# 		frappe.msgprint("Property Type, Property Subtype, Property Subtype Option and Locations are mandatory to serach property.")
+
+	def validate(self):
+		self.validate_area_budget_fields()
+	
+	def validate_area_budget_fields(self):
+		field_dict = {"area_minimum":["area_maximum", "Maxiumum Area", "Minimum Area"], "budget_minimum":["budget_maximum", "Maxiumum Budget", "Minimum Budget"]}
+		for min_field, max_field in field_dict.items():
+			if self.get(max_field[0]) < self.get(min_field):
+				frappe.throw("{0} must be greater than {1}".format(max_field[1], max_field[2]))
+
 
 
 @frappe.whitelist()
 def get_se_details(assign_to=None):
 	se_details = frappe.db.sql("""select name, visiter, schedule_date from `tabSite Visit` where
 								visiter='%s' and schedule_date>='%s'"""%(assign_to,nowdate()),as_dict=1)
-	frappe.errprint(se_details)
 	if len(se_details)>0:
 		return se_details
 	else:
@@ -50,7 +54,6 @@ def make_se_visit(property_list=None,assign_to=None,parent=None,schedule_date=No
 	property_new = json.loads(property_list)
 	if len(property_new)>0:
 		for i in property_new:
-			frappe.errprint(i)
 			doctype ='Site Visit'
 			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
 			update_se_status_in_leadform(i,name,assign_to,schedule_date)
@@ -127,7 +130,6 @@ def make_acm_visit(property_list=None,assign_to=None,parent=None,schedule_date=N
 	property_new = json.loads(property_list)
 	if len(property_new)>0:
 		for i in property_new:
-			frappe.errprint(i)
 			doctype ='ACM Visit'
 			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
 			update_acm_status_in_leadform(i,name,assign_to,schedule_date)
@@ -146,23 +148,18 @@ def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date)
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 	txt = "%{}%".format(txt)
-	return frappe.db.sql("""select name, concat_ws(' ', first_name, middle_name, last_name)
-		from `tabUser`
-		where ifnull(enabled, 0)=1
-			and docstatus < 2
-			and name not in ({standard_users})
-			and user_type != 'Website User'
-			and name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
-			and ({key} like %s
-				or concat_ws(' ', first_name, middle_name, last_name) like %s)
-		order by
-			case when name like %s then 0 else 1 end,
-			case when concat_ws(' ', first_name, middle_name, last_name) like %s
-				then 0 else 1 end,
-			name asc
-		limit %s, %s""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),
-			key=searchfield),
-			tuple(list(STANDARD_USERS) + [txt, txt, txt, txt, start, page_len]))
+	#print filters.get("location")
+	print frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
+		from `tabUser` usr,
+		`tabLocation` loc
+		where 
+			usr.name = loc.parent
+			and usr.name not in ("Guest", "Administrator")
+			and usr.user_type != 'Website User'
+			and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
+			and loc.location_id = '{location_id}' 
+		""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),location_id= filters.get("location"),
+			key=searchfield))
 
 
 def acm_query(doctype, txt, searchfield, start, page_len, filters):
@@ -221,9 +218,10 @@ def send_email(email, subject, template, args):
 			message=frappe.get_template(template).render(args))
 	
 @frappe.whitelist()
-def update_details(list=None,followup_type=None,followup_date=None):
-	properties = json.loads(list)
-	
+def update_details(prop_list=None,followup_type=None,followup_date=None):
+	properties = json.loads(prop_list)
+	print properties
+	print "in update Details"
 	for i in properties:
 		lead_property = frappe.get_doc("Lead Property Details", i.get('name'))
 		if followup_type=='Follow-Up For Share':
@@ -241,8 +239,9 @@ def update_details(list=None,followup_type=None,followup_date=None):
 	return True
 
 @frappe.whitelist()
-def update_followup_date(list=None,followup_type=None,followup_date=None):
-	properties = json.loads(list)
+def update_followup_date(prop_list=None,followup_type=None,followup_date=None):
+	properties = json.loads(prop_list)
+	print properties
 	if len(properties)>0:
 		for i in properties:
 			lead_property = frappe.get_doc("Lead Property Details", i)
@@ -254,4 +253,58 @@ def update_followup_date(list=None,followup_type=None,followup_date=None):
 				lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			lead_property.save(ignore_permissions=True)
 
-	
+
+
+def has_permission(doc, ptype, user):
+	print doc
+	print ptype
+	print user
+	# print get_permitted_and_not_permitted_links(doc.doctype)
+	links = get_permitted_and_not_permitted_links(doc.doctype)
+	if not links.get("not_permitted_links"):
+		# optimization: don't determine permissions based on link fields
+		return True
+
+	# True if any one is True or all are empty
+	names = []
+	for df in (links.get("permitted_links") + links.get("not_permitted_links")):
+		doctype = df.options
+		name = doc.get(df.fieldname)
+
+		names.append(name)
+
+		if name and frappe.has_permission(doctype, ptype, doc=name):
+			return True
+
+	if not any(names):
+		return True
+
+	else:
+		return False
+
+
+
+
+
+def get_permitted_and_not_permitted_links(doctype):
+	permitted_links = []
+	not_permitted_links = []
+
+	meta = frappe.get_meta(doctype)
+	# print meta
+	# print meta.get_link_fields()
+	for df in meta.get_link_fields():
+		print df.as_dict()
+		# if df.options not in ("Customer", "Supplier", "Sales Partner"):
+		# 	continue
+
+		print frappe.has_permission(df.options)
+		if frappe.has_permission(df.options):
+			permitted_links.append(df)
+		else:
+			not_permitted_links.append(df)
+
+	return {
+		"permitted_links": permitted_links,
+		"not_permitted_links": not_permitted_links
+	}	
