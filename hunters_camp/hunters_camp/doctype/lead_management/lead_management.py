@@ -148,8 +148,7 @@ def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date)
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 	txt = "%{}%".format(txt)
-	#print filters.get("location")
-	print frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
+	return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
 		from `tabUser` usr,
 		`tabLocation` loc
 		where 

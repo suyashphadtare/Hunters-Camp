@@ -224,23 +224,9 @@ Property = Class.extend({
 		d.show();
 		$(d.body).find("input[data-fieldname=possession]").datepicker({ dateFormat: 'mm-yy' });
 		me.init_for_property_type_change(d, fields)
-
-
-
-		
-
-    	
-
-		
+		$(d.body).find("input[data-fieldname=property_type]").trigger("change")
 		values = ['property_type','property_subtype','operation','transaction_type','age_of_property','listed_by']
 		final_result = []
-		$(d.body).find("input[data-fieldname=amenities]").change(function(){
-			$(d.body).find("#select_amenity").append("<div class='row'><div class='col-xs-6'>{0}</div>\
-				<div class='col-xs-6 my_amenity'><button type='button' class='btn btn-default btn-sm'><span class='glyphicon glyphicon-minus'></span></button></div></div>".replace("{0}",$(this).val()))
-		})
-
-		$(d.body).find("[data-fieldname=amenity_html]").append("<div id='select_amenity'></div>")
-
 		search_fields = ["property_type", "property_subtype", "operation", "property_subtype_option", "property_age",
 							"possession", "posting_date", "listed_by", "amenities", "transaction_type", "min_budget",
 							"max_budget", "min_area", "max_area"]
@@ -252,9 +238,9 @@ Property = Class.extend({
 					search_dict[field]= value
 				}
 			})
-			console.log(search_dict)
 			search_dict["user_id"] = frappe.get_cookie("hc_user_id")
 			search_dict["sid"] = frappe.get_cookie("sid")
+			search_dict["location"] = me.filters.location.$input.val()
 			frappe.call({
 				method:"hunters_camp.hunters_camp.page.property.property.search_property_with_advanced_criteria",
 				args:{"property_dict":search_dict},
@@ -481,12 +467,10 @@ Property = Class.extend({
 				callback:function(r){
 					console.log(r.message)
 					if (!amenity_obj && !subtype_obj){
-						console.log("in if")
 						amenity_obj = new Multiselect($(dialog.body).find("input[data-fieldname=amenities]"), r.message.amenities)		
 						subtype_obj = new Multiselect($(dialog.body).find("input[data-fieldname=property_subtype_option]"), r.message.subtype_options)
 					}
 					else{
-						console.log("in else")
 						amenity_obj.source = r.message.amenities
 						subtype_obj.source = r.message.subtype_options
 					}

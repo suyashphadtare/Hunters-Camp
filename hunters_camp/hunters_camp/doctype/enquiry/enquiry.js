@@ -61,7 +61,6 @@ cur_frm.cscript.lead = function(doc,cdt,cdn){
 	doc.address=""
 	doc.address_details=""
 	refresh_field(['address','address_details'])
-
 }
 
 
