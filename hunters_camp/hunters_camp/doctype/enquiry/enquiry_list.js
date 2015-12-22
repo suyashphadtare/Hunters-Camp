@@ -43,14 +43,13 @@ enquiry.Composer = Class.extend({
 				{fieldtype: "Section Break","name":"cc_sec"},
 
 				{label:__("Allocate Enquiry"), fieldtype:"Int", reqd: 1, fieldname:"allocate_enquiry_no"}
-				
 			],
 			primary_action_label: "Allocate",
 			primary_action: function() {
 				me.allocate_lead(count);
 			}
 		});
-		if(count>0){
+ 		if(count>0){
 			var count_wrapper = $(this.dialog.fields_dict.enquiry_count.wrapper).find("#count");
 			$('<b>Not Allowed Enquiry Count  :'+count+'</b>').appendTo(count_wrapper);
 			this.dialog.show();
