@@ -29,13 +29,18 @@ def get_result(filters):
 			response["data"] = [response.get("data")]
 		for prop in response.get("data"):
 			prop_id = prop.get("property_id")
+			prop_visit_count = get_property_visit_count(prop_id)
 			property_id = "<a onclick=get_on_click_trigger('{0}')>{0}</a>".format(prop_id)
 			res_list.append([ property_id , prop.get("property_title"), prop.get("property_type"),
 							prop.get("property_subtype"), prop.get("property_subtype_option"), prop.get("location"), 
-							prop.get("status")])
+							prop.get("status"),prop_count])
 			
 	return res_list
 
+def get_property_visit_count(property_id):
+	prop_count = frappe.db.sql("""select count(*) from 
+		`tabShow Contact Property` where property_id='{0}'""".format(property_id),as_list=1)[0][0]
+	return prop_count
 
 
 
@@ -56,6 +61,7 @@ def get_columns():
 			_("Property Subtype Option") + ":Data:180",
 			_("Location") + ":Data:100",
 			_("Status") + ":Data:100",
+			_("Visit Count") + ":Data:100",
 		   ]
 
 

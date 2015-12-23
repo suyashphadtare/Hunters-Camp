@@ -102,6 +102,12 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-filter"
 		});
+		me.clear_form = me.wrapper.page.add_field({
+						fieldname: "clear_form",
+						label: __("Clear Form"),
+						fieldtype: "Button",
+						icon: "icon-filter"
+		});
 
 		me.share = me.wrapper.page.add_field({
 						fieldname: "share",
@@ -346,6 +352,9 @@ Property = Class.extend({
 		else
 			msgprint("There is no any property is available to share.")
 
+	});
+	me.clear_form.$input.on("click", function() {
+		frappe.ui.toolbar.clear_cache()
 	});
 	
 	// TAG FEATURE...............................................................................
