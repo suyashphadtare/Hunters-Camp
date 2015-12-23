@@ -33,7 +33,7 @@ def get_result(filters):
 			property_id = "<a onclick=get_on_click_trigger('{0}')>{0}</a>".format(prop_id)
 			res_list.append([ property_id , prop.get("property_title"), prop.get("property_type"),
 							prop.get("property_subtype"), prop.get("property_subtype_option"), prop.get("location"), 
-							prop.get("status"),prop_count])
+							prop.get("status"),prop_visit_count])
 			
 	return res_list
 

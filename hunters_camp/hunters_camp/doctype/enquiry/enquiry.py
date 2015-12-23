@@ -182,6 +182,7 @@ def consultant_allocation(count,allocation_count):
 		for name in enquiry_form:
 			if name[0]:
 				enquiry_locations =  frappe.db.get_value('Enquiry', {'name':name[0]}, 'location_name')
+				
 
 				if enquiry_locations:
 					consultant= frappe.db.sql(""" select parent from `tabLocation` where location='%s'"""%enquiry_locations,as_list=1)

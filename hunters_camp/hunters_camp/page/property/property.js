@@ -128,10 +128,13 @@ Property = Class.extend({
 		$('[data-fieldname=lead_management]').css('display','none')
 		this.init_for_multiple_location()
 		// SEARCH CLICK
+		//var me = this;
 		me.search.$input.on("click", function() {
+			//var me = this;
+			console.log($(me.filters.location.$input).attr("data-field-city"))
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
-					method:'propshikari.versions.v1.search_property',
+					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
@@ -142,6 +145,7 @@ Property = Class.extend({
 						"budget_maximum": me.filters.budget_max.$input.val(),
 						"area_minimum": me.filters.area_min.$input.val(),
 						"area_maximum": me.filters.area_max.$input.val(),
+						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 10,
 						"page_number":1,
 						"request_source":'Hunterscamp',
@@ -460,7 +464,10 @@ Property = Class.extend({
 		frappe.call({
 			method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
 			callback:function(r){
+				me.location_list = r.message
 				new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
+				console.log($(me.wrapper).find("input[data-fieldname=city]").value)	
+
 			}
 		})	
 	},
@@ -1079,49 +1086,32 @@ Property = Class.extend({
 	//$( "#status change" ).click(function() {
 	$( "#select_status" ).change(function(){
 		var status
-		console.log("in selct status")
-		console.log(me.check_property_list)
-		console.log(me)
-		console.log(this)
-
 		result_set= []
-		if($("#select_status").val()=='Deactivate'){
-			console.log(me.check_property_list)
-			
-		}
-		else if($("#select_status").val()=='Sold'){
-			console.log(me.check_property_list)
-		}
-		status=status
+		status = status
 
 		$.each(me.check_property_list, function(i, j) {
-			console.log(j)
-			console.log($("#select_status").val())
-			 frappe.call({
-						method:'propshikari.versions.v1.update_property_status',
-						'async': false,
-						args :{
-							"data":{
-							"property_id": j,
-							"property_status":$("#select_status").val(),
-							"user_id": frappe.get_cookie('hc_user_id'),
-							"sid": frappe.get_cookie('sid')
-						  },
-						},
-						callback: function(r,rt) {
-							if(!r.exc) {
-								console.log(r.message)
-								if(i+1==me.check_property_list.length){
-									$('[data-fieldname=search]').trigger("click");	
-								}
-									
-							}
-						},
-				});	
+			frappe.call({
+				method:'propshikari.versions.v1.update_property_status',
+				'async': false,
+				args :{
+					"data":{
+					"property_id": j,
+					"property_status":$("#select_status").val(),
+					"user_id": frappe.get_cookie('hc_user_id'),
+					"sid": frappe.get_cookie('sid')
+				  },
+				},
+				callback: function(r,rt) {
+					if(!r.exc) {
+						console.log(r.message)
+						if(i+1==me.check_property_list.length){
+							$('[data-fieldname=search]').trigger("click");	
+						}
+							
+					}
+				},
+			});	
 		})
-		
-
-
 	});
 
 

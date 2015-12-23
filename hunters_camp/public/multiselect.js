@@ -57,11 +57,12 @@ Multiselect.prototype = {
 
 
 
-var LocationMultiSelect = function(autocomplete_field, source){
+var LocationMultiSelect = function(autocomplete_field, source,city){
 	var me = this
 	this.source = source
 	this.global_source = source
 	this.$autocomplete_field = autocomplete_field
+	this.$city_field = city
 	this.city_flag = true
 	this.$autocomplete_field.autocomplete({
         minLength: 0,
@@ -106,20 +107,26 @@ LocationMultiSelect.prototype = {
 	        .on('autocompletefocus', $.proxy(this.focus, this))
 	        .on('autocompleteselect', $.proxy(this.select, this))
 	        .on('keyup', $.proxy(this.keypress, this))
-				    
+
 	},
    	
    	focus: function() {
 		// prevent value inserted on focus
 		return false;
     },
-    
+    keydown:function(event){
+	   	console.log(event)
+    },
     select: function( event, ui ) {
-		var terms = this.split(event.target.value);
-		// remove the current input
+    	var terms = this.split(event.target.value);
+		var city = $(event.target).attr("data-field-city")
+		if ((!city) || (city && (ui.item.city_name != city))) {
+			$(event.target).attr("data-field-city",ui.item.city_name)
+		}
+    	// remove the current input
 		terms.pop();
 		// add the selected item
-		terms.push( ui.item.location_id );
+		terms.push( ui.item.location_name );
 		// add placeholder to get the comma-and-space at the end
 		terms.push( "" );
 		event.target.value = terms.join( "," );
@@ -141,7 +148,6 @@ LocationMultiSelect.prototype = {
     change:function(event){
     	// console.log(event)
     	// console.log("in change")
-    	
     },
     reassign_source:function(location_value){
     	var new_source = $.grep(this.source,function(loc, index){

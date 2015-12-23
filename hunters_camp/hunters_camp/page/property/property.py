@@ -142,3 +142,17 @@ def get_location_subtype_options(property_dict):
   property_dict["location"] = ','.join([loc for loc in property_dict.get("location","").split(',') if loc])
   property_dict["property_subtype_option"] = ','.join([option for option in property_dict.get("property_subtype_option","").split(',') if option])  
 
+
+@frappe.whitelist()
+def build_data_to_search_with_location_names(data):
+  property_data = json.loads(data)
+  if property_data.get("location"):
+    location_names = property_data.get("location").split(',')
+    condition = ",".join('"{0}"'.format(loc) for loc in location_names)
+    area_list = frappe.db.sql(""" select * from 
+      `tabArea` where area in ({0}) and city_name='{1}'""".format(condition,property_data.get("city")), as_dict=True)
+    if area_list:
+      property_data["location"] = ",".join([ area.get("name") for area in area_list ])
+    from propshikari.versions.v1 import search_property   
+    return search_property(data=json.dumps(property_data))
+    

@@ -329,7 +329,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					if(acm_list.length>0){
 						me.append_acm_popup_fields(me.pop_up,cur_frm.doc);
 						$(me.pop_up_body.find('.select')).css('display','none')
-						me.append_acm_property_details(cur_frm.doc);
+						me.append_acm_property_details(cur_frm.doc,me.pop_up);
 					}
 
 					else{
@@ -438,7 +438,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				primary_action_label: "Done",
 				primary_action: function(doc) {
 					// _me = this;
-					console.log("in primary_action")
 					doc=cur_frm.doc
 					var pd = doc.property_details;
 					if(me.pop_up.fields_dict.type_followup.input.value && me.pop_up.fields_dict.followup_date.input.value){
@@ -452,7 +451,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 								args: {
 									"prop_list":property_details_list,
 									"followup_type":me.pop_up.fields_dict.type_followup.input.value,
-									"followup_date":me.pop_up.fields_dict.followup_date.input.value
+									"followup_date":me.pop_up.fields_dict.followup_date.input.value,
+									"doc_name":doc.name
 								},
 								callback: function(r) {
 									me.pop_up.hide();
@@ -597,14 +597,13 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							console.log("in if")
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
 						}
-						console.log("ajdskljla")
 					}
 				}
 			};
 
 		},
 
-		append_acm_property_details: function(doc){
+		append_acm_property_details: function(doc,pop_up){
 			
 			var pd = doc.property_details;
 
@@ -626,6 +625,9 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 								<option value='Cancelled By ACM'>Cancelled By ACM</option>\
 								</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
+						if(pd[i].acm_status == 'Close'){
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Close'>Close</option>")
+						}
 					}
 				}
 			};

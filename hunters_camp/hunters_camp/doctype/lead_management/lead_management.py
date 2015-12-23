@@ -219,8 +219,6 @@ def send_email(email, subject, template, args):
 @frappe.whitelist()
 def update_details(prop_list=None,followup_type=None,followup_date=None):
 	properties = json.loads(prop_list)
-	print properties
-	print "in update Details"
 	for i in properties:
 		lead_property = frappe.get_doc("Lead Property Details", i.get('name'))
 		if followup_type=='Follow-Up For Share':
@@ -238,9 +236,8 @@ def update_details(prop_list=None,followup_type=None,followup_date=None):
 	return True
 
 @frappe.whitelist()
-def update_followup_date(prop_list=None,followup_type=None,followup_date=None):
+def update_followup_date(prop_list=None,followup_type=None,followup_date=None,doc_name=None):
 	properties = json.loads(prop_list)
-	print properties
 	if len(properties)>0:
 		for i in properties:
 			lead_property = frappe.get_doc("Lead Property Details", i)
@@ -251,13 +248,12 @@ def update_followup_date(prop_list=None,followup_type=None,followup_date=None):
 			else:
 				lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			lead_property.save(ignore_permissions=True)
-
-
+	lmdoc = frappe.get_doc("Lead Management",doc_name)
+	lmdoc.lead_status = 'Processed'
+	lmdoc.save(ignore_permissions=True)
+			
 
 def has_permission(doc, ptype, user):
-	print doc
-	print ptype
-	print user
 	# print get_permitted_and_not_permitted_links(doc.doctype)
 	links = get_permitted_and_not_permitted_links(doc.doctype)
 	if not links.get("not_permitted_links"):
