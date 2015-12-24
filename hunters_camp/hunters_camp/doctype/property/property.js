@@ -141,7 +141,6 @@ prop_operations = {
 		frm.page.clear_menu();
 	},
 	check_mandatory :function(frm) {
-		console.log("check_mandatory")
 		var me = this;
 		var has_errors = false;
 		frm.scroll_set = false;
@@ -191,7 +190,18 @@ prop_operations = {
 		me.manage_primary_operations_for_update(frm)
 		me.add_status_and_tag_to_menu(frm)
 		me.add_possession_status(frm, doc)
+		me.make_fields_read_only_according_to_roles(frm)
 
+	},
+	make_fields_read_only_according_to_roles:function(frm){
+		prop_fields = ["listed_by", "operation", "property_type", "property_subtype", "property_subtype_option", 
+						"no_of_bathroom", "state", "city", "location_link", "city_link", "possession", "transaction_type" ,"property_age",
+						"month", "year"]
+
+		if (!(frappe.get_cookie("user_id") == "Administrator" || inList(user_roles, "Propshikari Project Manager"))){
+			frm.toggle_enable(prop_fields, false)
+		}
+			
 	},
 	add_possession_status : function(frm, doc){
 		if (cur_frm.doc.possession == 1){
@@ -508,10 +518,14 @@ check_file_exists = function(frm,file_data){
 }
 
 cur_frm.fields_dict.property_subtype.get_query = function(doc) {
+	var operation = {}
+	if (doc.operation == "Buy"){
+		operation["buy"] = 1
+	}else if(doc.operation == "Rent"){
+		operation["rent"] = 1
+	}
 	return{
-		filters:{
-			'property_type': doc.property_type
-		}
+		filters:$.extend({"property_type":doc.property_type}, operation)
 	}
 }
 
@@ -526,6 +540,8 @@ SearchProperty = Class.extend({
 		var me = this
 		cur_frm.add_custom_button(__('Search Property'),function() {
 				me.render_dialog_for_property_search() },"btn-primary");
+		cur_frm.add_custom_button(__('Clear form'),function() {
+				me.clear_form() },"btn-primary");
 	},
 	render_dialog_for_property_search: function(){
 		this.dialog = new frappe.ui.Dialog({
@@ -618,6 +634,17 @@ SearchProperty = Class.extend({
 					msgprint("Please Select Property Id First")	
 				}
     	})
-    }
+    },
+    clear_form: function(){
+		frappe.ui.toolbar.clear_cache()
+	}
 
 })
+
+
+cur_frm.fields_dict.property_subtype_option.get_query = function(doc) {
+	return {
+			filters:{"property_type":doc.property_type},
+		}
+}
+

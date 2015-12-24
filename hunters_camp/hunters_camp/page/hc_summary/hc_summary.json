@@ -1,24 +1,22 @@
 {
  "content": null, 
- "creation": "2015-10-23 11:32:59.061072", 
+ "creation": "2015-12-24 11:34:38.793770", 
  "docstatus": 0, 
  "doctype": "Page", 
- "modified": "2015-12-21 15:34:43.878537", 
+ "idx": 0, 
+ "modified": "2015-12-24 11:34:38.793770", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
- "name": "project", 
+ "name": "hc_summary", 
  "owner": "Administrator", 
- "page_name": "project", 
+ "page_name": "hc_summary", 
  "roles": [
   {
    "role": "Administrator"
-  }, 
-  {
-   "role": "Projects Manager"
   }
  ], 
  "script": null, 
  "standard": "Yes", 
  "style": null, 
- "title": "Project"
+ "title": "Hunters Camp Summary"
 }

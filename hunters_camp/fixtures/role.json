@@ -2,6 +2,13 @@
  {
   "docstatus": 0, 
   "doctype": "Role", 
+  "modified": "2015-12-22 19:47:50.636211", 
+  "name": "Propshikari Project Manager", 
+  "role_name": "Propshikari Project Manager"
+ }, 
+ {
+  "docstatus": 0, 
+  "doctype": "Role", 
   "modified": "2015-11-24 21:59:14.765448", 
   "name": "System Manager", 
   "role_name": "System Manager"

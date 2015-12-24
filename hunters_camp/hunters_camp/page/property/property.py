@@ -113,8 +113,14 @@ def get_amenities(property_type):
 
 
 @frappe.whitelist()
-def get_location_list():
-  location = frappe.db.sql(" select name as location_id,area as location_name, city_name from `tabArea`",as_dict=1)
+def get_location_list(city=None):
+  if city:
+    location = frappe.db.sql("""select name as location_id,area as location_name, city_name from 
+      `tabArea` where city_name='{0}'""".format(city),as_dict=1)
+  else:
+    location = frappe.db.sql("""select name as location_id,area as location_name, city_name from 
+      `tabArea`""".format(city),as_dict=1)
+  
   return location
 
 @frappe.whitelist()
@@ -131,8 +137,28 @@ def search_property_with_advanced_criteria(property_dict):
   property_dict["request_source"] = "Hunterscamp"
   property_dict["min_area"] = int(property_dict.get("min_area",0))
   property_dict["max_area"] = int(property_dict.get("max_area",0))
-  print property_dict
+  get_location_subtype_options(property_dict)
   try:
     return api.search_property(json.dumps(property_dict))
   except Exception,e:
-    frappe.throw(e)  
+    frappe.throw(e)
+
+
+def get_location_subtype_options(property_dict):
+  property_dict["location"] = ','.join([loc for loc in property_dict.get("location","").split(',') if loc])
+  property_dict["property_subtype_option"] = ','.join([option for option in property_dict.get("property_subtype_option","").split(',') if option])  
+
+
+@frappe.whitelist()
+def build_data_to_search_with_location_names(data):
+  property_data = json.loads(data)
+  if property_data.get("location"):
+    location_names = property_data.get("location").split(',')
+    condition = ",".join('"{0}"'.format(loc) for loc in location_names)
+    area_list = frappe.db.sql(""" select * from 
+      `tabArea` where area in ({0}) and city_name='{1}'""".format(condition,property_data.get("city")), as_dict=True)
+    if area_list:
+      property_data["location"] = ",".join([ area.get("name") for area in area_list ])
+  from propshikari.versions.v1 import search_property
+  return search_property(data=json.dumps(property_data))
+    

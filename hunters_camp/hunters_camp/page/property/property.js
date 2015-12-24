@@ -102,6 +102,12 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-filter"
 		});
+		me.clear_form = me.wrapper.page.add_field({
+						fieldname: "clear_form",
+						label: __("Clear Form"),
+						fieldtype: "Button",
+						icon: "icon-filter"
+		});
 
 		me.share = me.wrapper.page.add_field({
 						fieldname: "share",
@@ -122,10 +128,15 @@ Property = Class.extend({
 		$('[data-fieldname=lead_management]').css('display','none')
 		this.init_for_multiple_location()
 		// SEARCH CLICK
+		//var me = this;
 		me.search.$input.on("click", function() {
+			//var me = this;
+			console.log($(me.filters.location.$input).attr("data-field-city"))
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
-					method:'propshikari.versions.v1.search_property',
+					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
+					freeze: true,
+					freeze_message:"Building Search.....This Might Take Some Time",
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
@@ -136,6 +147,7 @@ Property = Class.extend({
 						"budget_maximum": me.filters.budget_max.$input.val(),
 						"area_minimum": me.filters.area_min.$input.val(),
 						"area_maximum": me.filters.area_max.$input.val(),
+						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 10,
 						"page_number":1,
 						"request_source":'Hunterscamp',
@@ -144,7 +156,6 @@ Property = Class.extend({
 					  },
 					},
 					callback: function(r,rt) {
-						console.log(r.message)
 						if(!r.exc) {
 							if(r.message['total_records']>0){
 								me.render(r.message['data'],r.message['total_records'])
@@ -224,23 +235,9 @@ Property = Class.extend({
 		d.show();
 		$(d.body).find("input[data-fieldname=possession]").datepicker({ dateFormat: 'mm-yy' });
 		me.init_for_property_type_change(d, fields)
-
-
-
-		
-
-    	
-
-		
+		$(d.body).find("input[data-fieldname=property_type]").trigger("change")
 		values = ['property_type','property_subtype','operation','transaction_type','age_of_property','listed_by']
 		final_result = []
-		$(d.body).find("input[data-fieldname=amenities]").change(function(){
-			$(d.body).find("#select_amenity").append("<div class='row'><div class='col-xs-6'>{0}</div>\
-				<div class='col-xs-6 my_amenity'><button type='button' class='btn btn-default btn-sm'><span class='glyphicon glyphicon-minus'></span></button></div></div>".replace("{0}",$(this).val()))
-		})
-
-		$(d.body).find("[data-fieldname=amenity_html]").append("<div id='select_amenity'></div>")
-
 		search_fields = ["property_type", "property_subtype", "operation", "property_subtype_option", "property_age",
 							"possession", "posting_date", "listed_by", "amenities", "transaction_type", "min_budget",
 							"max_budget", "min_area", "max_area"]
@@ -252,11 +249,13 @@ Property = Class.extend({
 					search_dict[field]= value
 				}
 			})
-			console.log(search_dict)
 			search_dict["user_id"] = frappe.get_cookie("hc_user_id")
 			search_dict["sid"] = frappe.get_cookie("sid")
+			search_dict["location"] = me.filters.location.$input.val()
 			frappe.call({
 				method:"hunters_camp.hunters_camp.page.property.property.search_property_with_advanced_criteria",
+				freeze: true,
+				freeze_message:"Building Search.....This Might Take Some Time",
 				args:{"property_dict":search_dict},
 				callback:function(r){
 					if(r.message['total_records']>0){
@@ -360,6 +359,9 @@ Property = Class.extend({
 		else
 			msgprint("There is no any property is available to share.")
 
+	});
+	me.clear_form.$input.on("click", function() {
+		frappe.ui.toolbar.clear_cache()
 	});
 	
 	// TAG FEATURE...............................................................................
@@ -465,6 +467,7 @@ Property = Class.extend({
 		frappe.call({
 			method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
 			callback:function(r){
+				me.location_list = r.message
 				new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
 			}
 		})	
@@ -481,12 +484,10 @@ Property = Class.extend({
 				callback:function(r){
 					console.log(r.message)
 					if (!amenity_obj && !subtype_obj){
-						console.log("in if")
 						amenity_obj = new Multiselect($(dialog.body).find("input[data-fieldname=amenities]"), r.message.amenities)		
 						subtype_obj = new Multiselect($(dialog.body).find("input[data-fieldname=property_subtype_option]"), r.message.subtype_options)
 					}
 					else{
-						console.log("in else")
 						amenity_obj.source = r.message.amenities
 						subtype_obj.source = r.message.subtype_options
 					}
@@ -538,11 +539,11 @@ Property = Class.extend({
 			this.body.html("<p class='text-muted'>"+__("Specify filters to serach property.")+"</p>");
 			return;
 		}
-
 		me.filters.property_type.input.value= frappe.route_options['property_type']
 		me.filters.property_subtype.input.value=frappe.route_options['property_subtype']
 		me.filters.operation.input.value= frappe.route_options['operation'] ? frappe.route_options['operation'] : null
 		me.filters.location.input.value= frappe.route_options['location'] ? frappe.route_options['location'] : null
+		$(me.filters.location.input).attr("data-field-city",frappe.route_options['city'])
 		me.filters.budget_min.input.value=frappe.route_options['budget_minimum'] ? frappe.route_options['budget_minimum'] : null
 		me.filters.budget_max.input.value=frappe.route_options['budget_maximum'] ? frappe.route_options['budget_maximum'] : null
 		me.filters.area_max.input.value=frappe.route_options['area_maximum'] ? frappe.route_options['area_maximum'] : null
@@ -661,8 +662,8 @@ Property = Class.extend({
 
 			if(d['property_photo'])
 				$("<a class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
-			// else
-			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
+			else
+				$("<img id='theImg' src='/assets/hunters_camp/No_image_available.jpg'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist' >\
@@ -1086,49 +1087,32 @@ Property = Class.extend({
 	//$( "#status change" ).click(function() {
 	$( "#select_status" ).change(function(){
 		var status
-		console.log("in selct status")
-		console.log(me.check_property_list)
-		console.log(me)
-		console.log(this)
-
 		result_set= []
-		if($("#select_status").val()=='Deactivate'){
-			console.log(me.check_property_list)
-			
-		}
-		else if($("#select_status").val()=='Sold'){
-			console.log(me.check_property_list)
-		}
-		status=status
+		status = status
 
 		$.each(me.check_property_list, function(i, j) {
-			console.log(j)
-			console.log($("#select_status").val())
-			 frappe.call({
-						method:'propshikari.versions.v1.update_property_status',
-						'async': false,
-						args :{
-							"data":{
-							"property_id": j,
-							"property_status":$("#select_status").val(),
-							"user_id": frappe.get_cookie('hc_user_id'),
-							"sid": frappe.get_cookie('sid')
-						  },
-						},
-						callback: function(r,rt) {
-							if(!r.exc) {
-								console.log(r.message)
-								if(i+1==me.check_property_list.length){
-									$('[data-fieldname=search]').trigger("click");	
-								}
-									
-							}
-						},
-				});	
+			frappe.call({
+				method:'propshikari.versions.v1.update_property_status',
+				'async': false,
+				args :{
+					"data":{
+					"property_id": j,
+					"property_status":$("#select_status").val(),
+					"user_id": frappe.get_cookie('hc_user_id'),
+					"sid": frappe.get_cookie('sid')
+				  },
+				},
+				callback: function(r,rt) {
+					if(!r.exc) {
+						console.log(r.message)
+						if(i+1==me.check_property_list.length){
+							$('[data-fieldname=search]').trigger("click");	
+						}
+							
+					}
+				},
+			});	
 		})
-		
-
-
 	});
 
 

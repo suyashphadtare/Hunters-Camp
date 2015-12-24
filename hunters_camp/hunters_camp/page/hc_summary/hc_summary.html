@@ -1,0 +1,46 @@
+<div style="padding:20px">
+<h3>Overview</h3> 
+<p>Overview of Users and Properties</p> 
+<table class="table table-bordered"> 
+    <thead> 
+        <tr class="info"> 
+          <th style="width: 25%">Leads</th> 
+          <th style="width: 25%">Properties</th> 
+          <th style="width: 25%">Brokers</th>
+          <th style="width: 25%">Builders</th> 
+        </tr> 
+    </thead> 
+    <tbody>
+        <tr> 
+          <td>{{ data.leads }}</td> 
+          <td>{{ data.properties }}</td> 
+          <td>{{ data.brokers }}</td>
+          <td>{{ data.builders }}</td>  
+        </tr> 
+    </tbody> 
+</table> 
+<br> 
+<h3>Overview of Properties</h3>
+<p>Overview of Properties Posted in Across various categories</p>     
+<table class="table table-bordered"> 
+   <thead> 
+      <tr class="info"> 
+        <th style="width: 20%">Rented</th> 
+        <th style="width: 20%">Residential</th>
+        <th style="width: 20%">Contacted</th>
+        <th style="width: 20%">Commercial</th>
+        <th style="width: 20%">Land</th> 
+     </tr> 
+   </thead> 
+   <tbody> 
+      <tr>
+        <td>{{ data.rented }}</td> 
+        <td>{{ data.residential }}</td> 
+        <td>{{ data.contacted }}</td>
+        <td>{{ data.commercial }}</td>
+        <td>{{ data.land }}</td> 
+      </tr> 
+   </tbody> 
+</table> 
+</div>
+ 

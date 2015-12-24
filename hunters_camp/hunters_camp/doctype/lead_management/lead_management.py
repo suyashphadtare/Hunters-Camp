@@ -10,6 +10,8 @@ from frappe.model.mapper import get_mapped_doc
 from frappe.utils import validate_email_add
 import datetime
 import json
+from hunters_camp.hunters_camp.utils import get_sms_template
+from erpnext.setup.doctype.sms_settings.sms_settings import send_sms
 
 STANDARD_USERS = ("Guest", "Administrator")
 
@@ -57,8 +59,13 @@ def make_se_visit(property_list=None,assign_to=None,parent=None,schedule_date=No
 			doctype ='Site Visit'
 			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
 			update_se_status_in_leadform(i,name,assign_to,schedule_date)
-			if name:
-				create_to_do(assign_to,name,doctype)
+			lead_record = frappe.get_doc("Lead Management", parent)
+			child_id = frappe.get_doc("Lead Property Details",i)
+			se_visit = frappe.get_doc("Site Visit",name)
+			notify_lead_about_sv(lead_record,se_visit,child_id,assign_to)
+			notify_se_about_sv(lead_record,se_visit,child_id,assign_to)
+			# if name:
+			# 	create_to_do(assign_to,name,doctype)
 		return {"Status":'Available'}
 
 
@@ -101,8 +108,27 @@ def schedule_se_visit(child_property,assign_to,parent,doctype,schedule_date):
 
 	se_visit.insert(ignore_permissions=True)
 	se_visit.save()
+
 	return se_visit.name
-	
+
+def notify_lead_about_sv(lead_record,se_visit,child_id,assign_to):
+	user = frappe.get_doc("User",assign_to)
+	se_name = ' '.join([user.first_name,userlast_name]) if user.first_name and user.last_name else user.first_name	
+	msg = get_sms_template("Lead Site Visit",{"site_visit":se_visit.schedule_date,"se_name":se_name,"se_mobile":user.mobile_no})
+	if lead_record.mobile_no:
+		rec_list = []
+		rec_list.append(lead_record.mobile_no)
+		send_sms(rec_list,msg=msg)	
+
+def notify_se_about_sv(lead_record,se_visit,child_id,assign_to):
+	user = frappe.get_doc("User",assign_to)
+	msg = get_sms_template("SE",{"lead_name":lead_record.lead_name,"lead_mobile":lead_record.mobile_no,
+		"property_title":child_id.property_name,"prop_address":child_id.address,"se_datetime":se_visit.schedule_date})
+	if user.mobile_no:
+		rec_list = []
+		rec_list.append(lead_record.mobile_no)
+		send_sms(rec_list,msg=msg)		
+
 
 def update_se_status_in_leadform(source_name,se_visit,assign_to,schedule_date):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
@@ -133,9 +159,33 @@ def make_acm_visit(property_list=None,assign_to=None,parent=None,schedule_date=N
 			doctype ='ACM Visit'
 			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
 			update_acm_status_in_leadform(i,name,assign_to,schedule_date)
+			lead_record = frappe.get_doc("Lead Management", parent)
+			child_id = frappe.get_doc("Lead Property Details",i)
+			se_visit = frappe.get_doc("ACM Visit",name)
+			notify_lead_about_acm(lead_record,se_visit,child_id,assign_to)
+			notify_acm_about_acm(lead_record,se_visit,child_id,assign_to)
 			if name:
 				create_to_do(assign_to,name,doctype)
 		return {"Status":'Available'}
+
+def notify_lead_about_acm(lead_record,se_visit,child_id,assign_to):
+	user = frappe.get_doc("User",assign_to)
+	acm_name = ' '.join([user.first_name,userlast_name]) if user.first_name and user.last_name else user.first_name
+	msg = get_sms_template("Lead ACM",{"meeting_time":se_visit.schedule_date,
+		"acm_name":acm_name,"acm_no":user.mobile_no})
+	if lead_record.mobile_no:
+		rec_list = []
+		rec_list.append(lead_record.mobile_no)
+		send_sms(rec_list,msg=msg)	
+
+def notify_acm_about_acm(lead_record,se_visit,child_id,assign_to):
+	user = frappe.get_doc("User",assign_to)
+	msg = get_sms_template("ACM",{"lead_name":lead_record.lead_name,"lead_mobile":lead_record.mobile_no,
+		"property_title":child_id.property_name,"prop_address":child_id.address,"se_datetime":se_visit.schedule_date})
+	if user.mobile_no:
+		rec_list = []
+		rec_list.append(lead_record.mobile_no)
+		send_sms(rec_list,msg=msg)
 
 def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
@@ -148,6 +198,8 @@ def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date)
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 	txt = "%{}%".format(txt)
+	location_names = filters.get("location").split(',')
+	condition = ",".join('"{0}"'.format(loc) for loc in location_names)
 	return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
 		from `tabUser` usr,
 		`tabLocation` loc
@@ -156,8 +208,8 @@ def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 			and usr.name not in ("Guest", "Administrator")
 			and usr.user_type != 'Website User'
 			and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
-			and loc.location_id = '{location_id}' 
-		""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),location_id= filters.get("location"),
+			and loc.location in ({condition}) 
+		""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),condition= condition,
 			key=searchfield))
 
 
@@ -203,6 +255,16 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 		for user_id in users:
 			create_email(user_id[0],property_type,property_subtype,location,operation,
 						area_minimum,area_maximum,budget_minimum,budget_maximum)
+			pc = frappe.new_doc("Property Confirmation")
+			pc.property_type = property_type
+			pc.property_subtype = property_subtype
+			pc.operation = operation
+			pc.location = location
+			pc.area_minimum = area_minimum
+			pc.area_maximum = area_maximum
+			pc.budget_minimum = budget_minimum
+			pc.budget_maximum = budget_maximum
+			pc.insert(ignore_permissions=True)
 
 def create_email(user_id,property_type=None,property_subtype=None,location=None,operation=None,
 						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None):
@@ -219,8 +281,6 @@ def send_email(email, subject, template, args):
 @frappe.whitelist()
 def update_details(prop_list=None,followup_type=None,followup_date=None):
 	properties = json.loads(prop_list)
-	print properties
-	print "in update Details"
 	for i in properties:
 		lead_property = frappe.get_doc("Lead Property Details", i.get('name'))
 		if followup_type=='Follow-Up For Share':
@@ -238,9 +298,8 @@ def update_details(prop_list=None,followup_type=None,followup_date=None):
 	return True
 
 @frappe.whitelist()
-def update_followup_date(prop_list=None,followup_type=None,followup_date=None):
+def update_followup_date(prop_list=None,followup_type=None,followup_date=None,doc_name=None):
 	properties = json.loads(prop_list)
-	print properties
 	if len(properties)>0:
 		for i in properties:
 			lead_property = frappe.get_doc("Lead Property Details", i)
@@ -251,13 +310,12 @@ def update_followup_date(prop_list=None,followup_type=None,followup_date=None):
 			else:
 				lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			lead_property.save(ignore_permissions=True)
-
-
+	lmdoc = frappe.get_doc("Lead Management",doc_name)
+	lmdoc.lead_status = 'Processed'
+	lmdoc.save(ignore_permissions=True)
+			
 
 def has_permission(doc, ptype, user):
-	print doc
-	print ptype
-	print user
 	# print get_permitted_and_not_permitted_links(doc.doctype)
 	links = get_permitted_and_not_permitted_links(doc.doctype)
 	if not links.get("not_permitted_links"):

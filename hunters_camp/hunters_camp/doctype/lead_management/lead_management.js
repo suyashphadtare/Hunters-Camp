@@ -1,7 +1,7 @@
 // Copyright (c) 2015, Frappe Technologies Pvt. Ltd. and Contributors
 // License: GNU General Public License v3. See license.txt
+frappe.require("assets/hunters_camp/multiselect.js");
 
-cur_frm.add_fetch('location', 'area', 'location_name');
 cur_frm.add_fetch('lead', 'lead_name', 'lead_name');
 cur_frm.add_fetch('lead', 'middle_name', 'middle_name');
 cur_frm.add_fetch('lead', 'last_name', 'last_name');
@@ -13,41 +13,45 @@ cur_frm.add_fetch('lead', 'mobile_no', 'mobile_no');
 
 
 frappe.ui.form.on("Lead Management", "refresh", function(frm) {
-	if (!frm.doc.__islocal)// && !frm.doc.lead_status=='Closed')
-	{
+	if (!frm.doc.__islocal){
 		property_details = frm.doc.property_details || [];
 		frm.add_custom_button(__("Search & Share Property"), function() { 
 			make_dashboard(frm.doc)
 		})	
 		if(property_details.length>0){
 			frm.add_custom_button(__("Set Follow Ups"), function() { 
-			pop_up = new frappe.SetFollowUps();
-		})	
+				pop_up = new frappe.SetFollowUps();
+			})	
 
-		frm.add_custom_button(__("schedule SE"), function() { 
-			pop_up = new frappe.SEFollowUps();
-		})	
-		frm.add_custom_button(__("schedule ACM"), function() { 
-			pop_up = new frappe.ACMFollowUps();
-		})	
-
+			frm.add_custom_button(__("schedule SE"), function() { 
+				pop_up = new frappe.SEFollowUps();
+			})	
+			frm.add_custom_button(__("schedule ACM"), function() { 
+				pop_up = new frappe.ACMFollowUps();
+			})	
 		}
 	}
+	if (frm.doc.city){
+		var me = this;
+		me.init_multiple_location(frm)
+	}
+
 	// cur_frm.set_df_property("property_details", "read_only", true)
 	make_dashboard =  function(doc){
-		if(doc.property_type && doc.property_subtype && doc.operation && doc.location){
+		if(doc.property_type && doc.property_subtype && doc.operation && doc.location_name){
 			return frappe.call({
-					method:'propshikari.versions.v1.search_property',
+					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
 					args :{
 						"data":{
 						"operation": doc.operation,
 						"property_type": doc.property_type,
 						"property_subtype": doc.property_subtype,
-						"location": doc.location,
+						"location": doc.location_name,
 						"budget_minimum": doc.budget_minimum,
 						"budget_maximum": doc.budget_maximum,
 						"area_minimum": doc.area_minimum,
 						"area_maximum": doc.area_maximum,
+						"city":doc.city,
 						"records_per_page": 10,
 						"page_number":1,
 						"request_source":'Hunterscamp',
@@ -86,14 +90,15 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
-													"location": doc.location,
+													"location": doc.location_name,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
 													"area_minimum": doc.area_minimum,
 													"area_maximum": doc.area_maximum,
 													"total_records":total_records,
-													"data": final_result
+													"data": final_result,
+													"city":doc.city
 												};
 												frappe.set_route("property", "Hunters Camp");
 												}
@@ -106,11 +111,12 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 																"property_type": doc.property_type,
 																"property_subtype": doc.property_subtype,
 																"operation":doc.operation,
-																"location": doc.location,
+																"location": doc.location_name,
 																"budget_minimum": doc.budget_minimum,
 																"budget_maximum": doc.budget_maximum,
 																"area_minimum": doc.area_minimum,
 																"area_maximum": doc.area_maximum,
+																"city":doc.city		
 															},
 															callback: function(r,rt) {
 																doc.email_sent = 'Yes'
@@ -134,14 +140,15 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
-													"location": doc.location,
+													"location": doc.location_name,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
 													"area_minimum": doc.area_minimum,
 													"area_maximum": doc.area_maximum,
 													"total_records": total_records,
-													"data": r.message['data']
+													"data": r.message['data'],
+													"city":doc.city
 												};
 												frappe.set_route("property", "Hunters Camp");
 							}
@@ -153,11 +160,12 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"property_type": doc.property_type,
 										"property_subtype": doc.property_subtype,
 										"operation":doc.operation,
-										"location": doc.location,
+										"location": doc.location_name,
 										"budget_minimum": doc.budget_minimum,
 										"budget_maximum": doc.budget_maximum,
 										"area_minimum": doc.area_minimum,
 										"area_maximum": doc.area_maximum,
+										"city":doc.city
 									},
 									callback: function(r,rt) {
 										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
@@ -329,7 +337,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					if(acm_list.length>0){
 						me.append_acm_popup_fields(me.pop_up,cur_frm.doc);
 						$(me.pop_up_body.find('.select')).css('display','none')
-						me.append_acm_property_details(cur_frm.doc);
+						me.append_acm_property_details(cur_frm.doc,me.pop_up);
 					}
 
 					else{
@@ -438,7 +446,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				primary_action_label: "Done",
 				primary_action: function(doc) {
 					// _me = this;
-					console.log("in primary_action")
 					doc=cur_frm.doc
 					var pd = doc.property_details;
 					if(me.pop_up.fields_dict.type_followup.input.value && me.pop_up.fields_dict.followup_date.input.value){
@@ -452,7 +459,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 								args: {
 									"prop_list":property_details_list,
 									"followup_type":me.pop_up.fields_dict.type_followup.input.value,
-									"followup_date":me.pop_up.fields_dict.followup_date.input.value
+									"followup_date":me.pop_up.fields_dict.followup_date.input.value,
+									"doc_name":doc.name
 								},
 								callback: function(r) {
 									me.pop_up.hide();
@@ -597,14 +605,13 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							console.log("in if")
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
 						}
-						console.log("ajdskljla")
 					}
 				}
 			};
 
 		},
 
-		append_acm_property_details: function(doc){
+		append_acm_property_details: function(doc,pop_up){
 			
 			var pd = doc.property_details;
 
@@ -626,6 +633,9 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 								<option value='Cancelled By ACM'>Cancelled By ACM</option>\
 								</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
+						if(pd[i].acm_status == 'Close'){
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Close'>Close</option>")
+						}
 					}
 				}
 			};
@@ -701,7 +711,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						me.pop_up.fields_dict.assign_to.get_query = function(){
 							return {
 									"query":"hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query",	
-									"filters":{"location":cur_frm.doc.location}
+									"filters":{"location":cur_frm.doc.location_name}
 								}	
 							} 
 					}
@@ -1214,4 +1224,20 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc,cdt,cdn) {
 			'property_type': doc.property_type,
 		}
 	}
+}
+
+frappe.ui.form.on("Lead Management", "city", function(frm) {
+	var me = this;
+	me.init_multiple_location(frm)
+})
+
+init_multiple_location =  function(frm){
+	frappe.call({
+		method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
+		args:{"city":frm.doc.city},
+		callback:function(r){
+			me.location_list = r.message
+			new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
+		}
+	})	
 }
