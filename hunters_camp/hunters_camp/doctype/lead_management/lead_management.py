@@ -198,19 +198,20 @@ def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date)
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 	txt = "%{}%".format(txt)
-	location_names = filters.get("location").split(',')
-	condition = ",".join('"{0}"'.format(loc) for loc in location_names)
-	return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
-		from `tabUser` usr,
-		`tabLocation` loc
-		where 
-			usr.name = loc.parent
-			and usr.name not in ("Guest", "Administrator")
-			and usr.user_type != 'Website User'
-			and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
-			and loc.location in ({condition}) 
-		""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),condition= condition,
-			key=searchfield))
+	if filters.get("location"):
+		location_names = filters.get("location").split(',')
+		condition = ",".join('"{0}"'.format(loc) for loc in location_names)
+		return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
+			from `tabUser` usr,
+			`tabLocation` loc
+			where 
+				usr.name = loc.parent
+				and usr.name not in ("Guest", "Administrator")
+				and usr.user_type != 'Website User'
+				and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
+				and loc.location in ({condition}) 
+			""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),condition= condition,
+				key=searchfield))
 
 
 def acm_query(doctype, txt, searchfield, start, page_len, filters):

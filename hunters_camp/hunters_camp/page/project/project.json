@@ -3,7 +3,8 @@
  "creation": "2015-10-23 11:32:59.061072", 
  "docstatus": 0, 
  "doctype": "Page", 
- "modified": "2015-12-21 15:34:43.878537", 
+ "idx": 0, 
+ "modified": "2015-12-24 20:48:59.420303", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "project", 
@@ -14,7 +15,7 @@
    "role": "Administrator"
   }, 
   {
-   "role": "Projects Manager"
+   "role": "Propshikari Project Manager"
   }
  ], 
  "script": null, 

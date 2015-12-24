@@ -708,12 +708,17 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						$('[data-fieldname=cc_sec]').css('display','block')
 						$('[data-fieldname=assign_to]').css('display','block')
 						$('[data-fieldname=date]').css('display','block')
-						me.pop_up.fields_dict.assign_to.get_query = function(){
-							return {
-									"query":"hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query",	
-									"filters":{"location":cur_frm.doc.location_name}
-								}	
-							} 
+						if (doc.location_name){
+							me.pop_up.fields_dict.assign_to.get_query = function(){
+								return {
+										"query":"hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query",	
+										"filters":{"location":cur_frm.doc.location_name}
+									}	
+								}
+						}
+						else{
+							frappe.msgprint("Please add Location Name to Search Criteria")
+						} 
 					}
 					else{
 						$('[data-fieldname=cc_sec]').css('display','none')
@@ -867,11 +872,15 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						$('[data-fieldname=cc_sec]').css('display','block')
 						$('[data-fieldname=assign_to]').css('display','block')
 						$('[data-fieldname=date]').css('display','block')
-						me.pop_up.fields_dict.assign_to.get_query = function(){
-								query:"hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query";
-								filetrs:doc.location_name
+						if (doc.location_name){
+							me.pop_up.fields_dict.assign_to.get_query = function(){
+									query:"hunters_camp.hunters_camp.doctype.lead_management.lead_management.sales_executive_query";
+									filetrs:doc.location_name
+							}
 						}
-
+						else{
+							frappe.msgprint("Please Add location in search Criteria")
+						}	
 					}
 					else{
 						$('[data-fieldname=cc_sec]').css('display','none')
