@@ -538,11 +538,13 @@ Property = Class.extend({
 			this.body.html("<p class='text-muted'>"+__("Specify filters to serach property.")+"</p>");
 			return;
 		}
+		alert(frappe.route_options['city'])
 
 		me.filters.property_type.input.value= frappe.route_options['property_type']
 		me.filters.property_subtype.input.value=frappe.route_options['property_subtype']
 		me.filters.operation.input.value= frappe.route_options['operation'] ? frappe.route_options['operation'] : null
 		me.filters.location.input.value= frappe.route_options['location'] ? frappe.route_options['location'] : null
+		$(me.filters.location.input).attr("data-field-city",frappe.route_options['city'])
 		me.filters.budget_min.input.value=frappe.route_options['budget_minimum'] ? frappe.route_options['budget_minimum'] : null
 		me.filters.budget_max.input.value=frappe.route_options['budget_maximum'] ? frappe.route_options['budget_maximum'] : null
 		me.filters.area_max.input.value=frappe.route_options['area_maximum'] ? frappe.route_options['area_maximum'] : null
