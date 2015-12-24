@@ -24,7 +24,7 @@ hc.hc_summary = Class.extend({
 			return;
 		frappe.ui.make_app_page({
 			parent: this.parent,
-			title: 'Hunters Camp Summary',
+			title: 'Hunters Camp & Proshikari\'s Summary',
 			single_column: true
 		});
 		this.page = this.parent.page;

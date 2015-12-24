@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 frappe.require("assets/hunters_camp/multiselect.js");
 
-cur_frm.add_fetch('location', 'area', 'location_name');
 cur_frm.add_fetch('lead', 'lead_name', 'lead_name');
 cur_frm.add_fetch('lead', 'middle_name', 'middle_name');
 cur_frm.add_fetch('lead', 'last_name', 'last_name');
@@ -32,13 +31,11 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			})	
 		}
 	}
-	frappe.call({
-		method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
-		callback:function(r){
-			me.location_list = r.message
-			new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
-				
-	}})
+	if (frm.doc.city){
+		var me = this;
+		me.init_multiple_location(frm)
+	}
+
 	// cur_frm.set_df_property("property_details", "read_only", true)
 	make_dashboard =  function(doc){
 		if(doc.property_type && doc.property_subtype && doc.operation && doc.location_name){
@@ -54,7 +51,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						"budget_maximum": doc.budget_maximum,
 						"area_minimum": doc.area_minimum,
 						"area_maximum": doc.area_maximum,
-						"city":$(cur_frm.get_field("location_name").wrapper).attr("data-field-city"),
+						"city":doc.city,
 						"records_per_page": 10,
 						"page_number":1,
 						"request_source":'Hunterscamp',
@@ -101,7 +98,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"area_maximum": doc.area_maximum,
 													"total_records":total_records,
 													"data": final_result,
-													"city":$(cur_frm.get_field("location_name").wrapper).attr("data-field-city")
+													"city":doc.city
 												};
 												frappe.set_route("property", "Hunters Camp");
 												}
@@ -119,6 +116,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 																"budget_maximum": doc.budget_maximum,
 																"area_minimum": doc.area_minimum,
 																"area_maximum": doc.area_maximum,
+																"city":doc.city		
 															},
 															callback: function(r,rt) {
 																doc.email_sent = 'Yes'
@@ -150,7 +148,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"area_maximum": doc.area_maximum,
 													"total_records": total_records,
 													"data": r.message['data'],
-													"city":$(cur_frm.get_field("location_name").wrapper).attr("data-field-city")
+													"city":doc.city
 												};
 												frappe.set_route("property", "Hunters Camp");
 							}
@@ -167,6 +165,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"budget_maximum": doc.budget_maximum,
 										"area_minimum": doc.area_minimum,
 										"area_maximum": doc.area_maximum,
+										"city":doc.city
 									},
 									callback: function(r,rt) {
 										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
@@ -1225,4 +1224,20 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc,cdt,cdn) {
 			'property_type': doc.property_type,
 		}
 	}
+}
+
+frappe.ui.form.on("Lead Management", "city", function(frm) {
+	var me = this;
+	me.init_multiple_location(frm)
+})
+
+init_multiple_location =  function(frm){
+	frappe.call({
+		method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
+		args:{"city":frm.doc.city},
+		callback:function(r){
+			me.location_list = r.message
+			new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
+		}
+	})	
 }

@@ -16,12 +16,3 @@ def get_sms_template(name,args):
 			new = cstr(args.get(key))
 			template = template.replace(old, new)
 		return template
-
-"""
-msg = get_sms_template("delink",{"phr_name":args['person_firstname']})
-	if user.contact:
-		rec_list = []
-		rec_list.append(user.contact)
-		send_sms(rec_list,msg=msg)
-
-"""

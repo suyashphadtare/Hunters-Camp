@@ -60,12 +60,12 @@ def make_se_visit(property_list=None,assign_to=None,parent=None,schedule_date=No
 			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
 			update_se_status_in_leadform(i,name,assign_to,schedule_date)
 			lead_record = frappe.get_doc("Lead Management", parent)
-			child_id = frappe.get_doc("Lead Property Details", child_property)
-			se_visit = frappe.get_doc("Site Visit")
+			child_id = frappe.get_doc("Lead Property Details",i)
+			se_visit = frappe.get_doc("Site Visit",name)
 			notify_lead_about_sv(lead_record,se_visit,child_id,assign_to)
 			notify_se_about_sv(lead_record,se_visit,child_id,assign_to)
-			if name:
-				create_to_do(assign_to,name,doctype)
+			# if name:
+			# 	create_to_do(assign_to,name,doctype)
 		return {"Status":'Available'}
 
 
@@ -107,13 +107,14 @@ def schedule_se_visit(child_property,assign_to,parent,doctype,schedule_date):
 	})
 
 	se_visit.insert(ignore_permissions=True)
-	#se_visit.save()
+	se_visit.save()
 
 	return se_visit.name
 
-def notify_lead_about_se(lead_record,se_visit,child_id,assign_to):
+def notify_lead_about_sv(lead_record,se_visit,child_id,assign_to):
 	user = frappe.get_doc("User",assign_to)
-	msg = get_sms_template("Lead Site Visit",{"site_visit":se_visit.schedule_date,"se_name":' '.join([user.first_name,user.last_name]),"se_mobile":user.mobile_no})
+	se_name = ' '.join([user.first_name,userlast_name]) if user.first_name and user.last_name else user.first_name	
+	msg = get_sms_template("Lead Site Visit",{"site_visit":se_visit.schedule_date,"se_name":se_name,"se_mobile":user.mobile_no})
 	if lead_record.mobile_no:
 		rec_list = []
 		rec_list.append(lead_record.mobile_no)
@@ -159,24 +160,25 @@ def make_acm_visit(property_list=None,assign_to=None,parent=None,schedule_date=N
 			name = schedule_se_visit(i,assign_to,parent,doctype,schedule_date)
 			update_acm_status_in_leadform(i,name,assign_to,schedule_date)
 			lead_record = frappe.get_doc("Lead Management", parent)
-			child_id = frappe.get_doc("Lead Property Details", child_property)
-			se_visit = frappe.get_doc("Site Visit")
+			child_id = frappe.get_doc("Lead Property Details",i)
+			se_visit = frappe.get_doc("ACM Visit",name)
 			notify_lead_about_acm(lead_record,se_visit,child_id,assign_to)
-			notify_se_about_acm(lead_record,se_visit,child_id,assign_to)
+			notify_acm_about_acm(lead_record,se_visit,child_id,assign_to)
 			if name:
 				create_to_do(assign_to,name,doctype)
 		return {"Status":'Available'}
 
 def notify_lead_about_acm(lead_record,se_visit,child_id,assign_to):
 	user = frappe.get_doc("User",assign_to)
+	acm_name = ' '.join([user.first_name,userlast_name]) if user.first_name and user.last_name else user.first_name
 	msg = get_sms_template("Lead ACM",{"meeting_time":se_visit.schedule_date,
-		"acm_name":' '.join([user.first_name,user.last_name]),"acm_no":user.mobile_no})
+		"acm_name":acm_name,"acm_no":user.mobile_no})
 	if lead_record.mobile_no:
 		rec_list = []
 		rec_list.append(lead_record.mobile_no)
 		send_sms(rec_list,msg=msg)	
 
-def notify_se_about_acm(lead_record,se_visit,child_id,assign_to):
+def notify_acm_about_acm(lead_record,se_visit,child_id,assign_to):
 	user = frappe.get_doc("User",assign_to)
 	msg = get_sms_template("ACM",{"lead_name":lead_record.lead_name,"lead_mobile":lead_record.mobile_no,
 		"property_title":child_id.property_name,"prop_address":child_id.address,"se_datetime":se_visit.schedule_date})
@@ -196,7 +198,7 @@ def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date)
 def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 	from frappe.desk.reportview import get_match_cond
 	txt = "%{}%".format(txt)
-	location_names = filters.get("location_name").split(',')
+	location_names = filters.get("location").split(',')
 	condition = ",".join('"{0}"'.format(loc) for loc in location_names)
 	return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
 		from `tabUser` usr,
@@ -206,7 +208,7 @@ def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 			and usr.name not in ("Guest", "Administrator")
 			and usr.user_type != 'Website User'
 			and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
-			and loc.location in '({condition})' 
+			and loc.location in ({condition}) 
 		""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),condition= condition,
 			key=searchfield))
 

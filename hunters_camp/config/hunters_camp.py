@@ -8,11 +8,6 @@ def get_data():
 			"label": _("CRM"),
 			"icon": "icon-star",
 			"items": [
-				# {
-				# 	"type": "doctype",
-				# 	"name": "Lead",
-				# 	"description": _("Lead Details"),
-				# },
 				{
 					"type": "doctype",
 					"name": "Customer",
@@ -38,6 +33,12 @@ def get_data():
 					"name": "ACM Visit",
 					"description": _("ACM Visit Details"),
 				},
+				{
+					"type": "doctype",
+					"name": "Property Confirmation",
+					"description": _("List of Criterias not available"),
+				},
+				
 			]
 		},
 
@@ -99,18 +100,8 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Property Type",
-					"description": _("Types of Properties"),
-				},
-				{
-					"type": "doctype",
-					"name": "Property Subtype",
-					"description": _("Sub Types of Properties"),
-				},
-				{
-					"type": "doctype",
-					"name": "Property Subtype Option",
-					"description": _("Sub Type Option of Properties"),
+					"name": "Area",
+					"description": _("Location / Area"),
 				},
 				{
 					"type": "doctype",
@@ -124,9 +115,19 @@ def get_data():
 				},
 				{
 					"type": "doctype",
-					"name": "Area",
-					"description": _("Location / Area"),
-				}
+					"name": "Property Type",
+					"description": _("Types of Properties"),
+				},
+				{
+					"type": "doctype",
+					"name": "Property Subtype",
+					"description": _("Sub Types of Properties"),
+				},
+				{
+					"type": "doctype",
+					"name": "Property Subtype Option",
+					"description": _("Sub Type Option of Properties"),
+				},
 				
 			]
 		},
@@ -156,8 +157,14 @@ def get_data():
 					"type": "doctype",
 					"name": "User",
 					"label": _("Users"),
-					"description": _("User Informations"),
+					"description": _("User Information"),
 				},
+				{
+					"type": "doctype",
+					"name": "Message Templates",
+					"label": _("SMS Templates"),
+					"description": _("Templates for SMS"),
+				}
 			]
 		},
 		{
@@ -193,6 +200,12 @@ def get_data():
 					"name":"Builder Properties",
 					"doctype": "User",
 					"is_query_report": True
+				},
+				{
+					"type": "page",
+					"name": "hc_summary",
+					"label": _("Summary Report"),
+					"icon": "icon-bar-chart",
 				},
 			]
 		},

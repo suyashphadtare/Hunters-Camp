@@ -2,7 +2,6 @@
 // License: GNU General Public License v3. See license.txt
 frappe.require("assets/hunters_camp/multiselect.js");
 
-cur_frm.add_fetch('location', 'area', 'location_name');
 cur_frm.add_fetch('lead', 'lead_name', 'lead_name');
 cur_frm.add_fetch('lead', 'middle_name', 'middle_name');
 cur_frm.add_fetch('lead', 'last_name', 'last_name');
@@ -14,18 +13,28 @@ cur_frm.add_fetch('lead', 'mobile_no', 'mobile_no');
 
 frappe.ui.form.on("Enquiry", {
 	refresh: function(frm) {
-			cur_frm.set_df_property("lead", "read_only", frm.doc.__islocal != true)
-			frappe.call({
-			method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
-			callback:function(r){
-				me.location_list = r.message
-				new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
-				
-			}
-		})
+		cur_frm.set_df_property("lead", "read_only", frm.doc.__islocal != true)
+		if (frm.doc.city){
+			var me = this;
+			me.init_multiple_location(frm)	
+		}
+			
+	},
+	city:function(frm){
+		var me = this;
+		me.init_multiple_location(frm)
 	}
 });
-
+init_multiple_location =  function(frm){
+	frappe.call({
+		method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
+		args:{"city":frm.doc.city},
+		callback:function(r){
+			me.location_list = r.message
+			new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
+		}
+	})	
+}
 
 //Return query for getting contact name in link field
 cur_frm.fields_dict['address'].get_query = function(doc) {

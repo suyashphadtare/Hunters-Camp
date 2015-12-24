@@ -130,6 +130,10 @@ LocationMultiSelect.prototype = {
 		// add placeholder to get the comma-and-space at the end
 		terms.push( "" );
 		event.target.value = terms.join( "," );
+		if (cur_frm){
+			cur_frm.set_value("location_name",event.target.value)
+			cur_frm.refresh_field("location_name")
+		}
 		if(this.city_flag){
 			this.reassign_source(ui.item)
 			this.city_flag = false

@@ -135,6 +135,8 @@ Property = Class.extend({
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
 					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
+					freeze: true,
+					freeze_message:"Building Search.....This Might Take Some Time",
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
@@ -154,7 +156,6 @@ Property = Class.extend({
 					  },
 					},
 					callback: function(r,rt) {
-						console.log(r.message)
 						if(!r.exc) {
 							if(r.message['total_records']>0){
 								me.render(r.message['data'],r.message['total_records'])
@@ -253,6 +254,8 @@ Property = Class.extend({
 			search_dict["location"] = me.filters.location.$input.val()
 			frappe.call({
 				method:"hunters_camp.hunters_camp.page.property.property.search_property_with_advanced_criteria",
+				freeze: true,
+				freeze_message:"Building Search.....This Might Take Some Time",
 				args:{"property_dict":search_dict},
 				callback:function(r){
 					if(r.message['total_records']>0){
@@ -466,8 +469,6 @@ Property = Class.extend({
 			callback:function(r){
 				me.location_list = r.message
 				new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
-				console.log($(me.wrapper).find("input[data-fieldname=city]").value)	
-
 			}
 		})	
 	},
@@ -538,8 +539,6 @@ Property = Class.extend({
 			this.body.html("<p class='text-muted'>"+__("Specify filters to serach property.")+"</p>");
 			return;
 		}
-		alert(frappe.route_options['city'])
-
 		me.filters.property_type.input.value= frappe.route_options['property_type']
 		me.filters.property_subtype.input.value=frappe.route_options['property_subtype']
 		me.filters.operation.input.value= frappe.route_options['operation'] ? frappe.route_options['operation'] : null
@@ -663,8 +662,8 @@ Property = Class.extend({
 
 			if(d['property_photo'])
 				$("<a class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
-			// else
-			// 	$("<img id='theImg' src='/files/Home-icon.png'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
+			else
+				$("<img id='theImg' src='/assets/hunters_camp/No_image_available.jpg'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist' >\

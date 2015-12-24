@@ -113,8 +113,14 @@ def get_amenities(property_type):
 
 
 @frappe.whitelist()
-def get_location_list():
-  location = frappe.db.sql(" select name as location_id,area as location_name, city_name from `tabArea`",as_dict=1)
+def get_location_list(city=None):
+  if city:
+    location = frappe.db.sql("""select name as location_id,area as location_name, city_name from 
+      `tabArea` where city_name='{0}'""".format(city),as_dict=1)
+  else:
+    location = frappe.db.sql("""select name as location_id,area as location_name, city_name from 
+      `tabArea`""".format(city),as_dict=1)
+  
   return location
 
 @frappe.whitelist()
@@ -153,6 +159,6 @@ def build_data_to_search_with_location_names(data):
       `tabArea` where area in ({0}) and city_name='{1}'""".format(condition,property_data.get("city")), as_dict=True)
     if area_list:
       property_data["location"] = ",".join([ area.get("name") for area in area_list ])
-    from propshikari.versions.v1 import search_property   
-    return search_property(data=json.dumps(property_data))
+  from propshikari.versions.v1 import search_property
+  return search_property(data=json.dumps(property_data))
     
