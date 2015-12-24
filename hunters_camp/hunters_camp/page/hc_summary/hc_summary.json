@@ -1,0 +1,22 @@
+{
+ "content": null, 
+ "creation": "2015-12-24 11:34:38.793770", 
+ "docstatus": 0, 
+ "doctype": "Page", 
+ "idx": 0, 
+ "modified": "2015-12-24 11:34:38.793770", 
+ "modified_by": "Administrator", 
+ "module": "Hunters Camp", 
+ "name": "hc_summary", 
+ "owner": "Administrator", 
+ "page_name": "hc_summary", 
+ "roles": [
+  {
+   "role": "Administrator"
+  }
+ ], 
+ "script": null, 
+ "standard": "Yes", 
+ "style": null, 
+ "title": "Hunters Camp Summary"
+}
