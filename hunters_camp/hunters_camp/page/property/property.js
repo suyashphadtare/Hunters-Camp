@@ -102,13 +102,6 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-filter"
 		});
-		me.clear_form = me.wrapper.page.add_field({
-						fieldname: "clear_form",
-						label: __("Clear Form"),
-						fieldtype: "Button",
-						icon: "icon-filter"
-		});
-
 		me.share = me.wrapper.page.add_field({
 						fieldname: "share",
 						label: __("Share"),
@@ -121,6 +114,12 @@ Property = Class.extend({
 						label: __("Apply Tag"),
 						fieldtype: "Button",
 						icon: "icon-tag"
+		});
+		me.clear_form = me.wrapper.page.add_field({
+						fieldname: "clear_form",
+						label: __("Clear Form"),
+						fieldtype: "Button",
+						icon: "icon-filter"
 		});
 
 		$('[data-fieldname=tag]').css('display','none')
@@ -335,6 +334,8 @@ Property = Class.extend({
 	            		if(fields.user.$input.val()!=null){
 	            		return frappe.call({
 							method:'hunters_camp.hunters_camp.page.property.property.share_property_to_user',
+							freeze:true,
+							freeze_message:"Sharing properties....Please Wait",
 							args :{
 								"user": fields.user.$input.val(),
 								"property_resultset": final_result,
@@ -430,6 +431,8 @@ Property = Class.extend({
 				$.each(me.property_list, function(i, j) {
 					 frappe.call({
 								method:'propshikari.versions.v1.update_property_tag',
+								freeze:true,
+								freeze_message:"Applying Tag....",
 								'async': false,
 								args :{
 									"data":{
@@ -953,6 +956,8 @@ Property = Class.extend({
 		return frappe.call({
 			type: "GET",
 			method:"hunters_camp.hunters_camp.doctype.property.property.view_property",
+			freeze:true,
+			freeze_message:"Loading Property....",
 			args: {
 				"property_id":$(this).attr('id'),
 				"sid":frappe.get_cookie("sid")
@@ -977,6 +982,8 @@ Property = Class.extend({
         	page--;
        		return frappe.call({
 					method:'propshikari.versions.v1.search_property',
+					freeze:true,
+					freeze_message:"Getting properties..",
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
@@ -1016,6 +1023,8 @@ Property = Class.extend({
        	 	page++;
        	 	return frappe.call({
 					method:'propshikari.versions.v1.search_property',
+					freeze:true,
+					freeze_message:"Loading More Properties....",
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
@@ -1093,6 +1102,8 @@ Property = Class.extend({
 		$.each(me.check_property_list, function(i, j) {
 			frappe.call({
 				method:'propshikari.versions.v1.update_property_status',
+				freeze_message:"Updating property Status....",
+				freeze:true,
 				'async': false,
 				args :{
 					"data":{

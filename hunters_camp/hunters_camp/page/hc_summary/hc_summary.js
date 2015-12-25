@@ -12,6 +12,8 @@ hc.hc_summary = Class.extend({
 		var me = this;
 		return frappe.call({
 			method: "hunters_camp.hunters_camp.page.hc_summary.hc_summary.get_data",
+			freeze: true,
+			freeze_message:"Building Report.....This Might Take Some Time",
 			callback: function(r) {
 				var data = r.message;
 				me.make_page();
