@@ -84,7 +84,9 @@ scheduler_events = {
 		"hunters_camp.hunters_camp.doctype.agent.agent.send_email_notification"
 	]
 }
-
+permission_query_conditions = {
+	"Shared Properties For Agent":"hunters_camp.hunters_camp.doctype.shared_properties_for_agent.shared_properties_for_agent.get_permission_query_conditions",
+}
 # Testing
 # -------
 
