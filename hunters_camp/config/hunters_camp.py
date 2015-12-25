@@ -146,6 +146,12 @@ def get_data():
 					"name": "Agent Package",
 					"label": _("Agent Package"),
 					"description": _("Agent Package Details"),
+				},
+				{
+					"type": "doctype",
+					"name": "Shared Properties For Agent",
+					"label": _("Shared Properties"),
+					"description": _("Agent to Agent Shared Properties"),
 				}
 			]
 		},

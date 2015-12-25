@@ -462,6 +462,17 @@ cur_frm.fields_dict.project_subtype.get_query = function(doc) {
 	}
 }
 
+cur_frm.fields_dict.city_link.get_query = function(doc) {
+	return{
+		filters:{"state_name":doc.state}
+	}
+}
+cur_frm.fields_dict.location_link.get_query = function(doc) {
+	return{
+		filters:{"city_name":doc.city_link}
+	}
+}
+
 
 
 
