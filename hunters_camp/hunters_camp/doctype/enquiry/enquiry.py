@@ -182,20 +182,19 @@ def consultant_allocation(count,allocation_count):
 		for name in enquiry_form:
 			if name[0]:
 				enquiry_locations =  frappe.db.get_value('Enquiry', {'name':name[0]}, 'location_name')
-				print enquiry_locations
-				location_names = enquiry_locations.split(',')
-				condition = ",".join('"{0}"'.format(loc) for loc in location_names)
-
 				if enquiry_locations:
+					location_names = enquiry_locations.split(',')
+					condition = ",".join('"{0}"'.format(loc) for loc in location_names)
 					consultant= frappe.db.sql(""" select parent from `tabLocation` where location in ({0})""".format(condition),as_list=1)
 					consultant_details={}
 					if len(consultant)>0:
 						for c_name in consultant:
-							consultant_name=frappe.db.sql("""select parent from `tabUserRole` where parent='%s' and role='Consultant' and parent!='Administrator' and parent!='Guest'"""%c_name[0],as_list=1)
+							consultant_name=frappe.db.sql("""select parent from `tabUserRole` 
+								where parent='%s' and role='Consultant' 
+								and parent!='Administrator' and parent!='Guest'"""%c_name[0],as_list=1)
 							if consultant_name:
 								lead_count = frappe.db.sql("""select count(name) from `tabLead Management` where consultant='%s' and lead_status!='Closed'
 													"""%(consultant_name[0][0]),as_list=1)
-								
 								if lead_count:
 									consultant_details[consultant_name[0][0]]=lead_count[0][0]
 	
