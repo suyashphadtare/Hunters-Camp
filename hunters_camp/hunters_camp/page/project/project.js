@@ -1,3 +1,5 @@
+frappe.require("assets/hunters_camp/multiselect.js");
+
 frappe.pages['project'].on_page_load = function(wrapper) {
 	var page = frappe.ui.make_app_page({
 		parent: wrapper,
@@ -82,12 +84,19 @@ Project = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-search"
 		});
+		me.clear_form = me.wrapper.page.add_field({
+						fieldname: "clear_form",
+						label: __("Clear Form"),
+						fieldtype: "Button",
+						icon: "icon-filter"
+		});
 		// me.advance_filters = me.wrapper.page.add_field({
 		// 				fieldname: "advance_filters",
 		// 				label: __("Advance Filters"),
 		// 				fieldtype: "Button",
 		// 				icon: "icon-filter"
 		// });
+		this.init_for_multiple_location()
 
 
 
@@ -115,8 +124,6 @@ Project = Class.extend({
 					callback: function(r,rt) {
 						if(!r.exc) {
 							if(r.message['total_records']>0){
-								console.log(r.message['data'])
-								console.log(r.message['total_records'])
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
@@ -133,57 +140,6 @@ Project = Class.extend({
 
 	});
 
-	// 	me.advance_filters.$input.on("click", function() {
-	// 		//console.log(me.project_list)
-	// 		if(me.project_list.length>0){
-	// 			var d = new frappe.ui.Dialog({
-
-	// 				title: __("Add Advance filters"),
-	// 						fields: [
-	// 							{fieldtype:"Link", label:__("Project Type"),
-	// 								options:"Property Type", reqd:1, fieldname:"project_type"},
-	// 							{fieldtype:"Select", label:__("Operation"),
-	// 								options:"\nBuy\nRent", reqd:1, fieldname:"operation"},
-	// 							{fieldtype:"Select", label:__("Minimum Budget"),options:"\n0\n25Lac\n50Lac\n75Lac\n1Cr",
-	// 							 reqd:0, fieldname:"minimum_budget"},
-	// 							{fieldtype:"Select", label:__("Age Of Property"),
-	// 							 options:"\n1 Year\n2 Years\n3 Years\n4 Years",reqd:0, fieldname:"age_of_property"},
-	// 							{fieldtype:"Column Break",
-	// 								reqd:0, fieldname:"cl"},
-	// 							{fieldtype:"Link", label:__("Project Sub Type"),
-	// 							options:"Property Subtype", reqd:1, fieldname:"project_subtype"},
-	// 							{fieldtype:"Date", label:__("Posted Date"),
-	// 								reqd:0, fieldname:"posting_date"},
-	// 							{fieldtype:"Select", label:__("Maximum Budget"),options:"\n25Lac\n50Lac\n75Lac\n1Cr", reqd:0, fieldname:"maximum_budget"},
-	// 							{fieldtype:"Select", label:__("Possession"),
-	// 							 options:"\nReady\n5 Months\n6 Months",reqd:0, fieldname:"possession"},			
-
-	// 						],
-
-	// 					primary_action_label: "Apply",
-	// 					primary_action: function() {
-	// 						console.log("primary_action")
-	// 						//me.allocate_lead(count);
-	// 					}			
-	// 			});
-
-	// 			fields=d.fields_dict
-	// 			$('[data-fieldname=submit]').css('display','none')
-
-	// 			fields.project_type.input.value=me.filters.project_type.$input.val()
-	// 			fields.project_subtype.input.value=me.filters.project_subtype.$input.val()
-	// 			fields.operation.input.value=me.filters.operation.$input.val()
-	// 			fields.minimum_budget.input.value=me.filters.budget_min.$input.val()
-	// 			fields.maximum_budget.input.value=me.filters.budget_max.$input.val()
-
-	// 			$('[data-fieldname=submit]').css('display','block')
-	// 			d.show();
-
-	// 	}
-	// 	else
-	// 		msgprint("There is no any project is available to filter it further")
-
-	// });
 	},
 
 	refresh: function() {
@@ -442,6 +398,9 @@ Project = Class.extend({
 		}
 					
 	})
+	me.clear_form.$input.on("click", function() {
+		frappe.ui.toolbar.clear_cache()
+	});
 	
 
 	$('.pv').click(function(){
@@ -582,6 +541,17 @@ Project = Class.extend({
 	};
 
 
+	},
+	init_for_multiple_location:function(){
+		var me = this
+		frappe.call({
+			method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
+			callback:function(r){
+				me.location_list = r.message
+				LocationMultiSelect.prototype.init($(me.wrapper).find("input[data-fieldname=location]"), r.message)
+				//new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
+			}
+		})	
 	},
 
 
