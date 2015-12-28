@@ -27,6 +27,7 @@ def post_property(doc,sid):
 	doc["user_id"] = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
 	doc["sid"] = sid
 	doc["amenities"] = [ amenity.get("amenity_name") for amenity in doc.get("amenities") if amenity.get("status") == "Yes" ]
+	print doc["amenities"]
 	doc["flat_facilities"] = [ facility.get("facility_name") for facility in doc.get("flat_facilities") if facility.get("status") == "Yes" ]
 	validate_for_possesion_date(doc)
 	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}

@@ -538,6 +538,17 @@ cur_frm.fields_dict.location_link.get_query = function(doc) {
 		filters:{"city_name":doc.city_link}
 	}
 }
+cur_frm.fields_dict["amenities"].grid.get_field("amenity_name").get_query = function(doc) {
+	return{
+		filters:{"property_type":doc.property_type}
+	}	
+}
+cur_frm.fields_dict["flat_facilities"].grid.get_field("facility_name").get_query = function(doc) {
+	return{
+		filters:{"property_type":doc.property_type}
+	}	
+}
+
 
 
 
