@@ -58,7 +58,12 @@ Property = Class.extend({
 					label: __("Location"),
 					fieldtype: "Data"
 		});
-		
+		me.filters.property_subtype_option = me.wrapper.page.add_field({
+					fieldname: "property_subtype_option",
+					label: __("BHK"),
+					fieldtype: "Property Subtype Option",
+					options: "Property Subtype",
+		});
 		me.filters.budget_min = me.wrapper.page.add_field({
 					fieldname: "budget_min",
 					label: __("Budget Minimum"),
@@ -146,6 +151,7 @@ Property = Class.extend({
 						"budget_maximum": me.filters.budget_max.$input.val(),
 						"area_minimum": me.filters.area_min.$input.val(),
 						"area_maximum": me.filters.area_max.$input.val(),
+						"property_subtype_option": me.filters.property_subtype_option.$input.val(),
 						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 10,
 						"page_number":1,
