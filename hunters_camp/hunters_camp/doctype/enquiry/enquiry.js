@@ -12,6 +12,10 @@ cur_frm.add_fetch('lead', 'description', 'description');
 cur_frm.add_fetch('lead', 'mobile_no', 'mobile_no');
 
 frappe.ui.form.on("Enquiry", {
+	onload:function(frm){
+		var me = this;
+		//me.init_multiple_location(frm)
+	},
 	refresh: function(frm) {
 		cur_frm.set_df_property("lead", "read_only", frm.doc.__islocal != true)
 		if (frm.doc.city){
@@ -26,12 +30,13 @@ frappe.ui.form.on("Enquiry", {
 	}
 });
 init_multiple_location =  function(frm){
+	//console.log(cur_frm.fields_dict.location_name.$wrapper)
 	frappe.call({
 		method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
 		args:{"city":frm.doc.city},
 		callback:function(r){
 			me.location_list = r.message
-			new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
+			LocationMultiSelect.prototype.init($(cur_frm.wrapper).find("input[data-fieldname=location_name]"), r.message)
 		}
 	})	
 }

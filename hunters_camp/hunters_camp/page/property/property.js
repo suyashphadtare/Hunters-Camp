@@ -471,7 +471,8 @@ Property = Class.extend({
 			method:"hunters_camp.hunters_camp.page.property.property.get_location_list",
 			callback:function(r){
 				me.location_list = r.message
-				new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
+				LocationMultiSelect.prototype.init($(me.wrapper).find("input[data-fieldname=location]"), r.message)
+				//new LocationMultiSelect($(me.wrapper).find("input[data-fieldname=location]"), r.message)
 			}
 		})	
 	},
