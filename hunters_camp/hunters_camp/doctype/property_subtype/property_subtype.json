@@ -1,6 +1,6 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "field:property_subtype", 
  "creation": "2015-09-02 11:34:10.399933", 
@@ -140,7 +140,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-12-28 12:25:47.095239", 
+ "modified": "2015-12-28 13:40:48.963623", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Property Subtype", 
