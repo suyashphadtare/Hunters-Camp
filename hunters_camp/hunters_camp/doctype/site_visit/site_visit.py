@@ -15,3 +15,12 @@ class SiteVisit(Document):
 		child_entry = frappe.get_doc("Lead Property Details", child_id)
 		child_entry.se_status = self.se_status
 		child_entry.save(ignore_permissions=True)
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	"""
+		Filter condition for user
+	"""
+	#pass
+	if not user == 'Administrator':
+		return """(`tabSite Visit`.visiter ='{0}')""".format(user)

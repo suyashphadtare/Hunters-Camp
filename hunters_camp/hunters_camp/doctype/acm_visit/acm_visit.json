@@ -1132,7 +1132,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-12-28 13:26:29.820685", 
+ "modified": "2016-01-04 19:08:12.812743", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "ACM Visit", 
@@ -1157,6 +1157,7 @@
    "set_user_permissions": 0, 
    "share": 1, 
    "submit": 0, 
+   "user_permission_doctypes": "[\"User\"]", 
    "write": 1
   }, 
   {

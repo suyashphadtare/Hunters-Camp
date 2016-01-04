@@ -67,13 +67,13 @@ Property = Class.extend({
 		me.filters.budget_min = me.wrapper.page.add_field({
 					fieldname: "budget_min",
 					label: __("Budget Minimum"),
-					fieldtype: "Currency",
+					fieldtype: "Int",
 					options:'Company:company:default_currency'
 		});
 		me.filters.budget_max = me.wrapper.page.add_field({
 					fieldname: "budget_max",
 					label: __("Budget Maximum"),
-					fieldtype: "Currency",
+					fieldtype: "Int",
 					options:'Company:company:default_currency'
 		});
 		me.filters.area_min = me.wrapper.page.add_field({
@@ -135,7 +135,6 @@ Property = Class.extend({
 		//var me = this;
 		me.search.$input.on("click", function() {
 			//var me = this;
-			console.log($(me.filters.location.$input).attr("data-field-city"))
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
 					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
@@ -148,10 +147,10 @@ Property = Class.extend({
 						"property_subtype": me.filters.property_subtype.$input.val(),
 						"location": me.filters.location.$input.val(),
 						"property_subtype_option":me.filters.property_subtype_option.$input.val(),
-						"budget_minimum": me.filters.budget_min.$input.val(),
-						"budget_maximum": me.filters.budget_max.$input.val(),
-						"area_minimum": me.filters.area_min.$input.val(),
-						"area_maximum": me.filters.area_max.$input.val(),
+						"min_budget": parseInt(me.filters.budget_min.$input.val()),
+						"max_budget": parseInt(me.filters.budget_max.$input.val()),
+						"min_area": parseInt(me.filters.area_min.$input.val()),
+						"max_area": parseInt(me.filters.area_max.$input.val()),
 						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 10,
 						"page_number":1,
@@ -494,7 +493,6 @@ Property = Class.extend({
 				method:"hunters_camp.hunters_camp.page.property.property.get_amenities",
 				args:{"property_type":$(this).val()},
 				callback:function(r){
-					console.log(r.message)
 					if (!amenity_obj && !subtype_obj){
 						amenity_obj = new Multiselect($(dialog.body).find("input[data-fieldname=amenities]"), r.message.amenities)		
 						subtype_obj = new Multiselect($(dialog.body).find("input[data-fieldname=property_subtype_option]"), r.message.subtype_options)
@@ -521,7 +519,6 @@ Property = Class.extend({
 	          return false;
 	        },
 	        select: function( event, ui ) {
-	          console.log(this.value)
 	          var terms = split( this.value );
 	          // remove the current input
 	          terms.pop();
@@ -584,13 +581,13 @@ Property = Class.extend({
 		this.body.empty();
 		this.prop_list=prop_list
 		
-		this.changePage(1,numPages,this.prop_list,records_per_page,this.prop_list.length,flag='Normal');
+		this.changePage(1,numPages,this.prop_list,records_per_page,this.prop_list.length,flag='Normal',total_records);
 		
 
 	},
 
 
-	changePage: function(page,numPages,values,records_per_page,length,flag)
+	changePage: function(page,numPages,values,records_per_page,length,flag,total_records)
 	{	
 		var me=this
 		if(flag=='Normal'){
@@ -625,9 +622,9 @@ Property = Class.extend({
 	    if (page < 1) page = 1;
 	    if (page > numPages) page = numPages;
 
-	    me.show_user_property_table(page,numPages,values,records_per_page,length,flag);
+	    me.show_user_property_table(page,numPages,values,records_per_page,length,flag,total_records);
 
-	    $("#page").text(length)
+	    $("#page").text(total_records)
 	    if(length==1)
 	    	$("#page")
 
@@ -646,7 +643,7 @@ Property = Class.extend({
 	},
 
 
-	show_user_property_table: function(page,numPages,values,records_per_page,length,flag) {
+	show_user_property_table: function(page,numPages,values,records_per_page,length,flag,total_records) {
 
 		var me = this
 		me.property_data=values
@@ -912,7 +909,6 @@ Property = Class.extend({
 
 			$.each(d['amenities'], function(i, j){
 				if(j['status']=='Yes'){
-					console.log("hi")
 					if(i%2==0)
 					{
 						$($(me.body).find("#"+d['property_id']+"")).find("#amenities-first").append('<div class="row row-id"><div class="col-md-6 row"><div class="row property-row"><b>'+j['name']+' :</b></div></div><div class="col-md-6 row"><div class="row property-row">'+j['status']+'</div></div></div>')
@@ -990,22 +986,25 @@ Property = Class.extend({
 			//console.log(page)
         	page--;
        		return frappe.call({
-					method:'propshikari.versions.v1.search_property',
-					freeze:true,
-					freeze_message:"Getting properties..",
+					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
+					freeze: true,
+					freeze_message:"Getting Results....",
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
 						"property_type": me.filters.property_type.$input.val(),
 						"property_subtype": me.filters.property_subtype.$input.val(),
 						"location": me.filters.location.$input.val(),
-						"budget_minimum": me.filters.budget_min.$input.val(),
-						"budget_maximum": me.filters.budget_max.$input.val(),
-						"area_minimum": me.filters.area_min.$input.val(),
-						"area_maximum": me.filters.area_max.$input.val(),
+						"property_subtype_option":me.filters.property_subtype_option.$input.val(),
+						"min_budget": parseInt(me.filters.budget_min.$input.val()),
+						"max_budget": parseInt(me.filters.budget_max.$input.val()),
+						"min_area": parseInt(me.filters.area_min.$input.val()),
+						"max_area": parseInt(me.filters.area_max.$input.val()),
+						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 10,
 						"page_number":page,
-						"user_id": 'Guest',
+						"request_source":'Hunterscamp',
+						//"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
 					},
@@ -1013,10 +1012,10 @@ Property = Class.extend({
 						if(!r.exc) {
 							if(r.message['data'].length>0){
 								if(me.lead_management.$input.val().length != 0){
-									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal');
+									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 								}
 								else
-									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal');
+									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 						}
 					}
 					},
@@ -1031,22 +1030,25 @@ Property = Class.extend({
     	if (page < numPages) {
        	 	page++;
        	 	return frappe.call({
-					method:'propshikari.versions.v1.search_property',
-					freeze:true,
-					freeze_message:"Loading More Properties....",
+					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
+					freeze: true,
+					freeze_message:"Loading Results....",
 					args :{
 						"data":{
 						"operation": me.filters.operation.$input.val(),
 						"property_type": me.filters.property_type.$input.val(),
 						"property_subtype": me.filters.property_subtype.$input.val(),
 						"location": me.filters.location.$input.val(),
-						"budget_minimum": me.filters.budget_min.$input.val(),
-						"budget_maximum": me.filters.budget_max.$input.val(),
-						"area_minimum": me.filters.area_min.$input.val(),
-						"area_maximum": me.filters.area_max.$input.val(),
+						"property_subtype_option":me.filters.property_subtype_option.$input.val(),
+						"min_budget": parseInt(me.filters.budget_min.$input.val()),
+						"max_budget": parseInt(me.filters.budget_max.$input.val()),
+						"min_area": parseInt(me.filters.area_min.$input.val()),
+						"max_area": parseInt(me.filters.area_max.$input.val()),
+						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 10,
 						"page_number":page,
-						"user_id": 'Guest',
+						"request_source":'Hunterscamp',
+						//"user_id": 'Guest',
 						"sid": 'Guest'
 					  },
 					},
@@ -1056,10 +1058,10 @@ Property = Class.extend({
 								me.prop_list=r.message['data']
 								me.property_list=[]
 								if(me.lead_management.$input.val().length != 0){
-									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal');
+									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 								}
 								else
-									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal');
+									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 							}
 							else{
 								msgprint("There is no more properties available against the required serach criteria")
@@ -1078,11 +1080,11 @@ Property = Class.extend({
 		result_set= []
 		if($("#select_alert").val()=='posting_date'){
 			me.property_data.sort(date_sort_desc);
-			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting');
+			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting',total_records);
 		}
 		else if($("#select_alert").val()=='rate'){
 			me.property_data.sort(rate_sort_asc);
-			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting');
+			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting',total_records);
 		}
 
 
@@ -1124,7 +1126,6 @@ Property = Class.extend({
 				},
 				callback: function(r,rt) {
 					if(!r.exc) {
-						console.log(r.message)
 						if(i+1==me.check_property_list.length){
 							$('[data-fieldname=search]').trigger("click");	
 						}
@@ -1180,7 +1181,7 @@ Property = Class.extend({
 	},
 
 
-	show_unique_properties:function(page,numPages,data,records_per_page,length,flag){
+	show_unique_properties:function(page,numPages,data,records_per_page,length,flag,total_records){
 		var me=this
 		result=data
 		return frappe.call({
@@ -1202,7 +1203,7 @@ Property = Class.extend({
 						});
 						if(final_result.length>0){
 							final_result=final_result
-							me.changePage(page,numPages,final_result,records_per_page,final_result.length,flag='Normal');
+							me.changePage(page,numPages,final_result,records_per_page,final_result.length,flag='Normal',total_records);
 						}
 						else{
 							return frappe.call({
@@ -1225,7 +1226,7 @@ Property = Class.extend({
 				  }		}
 			}
 			  else{
-			  	me.changePage(page,numPages,result,records_per_page,result.length,flag='Normal');
+			  	me.changePage(page,numPages,result,records_per_page,result.length,flag='Normal',total_records);
 			  }
 			},
 		});		
@@ -1256,7 +1257,6 @@ AgentPropertyShare = Class.extend({
 
 		this.fields=this.dialog.fields_dict
 		this.dialog.show();
-		console.log($(this.dialog.body))
 		$(".modal-dialog").css("width","750px");
 		$(this.dialog.body).find("textarea[data-fieldname='agents']").css("height", "50px")
 		$(this.dialog.body).find("textarea[data-fieldname='agents']").attr("disabled",true)
@@ -1277,11 +1277,9 @@ AgentPropertyShare = Class.extend({
 			prop_dict["property_id"] =  $(property).parent().attr("id")
 			me.prop_list.push(prop_dict)
 		})
-		console.log(this.prop_list)
 		return this.prop_list
 	},
 	render_prop_table:function(){
-		console.log()
 		$(this.dialog.body).find("[data-fieldname='share_html']").html(this.get_table_html())
 	},
 	get_table_html:function(){

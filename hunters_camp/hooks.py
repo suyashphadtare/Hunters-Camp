@@ -86,6 +86,9 @@ scheduler_events = {
 }
 permission_query_conditions = {
 	"Shared Properties For Agent":"hunters_camp.hunters_camp.doctype.shared_properties_for_agent.shared_properties_for_agent.get_permission_query_conditions",
+	"Lead Management":"hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_permission_query_conditions",
+	"Site Visit":"hunters_camp.hunters_camp.doctype.site_visit.site_visit.get_permission_query_conditions",
+	"ACM Visit":"hunters_camp.hunters_camp.doctype.acm_visit.acm_visit.get_permission_query_conditions"
 }
 # Testing
 # -------
