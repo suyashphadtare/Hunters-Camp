@@ -122,11 +122,12 @@ def notify_lead_about_sv(lead_record,se_visit,child_id,assign_to):
 
 def notify_se_about_sv(lead_record,se_visit,child_id,assign_to):
 	user = frappe.get_doc("User",assign_to)
+	print user.name,user.mobile_no
 	msg = get_sms_template("SE",{"lead_name":lead_record.lead_name,"lead_mobile":lead_record.mobile_no,
 		"property_title":child_id.property_name,"prop_address":child_id.address,"se_datetime":se_visit.schedule_date})
 	if user.mobile_no:
 		rec_list = []
-		rec_list.append(lead_record.mobile_no)
+		rec_list.append(user.mobile_no)
 		send_sms(rec_list,msg=msg)		
 
 
@@ -181,10 +182,10 @@ def notify_lead_about_acm(lead_record,se_visit,child_id,assign_to):
 def notify_acm_about_acm(lead_record,se_visit,child_id,assign_to):
 	user = frappe.get_doc("User",assign_to)
 	msg = get_sms_template("ACM",{"lead_name":lead_record.lead_name,"lead_mobile":lead_record.mobile_no,
-		"property_title":child_id.property_name,"prop_address":child_id.address,"se_datetime":se_visit.schedule_date})
+		"property_title":child_id.property_name,"prop_address":child_id.address,"acm_datetime":se_visit.schedule_date})
 	if user.mobile_no:
 		rec_list = []
-		rec_list.append(lead_record.mobile_no)
+		rec_list.append(user.mobile_no)
 		send_sms(rec_list,msg=msg)
 
 def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date):
@@ -210,6 +211,17 @@ def sales_executive_query(doctype, txt, searchfield, start, page_len, filters):
 				and usr.user_type != 'Website User'
 				and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
 				and loc.location in ({condition}) 
+			""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),condition= condition,
+				key=searchfield))
+	else:
+		return frappe.db.sql("""select usr.name, concat_ws(' ', usr.first_name, usr.middle_name, usr.last_name)
+			from `tabUser` usr,
+			`tabLocation` loc
+			where 
+				usr.name = loc.parent
+				and usr.name not in ("Guest", "Administrator")
+				and usr.user_type != 'Website User'
+				and usr.name in (select parent from `tabUserRole` where role='Sales Executive' and parent!='Administrator' and parent!='Guest')
 			""".format(standard_users=", ".join(["%s"]*len(STANDARD_USERS)),condition= condition,
 				key=searchfield))
 
@@ -366,3 +378,12 @@ def get_permitted_and_not_permitted_links(doctype):
 		"permitted_links": permitted_links,
 		"not_permitted_links": not_permitted_links
 	}	
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	"""
+		Filter condition for user
+	"""
+	#pass
+	if not user == 'Administrator':
+		return """(`tabLead Management`.consultant ='{0}')""".format(user)

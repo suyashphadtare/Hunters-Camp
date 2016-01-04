@@ -184,7 +184,6 @@ project.operations = {
 	
 	},
 	make_property_details_read_only:function(frm){
-		console.log("in property_details")
 		cur_frm.set_df_property("property_details", "read_only", true)
 		$.each([2,3,4,5,6,7,8,9], function(index , value){
 			cur_frm.get_field("property_details").grid.docfields[value].read_only = 1
@@ -293,7 +292,6 @@ project.operations = {
 	init_delete_project_photo:function(frm){
 		var me = this
 		$(".close").click(function(){
-			console.log($(this).siblings())
 			if ($(this).siblings().hasClass("prj_img")){
 				me.delete_project_photo(frm, this)
 			}else{
@@ -326,8 +324,6 @@ project.operations = {
 				method:"hunters_camp.hunters_camp.doctype.projects.projects.delete_photo",
 				args: {doc: frm.doc, sid:frappe.get_cookie('sid'), img_url:img_src},
 				callback: function(r) {
-					console.log(r.message)
-					frappe.msgprint(r.message.message)
 					frm.doc.full_size_images = r.message.full_size
 					frm.doc.thumbnails = r.message.thumbnails
 					frm.doc.project_photo = r.message.photo 

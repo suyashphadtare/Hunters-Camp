@@ -23,7 +23,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				pop_up = new frappe.SetFollowUps();
 			})	
 
-			frm.add_custom_button(__("schedule SE"), function() { 
+			frm.add_custom_button(__("schedule SE"), function() {
 				pop_up = new frappe.SEFollowUps();
 			})	
 			frm.add_custom_button(__("schedule ACM"), function() { 
@@ -41,16 +41,18 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		if(doc.property_type && doc.property_subtype && doc.operation && doc.location_name){
 			return frappe.call({
 					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
+					freeze: true,
+					freeze_message:"Building Search.....This Might Take Some Time",
 					args :{
 						"data":{
 						"operation": doc.operation,
 						"property_type": doc.property_type,
 						"property_subtype": doc.property_subtype,
 						"location": doc.location_name,
-						"budget_minimum": doc.budget_minimum,
-						"budget_maximum": doc.budget_maximum,
-						"area_minimum": doc.area_minimum,
-						"area_maximum": doc.area_maximum,
+						"min_budget": doc.budget_minimum,
+						"max_budget": doc.budget_maximum,
+						"min_area": doc.area_minimum,
+						"max_area": doc.area_maximum,
 						"city":doc.city,
 						"records_per_page": 10,
 						"page_number":1,
@@ -257,7 +259,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 
 				// SHARE FOLLOW UP FOR SE ---------------------------------------------
 				if(me.pop_up.fields_dict.type_followup.input.value=='Follow-Up For SE'){
-					
 					pd = cur_frm.doc.property_details
 					for(i=0;i<pd.length;i++){
 						if(pd[i].se_followup_date){
@@ -309,7 +310,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 
 
 				if(me.pop_up.fields_dict.type_followup.input.value=='Follow-Up For ACM'){
-					
 					for(i=0;i<pd.length;i++){
 						if(pd[i].acm_followup_date){
 							if(pd[i].acm_followup_date.length!=0 && pd[i].acm_visit){
@@ -456,6 +456,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							if(me.pop_up.fields_dict.followup_date.input.value){
 								return frappe.call({
 								method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_followup_date',
+								freeze: true,
+								freeze_message:"Updating Follow Date",
 								args: {
 									"prop_list":property_details_list,
 									"followup_type":me.pop_up.fields_dict.type_followup.input.value,
@@ -476,6 +478,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							if (property_details_list.length){
 								return frappe.call({
 									method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_details',
+									freeze: true,
+									freeze_message:"Updating Follow Date",
 									args: {
 										"prop_list":property_details_list,
 										"followup_type":me.pop_up.fields_dict.type_followup.input.value,
@@ -763,7 +767,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				primary_action_label: "Schedule SE",
 				primary_action: function() {
 					// Update Clearance Date of the checked vouchers
-					console.log(property_details_list)
 					if(!property_details_list.length)
 						msgprint("Please first select the property to schedule SE");
 					else{
@@ -772,6 +775,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							property_details_list = []
 							return frappe.call({
 								method: "hunters_camp.hunters_camp.doctype.lead_management.lead_management.make_se_visit",
+								freeze:true,
+								freeze_message:"Scheduling Site Visit....Please Wait",
 								args: {
 									"property_list":new_prop_list,
 									"assign_to": me.assign_to,
@@ -1077,6 +1082,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						if(me.assign_to.length>0 && me.pop_up.fields_dict.date.$input.val()){
 							return frappe.call({
 								method: "hunters_camp.hunters_camp.doctype.lead_management.lead_management.make_acm_visit",
+								freeze:true,
+								freeze_message:"Scheduling ACM Visit....Please Wait",
 								args: {
 									"property_list":property_details_list,
 									"assign_to": me.assign_to,
@@ -1243,7 +1250,7 @@ init_multiple_location =  function(frm){
 		args:{"city":frm.doc.city},
 		callback:function(r){
 			me.location_list = r.message
-			new LocationMultiSelect($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
+			LocationMultiSelect.prototype.init($(cur_frm.get_field("location_name").wrapper).find("input[data-fieldname=location_name]"), r.message)
 		}
 	})	
 }

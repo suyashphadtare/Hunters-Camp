@@ -138,7 +138,7 @@ $.extend(LocationMultiSelect.prototype ,{
 		    	}
 		    },       
 	    }).data("ui-autocomplete")._renderItem = function( ul, loc ) {
-	      		return $("<li>").append("<a><b>"+loc.location_id+"</b><br>"+loc.location_name+"</a>").appendTo(ul);
+				return $("<li>").append("<a><b>"+loc.location_id+"</b><br>"+loc.location_name+"</a>").appendTo(ul);
 	  		};
 	    //this.bind_events();
 

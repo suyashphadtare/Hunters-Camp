@@ -45,3 +45,12 @@ def update_lead_management_book_details(bank=None,cheque_no=None,payer=None,cheq
 	lm.description = description
 	lm.purchased_property_id = property_id
 	lm.save(ignore_permissions=True)
+
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	"""
+		Filter condition for user
+	"""
+	#pass
+	if not user == 'Administrator':
+		return """(`tabACM Visit`.visiter ='{0}')""".format(user)
