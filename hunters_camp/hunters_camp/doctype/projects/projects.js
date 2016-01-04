@@ -49,6 +49,11 @@ cur_frm.cscript.check_for_possession_status = function(frm){
 	frm.toggle_reqd("month", frm.doc.possession == 0);
 	frm.toggle_reqd("year", frm.doc.possession == 0);
 }
+cur_frm.fields_dict["amenities"].grid.get_field("amenity_name").get_query = function(doc) {
+	return{
+		filters:{"property_type":doc.project_type}
+	}	
+}
 
 
 project.operations = {

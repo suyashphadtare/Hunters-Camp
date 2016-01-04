@@ -48,6 +48,8 @@ frappe.ui.form.on("Property", "operation", function(frm) {
 	var me = this;
 	frm.toggle_reqd("month", frm.doc.operation==="Buy");
 	frm.toggle_reqd("year", frm.doc.operation==="Buy");
+	if (frm.doc.operation=='Rent') frm.fields_dict["price"].set_label("Expected Rent");
+	else frm.fields_dict["price"].set_label("Price");
 });
 
 

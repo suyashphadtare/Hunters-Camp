@@ -22,7 +22,7 @@ frappe.query_reports["Builder Properties"] = {
 			"options":"Property",
 			"get_query": function() {
 				return {
-					"query": "hunters_camp.hunters_camp.report.user_visit_log.user_visit_log.get_my_properties",
+					"query": "hunters_camp.hunters_camp.report.builder_properties.builder_properties.get_my_properties",
 					"filters":{"agent":frappe.query_report.filters_by_name.agent.get_value()}
 				}
 			}

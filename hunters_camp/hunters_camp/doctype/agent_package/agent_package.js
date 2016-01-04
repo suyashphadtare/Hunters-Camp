@@ -6,7 +6,7 @@
 frappe.ui.form.on("Agent Package", {
 	
 	onload: function(frm) {
-		console.log("in onload")
+		
 	},
 	refresh:function(frm){
 		if(!frm.doc.__islocal){
@@ -29,8 +29,6 @@ cur_frm.add_fetch("package_name", "posting_allowed", "package_posting_allowed")
 cur_frm.add_fetch("package_name", "validity_of_package", "package_validity")
 
 cur_frm.cscript.package_name = function(){
-		console.log("asdsda9879")
-		console.log(cur_frm)
 		cur_frm.cscript.start_date()
 }
 

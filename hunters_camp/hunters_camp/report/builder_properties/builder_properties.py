@@ -5,7 +5,7 @@ from __future__ import unicode_literals
 import frappe
 from frappe import _
 import json
-from  propshikari.propshikari.property_update_api import get_agent_properties
+from  propshikari.propshikari.property_update_api import get_builder_properties
 from  propshikari.propshikari.propshikari_api import get_property_of_given_id
 
 
@@ -21,9 +21,9 @@ def get_result(filters):
 	user_id = frappe.db.get_value("User", filters.get("agent"), "user_id")
 	res_list = []
 	if user_id:
-		request_data = json.dumps({"user_id":user_id, "property_id":filters.get("property_id")})
+		request_data = json.dumps({"user_id":user_id, "property_id":filters.get("property_id"),"builder":filters.get("agent")})
 		if not filters.get("property_id"):
-			response = get_agent_properties(request_data) 
+			response = get_builder_properties(request_data) 
 		else: 
 			response = get_property_of_given_id(request_data)
 			response["data"] = [response.get("data")]
@@ -34,7 +34,6 @@ def get_result(filters):
 			res_list.append([ property_id , prop.get("property_title"), prop.get("property_type"),
 							prop.get("property_subtype"), prop.get("property_subtype_option"), prop.get("location"), 
 							prop.get("status"),prop_visit_count])
-			
 	return res_list
 
 def get_property_visit_count(property_id):
@@ -70,8 +69,8 @@ def get_my_properties(doctype, txt, searchfield, start, page_len, filters):
 	user_id = frappe.db.get_value("User", filters.get("agent"), "user_id")
 	res_list = []
 	if user_id:
-		request_data = json.dumps({"user_id":user_id})
-		response = get_agent_properties(request_data)
+		request_data = json.dumps({"user_id":user_id,"builder":filters.get("agent")})
+		response = get_builder_properties(request_data)
 		for prop in response.get("data"):
 			res_list.append([prop.get("property_id"),prop.get("property_title")])
 	return res_list
