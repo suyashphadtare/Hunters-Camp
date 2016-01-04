@@ -217,7 +217,7 @@ Project = Class.extend({
 			<div id='buttons' >\
 		<p align='right'><input type='button' value='Prev' class='btn btn-default btn-sm btn-modal-close button-div' id='btn_prev'>\
 		<input type='button' value='Next' class='btn btn-default btn-sm btn-modal-close button-div' id='btn_next'></p>\
-		<p align='left'><b>Total Properties:</b> <span id='page'></span></p></div>").appendTo(me.body);
+		<p align='left'><b>Total Project(s):</b> <span id='page'></span></p></div>").appendTo(me.body);
 
 
 		$.each(values, function(i, d) {
@@ -233,10 +233,13 @@ Project = Class.extend({
 			 </div></div>\
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
-			if(d['full_size_images']!=null){
-				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['full_size_images'][0]+"/ style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
+			if(d['property_photo']){
+				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['project_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
 			}
-				
+			else{
+				$("<img id='theImg' src='/assets/hunters_camp/No_image_available.jpg' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
+			}
+
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist' >\
 			      <li role='presentation' class='active'><a href='#general"+""+i+"' id='home-tab' style='height:35px;margin-top:-3px;'role='tab' data-toggle='tab' aria-controls='home' aria-expanded='false'><i class='icon-li icon-file'></i>&nbsp;&nbsp;Project Details</a></li>\
 			      <li role='presentation' class=''><a href='#more"+""+i+"' role='tab' id='profile-tab' style='height:35px;margin-top:-3px;' data-toggle='tab' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-book'></i>&nbsp;&nbsp;Property Details</a></li>\

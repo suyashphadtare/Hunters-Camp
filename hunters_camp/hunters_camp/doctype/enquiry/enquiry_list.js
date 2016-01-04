@@ -51,7 +51,7 @@ enquiry.Composer = Class.extend({
 		});
  		if(count>0){
 			var count_wrapper = $(this.dialog.fields_dict.enquiry_count.wrapper).find("#count");
-			$('<b>Not Allowed Enquiry Count  :'+count+'</b>').appendTo(count_wrapper);
+			$('<b>Not Alloted Enquiry Count  :'+count+'</b>').appendTo(count_wrapper);
 			this.dialog.show();
 		}
 		else{

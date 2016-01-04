@@ -675,7 +675,7 @@ Property = Class.extend({
 			if(d['property_photo'])
 				$("<a class='thumbnail img-class'><img id='theImg' src="+d['property_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
 			else
-				$("<img id='theImg' src='/assets/hunters_camp/No_image_available.jpg'/ class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
+				$("<img id='theImg' src='/assets/hunters_camp/No_image_available.jpg' class='img-rounded' align='center'>").appendTo($(me.body).find("#"+i+""))
 				
 
 			$("<ul id='mytab' class='nav nav-tabs' role='tablist' >\
