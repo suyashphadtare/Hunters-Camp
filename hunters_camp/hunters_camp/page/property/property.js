@@ -257,6 +257,8 @@ Property = Class.extend({
 			search_dict["user_id"] = frappe.get_cookie("hc_user_id")
 			search_dict["sid"] = frappe.get_cookie("sid")
 			search_dict["location"] = me.filters.location.$input.val()
+			search_dict["city"] = $(me.filters.location.$input).attr("data-field-city")
+
 			frappe.call({
 				method:"hunters_camp.hunters_camp.page.property.property.search_property_with_advanced_criteria",
 				freeze: true,
@@ -654,7 +656,7 @@ Property = Class.extend({
 			<div id='buttons' >\
 		<p align='right'><input type='button' value='Prev' class='btn btn-default btn-sm btn-modal-close button-div' id='btn_prev'>\
 		<input type='button' value='Next' class='btn btn-default btn-sm btn-modal-close button-div' id='btn_next'></p>\
-		<p align='left'><b>Total Documents:</b> <span id='page'></span></p></div>").appendTo(me.body);
+		<p align='left'><b>Total Properties:</b> <span id='page'></span></p></div>").appendTo(me.body);
 
 
 		$.each(values, function(i, d) {

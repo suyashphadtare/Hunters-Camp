@@ -145,8 +145,21 @@ def search_property_with_advanced_criteria(property_dict):
 
 
 def get_location_subtype_options(property_dict):
-  property_dict["location"] = ','.join([loc for loc in property_dict.get("location","").split(',') if loc])
+  if property_dict["location"]:
+    property_dict["location"] = get_location_for_adv_search(property_dict)
   property_dict["property_subtype_option"] = ','.join([option for option in property_dict.get("property_subtype_option","").split(',') if option])  
+
+def get_location_for_adv_search(property_dict):
+  location_names = property_dict.get("location").split(',')
+  condition = ",".join('"{0}"'.format(loc) for loc in location_names)
+  area_list = frappe.db.sql(""" select * from 
+    `tabArea` where area in ({0}) and city_name='{1}'""".format(condition,property_dict.get("city")), as_dict=True)
+  if area_list:
+    return ",".join([ area.get("name") for area in area_list ])
+  else:
+    return ""
+       
+
 
 
 @frappe.whitelist()

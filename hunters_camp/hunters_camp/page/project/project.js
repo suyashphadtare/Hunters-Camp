@@ -50,7 +50,7 @@ Project = Class.extend({
 					fieldname: "operation",
 					label: __("Operation"),
 					fieldtype: "Select",
-					options: "\nBuy\nRent"
+					options: "\nBuy"
 		});
 		me.filters.budget_min = me.wrapper.page.add_field({
 					fieldname: "budget_min",
@@ -103,7 +103,7 @@ Project = Class.extend({
 		me.search.$input.on("click", function() {
 			if(me.filters.project_type.$input.val() && me.filters.project_subtype.$input.val()){
 				return frappe.call({
-					method:'propshikari.versions.v1.search_project',
+					method:'hunters_camp.hunters_camp.page.project.project.build_data_to_search_with_location_names',
 					args :{
 						"data":{
 						"project_type": me.filters.project_type.$input.val(),
@@ -114,6 +114,7 @@ Project = Class.extend({
 						"budget_maximum": me.filters.budget_max.$input.val(),
 						"area_minimum": me.filters.area_min.$input.val(),
 						"area_maximum": me.filters.area_max.$input.val(),
+						"city":$(me.filters.location.$input).attr("data-field-city"),
 						"records_per_page": 5,
 						"page_number":1,
 						"request_source":'Hunterscamp',
@@ -127,7 +128,7 @@ Project = Class.extend({
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
-								msgprint("Property is not available related to search criteria which you have specified.")
+								msgprint("Projects is not available related to search criteria which you have specified.")
 							}		
 					}
 
@@ -216,7 +217,7 @@ Project = Class.extend({
 			<div id='buttons' >\
 		<p align='right'><input type='button' value='Prev' class='btn btn-default btn-sm btn-modal-close button-div' id='btn_prev'>\
 		<input type='button' value='Next' class='btn btn-default btn-sm btn-modal-close button-div' id='btn_next'></p>\
-		<p align='left'><b>Total Documents:</b> <span id='page'></span></p></div>").appendTo(me.body);
+		<p align='left'><b>Total Properties:</b> <span id='page'></span></p></div>").appendTo(me.body);
 
 
 		$.each(values, function(i, d) {

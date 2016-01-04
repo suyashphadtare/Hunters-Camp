@@ -565,7 +565,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
-						console.log($(pop_up.body).find("#property_details tbody tr").last().find("#followup_status"))
 						$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").val(pd[i].share_followup_status)
 					}
 					
@@ -602,7 +601,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
 						if(pd[i].se_status == 'Cancelled By SE' || pd[i].se_status == 'Cancelled By Client'){
-							console.log("in if")
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
 						}
 					}
@@ -618,7 +616,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit){
+					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close'){
 
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
@@ -633,7 +631,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 								<option value='Cancelled By ACM'>Cancelled By ACM</option>\
 								</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
-						if(pd[i].acm_status == 'Close'){
+						if(pd[i].acm_status == 'Close' && pd[i].acm_followup_status !='Close'){
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Close'>Close</option>")
 						}
 					}
@@ -1122,7 +1120,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				}
 			}
 			$('#container').remove()
-			console.log(["acm_visit",acm_final_list])
 			if(acm_final_list.length>0){
 				$('#container').remove()
 				me.append_pop_up_dialog_body(me.pop_up,doc)
