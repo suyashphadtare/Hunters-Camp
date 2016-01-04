@@ -233,7 +233,7 @@ Project = Class.extend({
 			 </div></div>\
 			 </div></li>").appendTo($(me.body).find("#mytable"))
 
-			if(d['property_photo']){
+			if(d['project_photo']){
 				$("<a href='#' class='thumbnail img-class'><img id='theImg' src="+d['project_photo']+" style='height:110px; align:center'></a>").appendTo($(me.body).find("#"+i+""))
 			}
 			else{
