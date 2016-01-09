@@ -36,15 +36,15 @@ Project = Class.extend({
 					fieldname: "project_subtype",
 					label: __("Project Subtype"),
 					fieldtype: "Link",
-					options: "Property Subtype"
-			// 		"get_query": function() {
-			// 	return {
-			// 		"doctype": "Property Subtype",
-			// 		"filters": {
-			// 			"property_type": me.filters.property_type.$input.val(),
-			// 		}
-			// 	}
-			// }
+					options: "Property Subtype",
+					"get_query": function() {
+						return {
+							"doctype": "Property Subtype",
+							"filters": {
+								"property_type": me.filters.project_type.$input.val(),
+							}
+						}
+					}
 		});
 		me.filters.operation = me.wrapper.page.add_field({
 					fieldname: "operation",
@@ -128,6 +128,9 @@ Project = Class.extend({
 								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
+								$("#property").remove();
+								$("#buttons").remove();
+								$("#sorting").remove();
 								msgprint("Projects is not available related to search criteria which you have specified.")
 							}		
 					}
@@ -520,9 +523,7 @@ Project = Class.extend({
 			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting');
 		}
 		else if($("#select_alert").val()=='rate'){
-			console.log($("#select_alert").val())
 			me.property_data.sort(rate_sort_asc);
-			console.log(me.property_data)
 			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting');
 		}
 

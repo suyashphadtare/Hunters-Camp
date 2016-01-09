@@ -208,6 +208,18 @@ def get_data():
 					"is_query_report": True
 				},
 				{
+					"type": "report",
+					"name": "Groups",
+					"doctype":"Group",
+					"is_query_report": True
+				},
+				{
+					"type": "report",
+					"name": "Groups User",
+					"doctype":"Group User",
+					"is_query_report": True
+				},
+				{
 					"type": "page",
 					"name": "hc_summary",
 					"label": _("Summary Report"),
