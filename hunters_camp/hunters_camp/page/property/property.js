@@ -279,7 +279,7 @@ Property = Class.extend({
 				callback:function(r){
 					if(r.message['total_records']>0){
 						me.filters.area_max.input.value = "2"
-						me.set_advance_filter_values_on_basic_search(fields)
+						me.set_advance_filter_values_on_basic_search(fields,search_dict)
 						me.render(r.message['data'],r.message['total_records'])
 					}
 					else{
@@ -603,11 +603,18 @@ Property = Class.extend({
 
 		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
 	},
-	set_advance_filter_values_on_basic_search:function(fields){
-		field_list  = ["property_type","property_subtype","property_subtype_option",
-		"budget_maximum","budget_minimum","area_minimum","area_maximum"]
-		$.each(field_list,function(index, field)){
-				
+	set_advance_filter_values_on_basic_search:function(fields,search_dict){
+		var me = this;
+		field_list  = [{"ffn":"property_type","afn":"property_type"},
+			{"ffn":"property_subtype","afn":"property_subtype"},
+			{"ffn":"property_subtype_option","afn":"property_subtype_option"},
+			{"afn":"min_budget","ffn":"budget_min"},
+			{"afn":"max_budget","ffn":"budget_max"},
+			{"afn":"min_area","ffn":"area_min"},
+			{"afn":"max_area","ffn":"area_max"},
+			{"afn":"operation","ffn":"operation"}]
+		$.each(field_list,function(index, field){
+			me.filters[field["ffn"]].input.value = fields[field["afn"]].$input[0].value
 		})
 	},
 	render: function(prop_list,total_records) {
