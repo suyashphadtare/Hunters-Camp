@@ -162,8 +162,8 @@ def user_query(doctype, txt, searchfield, start, page_len, filters):
 #Get count of non allocated enquiries---
 @frappe.whitelist(allow_guest=True)
 def get_non_allocated_enquiry():
-	count =  frappe.db.sql("""select count(name) from `tabEnquiry` where enquiry_status='Not Allocated'
-					order by creation desc """,as_list=1)
+	count =  frappe.db.sql("""select count(name) from `tabEnquiry` where enquiry_status='Not Allocated' and user='{0}'
+					order by creation desc """.format(frappe.session.user),as_list=1)
 	if count:
 		if count[0][0]!=0:
 			return count[0][0]
@@ -281,3 +281,12 @@ def cretae_to_do(assign_to,lead_management):
 	d.assigned_by = frappe.session.user
 	d.save(1)
 
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+	"""
+		Filter condition for user
+	"""
+	#pass
+	print "hhuu"
+	if not user == 'Administrator':
+		return """(`tabEnquiry`.user ='{0}')""".format(user)
