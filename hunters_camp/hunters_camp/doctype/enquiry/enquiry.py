@@ -175,8 +175,8 @@ def get_non_allocated_enquiry():
 @frappe.whitelist(allow_guest=True)
 def consultant_allocation(count,allocation_count):
 	enquiry_list=[]
-	enquiry_form= frappe.db.sql("""select name from `tabEnquiry` where enquiry_status='Not Allocated' order by creation limit %s
-								"""%allocation_count,as_list=1)
+	enquiry_form= frappe.db.sql("""select name from `tabEnquiry` where enquiry_status='Not Allocated' and user='%s' order by creation limit %s
+								"""%(frappe.session.user,allocation_count),as_list=1)
 	if len(enquiry_form)>0:
 
 		for name in enquiry_form:
