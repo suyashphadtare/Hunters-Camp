@@ -39,12 +39,12 @@ Property = Class.extend({
 					fieldtype: "Link",
 					options: "Property Subtype",
 					"get_query": function() {
-				return {
-					"doctype": "Property Subtype",
-					"filters": {
-						"property_type": me.filters.property_type.$input.val(),
-					}
-				}
+						return {
+							"doctype": "Property Subtype",
+							"filters": {
+								"property_type": me.filters.property_type.$input.val(),
+							}
+						}
 			}
 		});
 		me.filters.operation = me.wrapper.page.add_field({
@@ -61,8 +61,7 @@ Property = Class.extend({
 		me.filters.property_subtype_option = me.wrapper.page.add_field({
 					fieldname: "property_subtype_option",
 					label: __("BHK"),
-					fieldtype: "Link",
-					options: "Property Subtype Option"
+					fieldtype: "Data"
 		});
 		me.filters.budget_min = me.wrapper.page.add_field({
 					fieldname: "budget_min",
@@ -131,6 +130,7 @@ Property = Class.extend({
 		$('[data-fieldname=share]').css('display','none')
 		$('[data-fieldname=lead_management]').css('display','none')
 		this.init_for_multiple_location()
+		this.init_for_property_type_change_for_filters()
 		// SEARCH CLICK
 		//var me = this;
 		me.search.$input.on("click", function() {
@@ -194,7 +194,7 @@ Property = Class.extend({
 							options:"\nBuy\nRent", reqd:1, fieldname:"operation"},
 						{fieldtype:"Int", label:__("Min Area"),
 						 fieldname:"min_area"},	
-						{fieldtype:"Select", label:__("Minimum Budget"),options:"\n0\n25Lac\n50Lac\n75Lac\n1Cr\n2Cr\n3Cr\n4Cr\n5Cr\n10Cr",
+						{fieldtype:"Int", label:__("Minimum Budget"),
 						 reqd:0, fieldname:"min_budget"},
 						{fieldtype:"Select", label:__("Transaction Type")
 							,options:"\nResale\nNew Booking",reqd:0, fieldname:"transaction_type"},
@@ -206,12 +206,20 @@ Property = Class.extend({
 						{fieldtype:"Column Break",
 							reqd:0, fieldname:"cl"},
 						{fieldtype:"Link", label:__("Property Sub Type"),
-						options:"Property Subtype", reqd:1, fieldname:"property_subtype"},
+						options:"Property Subtype", reqd:1, fieldname:"property_subtype",
+							"get_query": function() {
+							return {
+								"doctype": "Property Subtype",
+								"filters": {
+									"property_type": d.fields_dict.property_type.$input.val(),
+								}}
+							}
+						},
 						{fieldtype:"Data", label:__("Property SubType option"),
 							fieldname:"property_subtype_option"},
 						{fieldtype:"Int", label:__("Max Area"),
 						 fieldname:"max_area"},	
-						{fieldtype:"Select", label:__("Maximum Budget"),options:"\n0\n25Lac\n50Lac\n75Lac\n1Cr\n2Cr\n3Cr\n4Cr\n5Cr\n10Cr", reqd:0, fieldname:"max_budget"},
+						{fieldtype:"Int", label:__("Maximum Budget"),reqd:0, fieldname:"max_budget"},
 						{fieldtype:"Date", label:__("Posted Date"),
 							reqd:0, fieldname:"posting_date"},
 						{fieldtype:"Data", label:__("Possession"),
@@ -229,12 +237,17 @@ Property = Class.extend({
 		fields=d.fields_dict
 		$('[data-fieldname=submit]').css('display','none')
 
+
 		fields.property_type.input.value = me.filters.property_type.$input.val()
 		fields.property_subtype.input.value = me.filters.property_subtype.$input.val()
+		fields.property_subtype_option.input.value = me.filters.property_subtype_option.$input.val()
 		fields.operation.input.value = me.filters.operation.$input.val()
 		fields.min_budget.input.value = me.filters.budget_min.$input.val()
 		fields.max_budget.input.value = me.filters.budget_max.$input.val()
+		fields.min_area.input.value = me.filters.area_min.$input.val()
+		fields.max_area.input.value = me.filters.area_max.$input.val()
 
+		
 		$('[data-fieldname=submit]').css('display','block')
 		d.show();
 		$(d.body).find("input[data-fieldname=possession]").datepicker({ dateFormat: 'mm-yy' });
@@ -265,6 +278,8 @@ Property = Class.extend({
 				args:{"property_dict":search_dict},
 				callback:function(r){
 					if(r.message['total_records']>0){
+						me.filters.area_max.input.value = "2"
+						me.set_advance_filter_values_on_basic_search(fields)
 						me.render(r.message['data'],r.message['total_records'])
 					}
 					else{
@@ -486,19 +501,39 @@ Property = Class.extend({
 	init_for_property_type_change:function(dialog, dialog_fields){
 		var amenity_obj = ''
 		var subtype_obj = ''
-		$(dialog.body).find("input[data-fieldname=property_type]").change(function(){
-			$(dialog.body).find("input[data-fieldname=amenities]").val("")
-			$(dialog.body).find("input[data-fieldname=property_subtype_option]").val("")
+		$(dialog.body).find("input[data-fieldname=property_type]").blur(function(){
 			frappe.call({
 				method:"hunters_camp.hunters_camp.page.property.property.get_amenities",
 				args:{"property_type":$(this).val()},
 				callback:function(r){
+					$(dialog.body).find("input[data-fieldname=amenities]").val("")
+					$(dialog.body).find("input[data-fieldname=property_subtype_option]").val("")
 					if (!amenity_obj && !subtype_obj){
 						amenity_obj = new Multiselect($(dialog.body).find("input[data-fieldname=amenities]"), r.message.amenities)		
 						subtype_obj = new Multiselect($(dialog.body).find("input[data-fieldname=property_subtype_option]"), r.message.subtype_options)
 					}
 					else{
 						amenity_obj.source = r.message.amenities
+						subtype_obj.source = r.message.subtype_options
+					}
+					
+				}
+			})
+		})
+	},
+	init_for_property_type_change_for_filters:function(){
+		var subtype_obj = ''
+		var me = this;
+		$(me.wrapper).find("input[data-fieldname=property_type]").change(function(){
+			$(me.wrapper).find("input[data-fieldname=property_subtype_option]").val("")
+			frappe.call({
+				method:"hunters_camp.hunters_camp.page.property.property.get_amenities",
+				args:{"property_type":$(this).val()},
+				callback:function(r){
+					if (!subtype_obj){
+						subtype_obj = new Multiselect($(me.wrapper).find("input[data-fieldname=property_subtype_option]"), r.message.subtype_options)
+					}
+					else{
 						subtype_obj.source = r.message.subtype_options
 					}
 					
@@ -558,6 +593,7 @@ Property = Class.extend({
 		me.filters.area_max.input.value=frappe.route_options['area_maximum'] ? frappe.route_options['area_maximum'] : null
 		me.filters.area_min.input.value=frappe.route_options['area_minimum'] ? frappe.route_options['area_minimum'] : null
 		me.lead_management.input.value=frappe.route_options['lead_management']
+		me.filters.property_subtype_option.input.value=frappe.route_options['subtype_option']
 
 		if(me.lead_management.$input.val().length != 0)
 			$('[data-fieldname=search]').css('display','none')
@@ -567,7 +603,13 @@ Property = Class.extend({
 
 		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
 	},
-	
+	set_advance_filter_values_on_basic_search:function(fields){
+		field_list  = ["property_type","property_subtype","property_subtype_option",
+		"budget_maximum","budget_minimum","area_minimum","area_maximum"]
+		$.each(field_list,function(index, field)){
+				
+		})
+	},
 	render: function(prop_list,total_records) {
 		var me = this;
 		var current_page = 1;

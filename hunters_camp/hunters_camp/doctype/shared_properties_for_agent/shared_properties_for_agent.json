@@ -353,7 +353,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2015-12-28 12:26:21.353178", 
+ "modified": "2016-01-11 14:52:59.167334", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Shared Properties For Agent", 
@@ -404,5 +404,6 @@
  "read_only": 0, 
  "read_only_onload": 0, 
  "sort_field": "modified", 
- "sort_order": "DESC"
+ "sort_order": "DESC", 
+ "title_field": "property_title"
 }

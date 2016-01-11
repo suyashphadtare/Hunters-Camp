@@ -48,6 +48,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						"operation": doc.operation,
 						"property_type": doc.property_type,
 						"property_subtype": doc.property_subtype,
+						"property_subtype_option":doc.property_subtype_option,
 						"location": doc.location_name,
 						"min_budget": doc.budget_minimum,
 						"max_budget": doc.budget_maximum,
@@ -92,6 +93,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"lead_management": doc.name,
 													"property_type": doc.property_type,
 													"property_subtype": doc.property_subtype,
+													"subtype_option":doc.property_subtype_option,
 													"location": doc.location_name,
 													"operation":doc.operation,
 													"budget_minimum": doc.budget_minimum,
@@ -144,6 +146,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 													"property_subtype": doc.property_subtype,
 													"location": doc.location_name,
 													"operation":doc.operation,
+													"subtype_option":doc.property_subtype_option,
 													"budget_minimum": doc.budget_minimum,
 													"budget_maximum": doc.budget_maximum,
 													"area_minimum": doc.area_minimum,
@@ -161,6 +164,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 									args :{
 										"property_type": doc.property_type,
 										"property_subtype": doc.property_subtype,
+										"property_subtype_option":doc.property_subtype_option,
 										"operation":doc.operation,
 										"location": doc.location_name,
 										"budget_minimum": doc.budget_minimum,
@@ -591,7 +595,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit){
+					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\

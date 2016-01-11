@@ -104,6 +104,8 @@ def share_property_to_agents(email_id, comments, sid, user_id):
 
 @frappe.whitelist()
 def get_amenities(property_type):
+  print property_type
+  print "sahgdsjhgdsaghj"
   amenities = frappe.db.sql(" select amenity_name from `tabAmenities` where property_type='{0}' ".format(property_type), as_list=1)
   subtype_options = frappe.db.sql(" select property_subtype_option from `tabProperty Subtype Option` where property_type='{0}' ".format(property_type), as_list=1)
   response_dict = {}
@@ -130,8 +132,8 @@ def search_property_with_advanced_criteria(property_dict):
                     "2Cr":20000000, "3Cr":30000000, "4Cr":40000000, "5Cr":50000000, "10Cr":100000000}
   amenities_list = [amenity for amenity in property_dict.get("amenities","").split(',') if amenity]        
   property_dict["amenities"] = amenities_list
-  property_dict["min_budget"] = budget_mapper.get(property_dict.get("min_budget", ""),0)
-  property_dict["max_budget"] = budget_mapper.get(property_dict.get("max_budget", ""),0)
+  property_dict["min_budget"] = int(property_dict.get("min_budget",0))
+  property_dict["max_budget"] = int(property_dict.get("max_budget",0))
   property_dict["records_per_page"] = 10
   property_dict["page_number"] = 1
   property_dict["request_source"] = "Hunterscamp"

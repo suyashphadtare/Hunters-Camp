@@ -94,7 +94,6 @@ prop_operations = {
 	},
 	post_property:function(frm,doc){
 		var me = this
-		console.log("post property")
 		if(me.check_mandatory(frm)) {
 			frappe.call({
 				freeze: true,
@@ -333,15 +332,11 @@ prop_operations = {
 	init_delete_property_photo:function(frm){
 		var me = this
 		$(".close").click(function(){
-			console.log($(this).siblings())
 			var inner_me = this
 			frappe.confirm(__("Are you sure you want to delete Property Photo"), function() {
-				console.log("yes")
 				if ($(inner_me).siblings().hasClass("prj_img")){
-					console.log("in if")
 					me.delete_property_photo(frm, inner_me)
 				}else{
-					console.log("in else")
 					img_src = $(inner_me).siblings().attr("src")
 					index = 0
 					$.each(frm.doc.property_photos, function(i,value){
@@ -370,7 +365,6 @@ prop_operations = {
 			method:"hunters_camp.hunters_camp.doctype.property.property.delete_photo",
 			args: {doc: frm.doc, sid:frappe.get_cookie('sid'), img_url:img_src},
 			callback: function(r) {
-				console.log(r.message)
 				frappe.msgprint(r.message.message)
 				frm.doc.full_size_images = r.message.full_size
 				frm.doc.thumbnails = r.message.thumbnails
@@ -439,7 +433,6 @@ frappe.ui.form.on("Property", "attach_image", function(frm) {
 			msgprint(__("Please attach a file or set a URL"));
 		},
 		callback: function(file_data) {
-			console.log("in callback")
 			// console.log(file_data)
 			me.process_images(frm,file_data)
 			me.display_thumbnail(frm)
@@ -472,7 +465,6 @@ process_images = function(frm,file_data){
 					img_list.push.apply(img_list, file_data)
 					frm.doc.property_photos = img_list
 				}
-			console.log(frm.doc.property_photos)
 			show_list.push.apply(show_list, $.map(file_data, function(d){ return d.file_name }))
 			frm.doc.photo_names = show_list.join(',')
 			refresh_field(["property_photos","photo_names"])
@@ -499,8 +491,8 @@ display_existing_images = function(frm, wrapper){
 		$.each(thumbnails_list ,function(index, thumbnail){
 			$("<div class='img-wrap'> <span class='close'>&times;</span><img class='imageThumb prj_img' src="+thumbnail+" ></div>").appendTo(wrapper);
 		})
-		prop_operations.init_delete_property_photo(frm)		
 	}
+	prop_operations.init_delete_property_photo(frm)
 }
 
 
