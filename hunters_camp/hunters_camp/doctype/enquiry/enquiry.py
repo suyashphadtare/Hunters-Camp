@@ -287,6 +287,5 @@ def get_permission_query_conditions(user):
 		Filter condition for user
 	"""
 	#pass
-	print "hhuu"
 	if not user == 'Administrator':
 		return """(`tabEnquiry`.user ='{0}')""".format(user)
