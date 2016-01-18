@@ -30,6 +30,11 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				pop_up = new frappe.ACMFollowUps();
 			})	
 		}
+		if (frappe.get_prev_route() && (frappe.get_prev_route()[0]=='property')){
+			frappe.ui.toolbar.clear_cache()
+			//console.log("hiihih")	
+		}
+		//frappe.ui.toolbar.clear_cache()
 	}
 	if (frm.doc.city){
 		var me = this;
@@ -78,33 +83,32 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										callback: function(r,rt) {
 											var final_property_result = {}
 											if(r.message){
+												console.log(r.message)
 												$.each(r.message['property_id'],function(i, property){
 		  											final_property_result[(property['property_id'].trim())]=''
 		  											
 												});
-
 												final_result = jQuery.grep(result, function( d ) {
 		 											return !(d['property_id'] in final_property_result)
 												});
-
 												if(final_result.length>0){
-													final_result=final_result
+													final_result = final_result
 													frappe.route_options = {
-													"lead_management": doc.name,
-													"property_type": doc.property_type,
-													"property_subtype": doc.property_subtype,
-													"subtype_option":doc.property_subtype_option,
-													"location": doc.location_name,
-													"operation":doc.operation,
-													"budget_minimum": doc.budget_minimum,
-													"budget_maximum": doc.budget_maximum,
-													"area_minimum": doc.area_minimum,
-													"area_maximum": doc.area_maximum,
-													"total_records":total_records,
-													"data": final_result,
-													"city":doc.city
-												};
-												frappe.set_route("property", "Hunters Camp");
+														"lead_management": doc.name,
+														"property_type": doc.property_type,
+														"property_subtype": doc.property_subtype,
+														"subtype_option":doc.property_subtype_option,
+														"location": doc.location_name,
+														"operation":doc.operation,
+														"budget_minimum": doc.budget_minimum,
+														"budget_maximum": doc.budget_maximum,
+														"area_minimum": doc.area_minimum,
+														"area_maximum": doc.area_maximum,
+														"total_records":total_records,
+														"data": final_result,
+														"city":doc.city
+													};
+													frappe.set_route("property","Hunters Camp");	
 												}
 												else {
 												
@@ -141,21 +145,21 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 									});		
 								}
 								frappe.route_options = {
-													"lead_management": doc.name,
-													"property_type": doc.property_type,
-													"property_subtype": doc.property_subtype,
-													"location": doc.location_name,
-													"operation":doc.operation,
-													"subtype_option":doc.property_subtype_option,
-													"budget_minimum": doc.budget_minimum,
-													"budget_maximum": doc.budget_maximum,
-													"area_minimum": doc.area_minimum,
-													"area_maximum": doc.area_maximum,
-													"total_records": total_records,
-													"data": r.message['data'],
-													"city":doc.city
-												};
-												frappe.set_route("property", "Hunters Camp");
+									"lead_management": doc.name,
+									"property_type": doc.property_type,
+									"property_subtype": doc.property_subtype,
+									"location": doc.location_name,
+									"operation":doc.operation,
+									"subtype_option":doc.property_subtype_option,
+									"budget_minimum": doc.budget_minimum,
+									"budget_maximum": doc.budget_maximum,
+									"area_minimum": doc.area_minimum,
+									"area_maximum": doc.area_maximum,
+									"total_records": total_records,
+									"data": r.message['data'],
+									"city":doc.city
+								};
+								frappe.set_route("property", "Hunters Camp");
 							}
 							else{
 								// email to admin
@@ -595,7 +599,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested' || pd[i].se_follow_up_status=='Another Follow Up'){
+					if((pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested') || pd[i].se_follow_up_status=='Another Follow Up'){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
@@ -608,9 +612,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
-						console.log(pd[i].se_follow_up_status)
 						if((pd[i].se_status == 'Cancelled By SE' || pd[i].se_status == 'Cancelled By Client') && pd[i].se_follow_up_status !='Another Follow Up'){
-							console.log(pd[i].se_follow_up_status)
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
 						}
 						if(pd[i].se_follow_up_status == 'Not Intrested'){
@@ -682,9 +684,9 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			me.assign_to=''
 			
 			for(i=0;i<pd.length;i++){
-				if(pd[i].share_followup_status=='Intrested' && !pd[i].site_visit)
+				if((pd[i].share_followup_status =='Intrested' && !pd[i].site_visit) || (pd[i].share_followup_status =='Intrested' && (pd[i].se_status=="Cancelled By SE" || pd[i].se_status=="Cancelled By Client"))){
 					se_list.push(pd[i].name)
-
+				}	
 			}
 			if(se_list.length>0){
 				me.pop_up = this.show_pop_up_dialog(cur_frm.doc,me);
@@ -936,7 +938,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].share_followup_status =='Intrested' && !pd[i].site_visit){
+					if((pd[i].share_followup_status =='Intrested' && !pd[i].site_visit) || (pd[i].share_followup_status =='Intrested' && (pd[i].se_status=="Cancelled By SE" || pd[i].se_status=="Cancelled By Client"))){
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_name'>"+ pd[i].property_name +"</td>\
@@ -964,8 +966,9 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			me.assign_to=''
 			
 			for(i=0;i<pd.length;i++){
-				if(pd[i].se_follow_up_status=='Intrested' && !pd[i].acm_visit)
+				if(pd[i].acm_followup_status =='Reschedule' || (pd[i].se_follow_up_status =='Intrested' && !pd[i].acm_visit)){
 					se_list.push(pd[i].name)
+				}
 
 			}
 			if(se_list.length>0){

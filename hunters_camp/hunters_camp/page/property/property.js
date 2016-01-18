@@ -313,6 +313,8 @@ Property = Class.extend({
 				if (me.lead_management.$input.val().length != 0){
 					return frappe.call({
 						method:'hunters_camp.hunters_camp.page.property.property.add_properties_in_lead_management',
+						freeze:true,
+						freeze_message:"Sharing Properties...Please Wait",
 						args :{
 							"lead_management":me.lead_management.$input.val(),
 							"property_resultset": final_result
@@ -600,7 +602,7 @@ Property = Class.extend({
 		else
 			$('[data-fieldname=search]').css('display','block')
 
-
+		console.log([frappe.route_options['total_records'],"dsa"])
 		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
 	},
 	set_advance_filter_values_on_basic_search:function(fields,search_dict){
