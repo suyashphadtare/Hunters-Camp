@@ -595,7 +595,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit){
+					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested' || pd[i].se_follow_up_status=='Another Follow Up'){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
@@ -608,7 +608,12 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 							<option value='Another Follow Up'>Another Follow Up</option>\
 							</select></td>\
 							</tr>").appendTo($("#property_details tbody"));
-						if(pd[i].se_status == 'Cancelled By SE' || pd[i].se_status == 'Cancelled By Client'){
+						console.log(pd[i].se_follow_up_status)
+						if((pd[i].se_status == 'Cancelled By SE' || pd[i].se_status == 'Cancelled By Client') && pd[i].se_follow_up_status !='Another Follow Up'){
+							console.log(pd[i].se_follow_up_status)
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
+						}
+						if(pd[i].se_follow_up_status == 'Not Intrested'){
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
 						}
 					}
@@ -616,16 +621,12 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			};
 
 		},
-
 		append_acm_property_details: function(doc,pop_up){
-			
 			var pd = doc.property_details;
-
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close'){
-
+					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close' && pd[i].acm_followup_status !='Reschedule'){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
@@ -642,12 +643,17 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						if(pd[i].acm_status == 'Close' && pd[i].acm_followup_status !='Close'){
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Close'>Close</option>")
 						}
+						if((pd[i].acm_status == 'Cancelled by ACM' || pd[i].acm_status == 'Cancelled by Lead') && pd[i].acm_followup_status!='Another Follow Up'){
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
+						}
+						if((pd[i].acm_status == 'Cancelled by ACM' || pd[i].acm_status == 'Cancelled by Lead') && pd[i].acm_followup_status=='Another Follow Up'){
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Reschedule'>Reschedule</option>")
+						}
 					}
 				}
 			};
 
 		},
-
 		check_all_jvs: function(){
 			property_details_list = [];
 			if($(this.pop_up_body).find("input#check_all").is(":checked")){
@@ -660,8 +666,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 				$("input#_select").prop("checked",false)
 				property_details_list = [];
 			}
-	}
-
+		}
 	});
 
 	var se_list = []
@@ -927,9 +932,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		},
 
 		append_se_popup_fields: function(doc){
-			
 			var pd = doc.property_details;
-
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
@@ -937,15 +940,11 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_name'>"+ pd[i].property_name +"</td>\
-							<td align='center' id='status'>"+pd[i].share_followup_status+"</td>\
+							<td align='center' id='status'>"+ pd[i].share_followup_status +"</td>\
 							</tr>").appendTo($("#property_details tbody"));
 					}
-					
 				}
-
-				
 			};
-
 		},
 
 		});
@@ -1210,7 +1209,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].se_follow_up_status =='Intrested' && !pd[i].acm_visit){
+					if(pd[i].acm_followup_status =='Reschedule' || (pd[i].se_follow_up_status =='Intrested' && !pd[i].acm_visit)){
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
 							<td align='center' id ='property_name'>"+ pd[i].property_name +"</td>\
@@ -1219,10 +1218,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					}
 					
 				}
-
-				
 			};
-
 		},
 
 		});

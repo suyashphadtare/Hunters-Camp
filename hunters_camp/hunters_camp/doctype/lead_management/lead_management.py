@@ -323,9 +323,9 @@ def update_followup_date(prop_list=None,followup_type=None,followup_date=None,do
 			else:
 				lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			lead_property.save(ignore_permissions=True)
-	lmdoc = frappe.get_doc("Lead Management",doc_name)
-	lmdoc.lead_status = 'Processed'
-	lmdoc.save(ignore_permissions=True)
+	# lmdoc = frappe.get_doc("Lead Management",doc_name)
+	# lmdoc.lead_status = 'Processed'
+	# lmdoc.save(ignore_permissions=True)
 			
 
 def has_permission(doc, ptype, user):
