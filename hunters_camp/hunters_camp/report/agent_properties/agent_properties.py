@@ -55,7 +55,8 @@ def get_conditions(filters):
 
 
 def get_columns():
-	return [_("Property Id") + ":Data:200",
+	return [
+			_("Property Id") + ":Data:200",
 			_("Property Title") + ":Data:200",
 			_("Property Type") + ":Data:120", 
 			_("Property Subtype") + ":Data:160",
@@ -81,5 +82,8 @@ def get_my_properties(doctype, txt, searchfield, start, page_len, filters):
 def get_agent_list(doctype, txt, searchfield, start, page_len, filters):
 	if frappe.db.get_value("Agent", frappe.session.user, "name"):
 		return [[frappe.session.user]]
-	return frappe.get_all("Agent",fields= ['name'], as_list=1)
+	elif frappe.session.user == 'Administrator':
+		return frappe.get_all("Agent",fields= ['name'], as_list=1)
+	else:
+		[[]]
 
