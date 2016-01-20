@@ -128,7 +128,11 @@ def get_data():
 					"name": "Property Subtype Option",
 					"description": _("Sub Type Option of Properties"),
 				},
-				
+				{
+					"type": "doctype",
+					"name": "Package",
+					"description": _("Pakages for Agents"),
+				},
 			]
 		},
 		{
@@ -170,6 +174,12 @@ def get_data():
 					"name": "Message Templates",
 					"label": _("SMS Templates"),
 					"description": _("Templates for SMS"),
+				},
+				{
+					"type": "doctype",
+					"name": "SMS Settings",
+					"label": _("SMS Settings"),
+					"description": _("Configration of SMS Gateway"),
 				}
 			]
 		},
@@ -225,6 +235,12 @@ def get_data():
 					"label": _("Summary Report"),
 					"icon": "icon-bar-chart",
 				},
+				{
+					"type": "doctype",
+					"name": "SMS Log",
+					"label": _("SMS Log"),
+					"description": _("Logs of SMSes Sent through System"),
+				}
 			]
 		},
 

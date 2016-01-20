@@ -57,7 +57,7 @@ frappe.ui.form.on("ACM Visit", "refresh", function(frm) {
 								"amount":d.fields_dict.amount.$input.val(),
 								"description":d.fields_dict.description.$input.val(),
 								"name": cur_frm.doc.name,
-								"lead_management_id": cur_frm.doc.lead_management_id
+								"lead_management_id": cur_frm.doc.child_id
 							},
 							callback: function(r) {
 								//cur_frm.refresh_fields();

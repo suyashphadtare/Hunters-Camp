@@ -27,7 +27,11 @@ class LeadManagement(Document):
 			if self.get(max_field[0]) < self.get(min_field):
 				frappe.throw("{0} must be greater than {1}".format(max_field[1], max_field[2]))
 
-
+	def on_update(self):
+		if self.get("property_details") and self.lead_status == "Unprocessed":
+			self.lead_status = "Processed"
+			frappe.db.set_value("Lead Management",self.name,"lead_status","Processed")
+			
 
 @frappe.whitelist()
 def get_se_details(assign_to=None):
@@ -262,7 +266,7 @@ def get_diffrent_property(data=None,lead_management=None):
 
 @frappe.whitelist()
 def get_administartor(property_type=None,property_subtype=None,location=None,operation=None,
-						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None):
+						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None,lead_name=None):
 	
 	users =  frappe.db.sql("""select parent from `tabUserRole` where role='System Manager' 
 						and parent!='Administrator'""",as_list=1)
@@ -270,16 +274,18 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 		for user_id in users:
 			create_email(user_id[0],property_type,property_subtype,location,operation,
 						area_minimum,area_maximum,budget_minimum,budget_maximum)
-			pc = frappe.new_doc("Property Confirmation")
-			pc.property_type = property_type
-			pc.property_subtype = property_subtype
-			pc.operation = operation
-			pc.location = location
-			pc.area_minimum = area_minimum
-			pc.area_maximum = area_maximum
-			pc.budget_minimum = budget_minimum
-			pc.budget_maximum = budget_maximum
-			pc.insert(ignore_permissions=True)
+		pc = frappe.new_doc("Property Confirmation")
+		pc.property_type = property_type
+		pc.property_subtype = property_subtype
+		pc.operation = operation
+		pc.location = location
+		pc.area_minimum = area_minimum
+		pc.area_maximum = area_maximum
+		pc.budget_minimum = budget_minimum
+		pc.budget_maximum = budget_maximum
+		pc.lead_name = lead_name
+		pc.first_name = frappe.db.get_value("Lead",{"name":lead_name},"lead_name")
+		pc.insert(ignore_permissions=True)
 
 def create_email(user_id,property_type=None,property_subtype=None,location=None,operation=None,
 						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None):

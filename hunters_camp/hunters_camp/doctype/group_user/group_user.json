@@ -93,7 +93,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-19 11:23:07.669227", 
+ "modified": "2016-01-20 15:22:05.880196", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Group User", 
@@ -102,7 +102,7 @@
  "permissions": [
   {
    "amend": 0, 
-   "apply_user_permissions": 0, 
+   "apply_user_permissions": 1, 
    "cancel": 0, 
    "create": 1, 
    "delete": 1, 

@@ -82,7 +82,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										callback: function(r,rt) {
 											var final_property_result = {}
 											if(r.message){
-												console.log(r.message)
 												$.each(r.message['property_id'],function(i, property){
 		  											final_property_result[(property['property_id'].trim())]=''
 		  											
@@ -123,7 +122,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 																"budget_maximum": doc.budget_maximum,
 																"area_minimum": doc.area_minimum,
 																"area_maximum": doc.area_maximum,
-																"city":doc.city		
+																"city":doc.city,
+																"lead_name":doc.lead		
 															},
 															callback: function(r,rt) {
 																doc.email_sent = 'Yes'
@@ -174,7 +174,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"budget_maximum": doc.budget_maximum,
 										"area_minimum": doc.area_minimum,
 										"area_maximum": doc.area_maximum,
-										"city":doc.city
+										"city":doc.city,
+										"lead_name":doc.lead
 									},
 									callback: function(r,rt) {
 										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
@@ -457,7 +458,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					var pd = doc.property_details;
 					if(me.pop_up.fields_dict.type_followup.input.value && me.pop_up.fields_dict.followup_date.input.value){
 						if(!property_details_list.length && (me.flag==1 || me.flag1==1 || me.flag2==1)){
-							console.log("1")
 							for(i=0;i<pd.length;i++){
 								property_details_list.push(pd[i].name)
 							}
@@ -482,7 +482,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						}
 							//msgprint("Please first select the property to set followup");
 						else if(me.check_for_status_property_id(property_details_list) && (me.flag==0 || me.flag1==0 || me.flag2==0)){
-							console.log("2")
 							if (property_details_list.length){
 
 								return frappe.call({
@@ -546,7 +545,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 
 			this.pop_up_body = $("<div id='container' style='overflow: auto;max-height: 300px;'><table class='table table-bordered table-hover' id='property_details'><thead>\
 			<th width='inherit'></th><th><b>Property ID</b></th><th><b>Property Name</b></th><th><b>Site Visit</b></th><th><b>SE Status</b></th>\
-			<th><b>Status</b></th></thead><tbody></tbody></table></div>").appendTo($(this.fd.followup.wrapper));
+			<th><b>Follow Up Status</b><th><b>Status</b></th></thead><tbody></tbody></table></div>").appendTo($(this.fd.followup.wrapper));
 
 		},
 
@@ -556,7 +555,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 
 			this.pop_up_body = $("<div id='container' style='overflow: auto;max-height: 300px;'><table class='table table-bordered table-hover' id='property_details'><thead>\
 			<th width='inherit'></th><th><b>Property ID</b></th><th><b>Property Name</b></th><th><b>ACM Visit</b></th><th><b>ACM Status</b></th>\
-			<th><b>Status</b></th></thead><tbody></tbody></table></div>").appendTo($(this.fd.followup.wrapper));
+			<th><b>Follow Up Status</b></th><th><b>Status</b></th></thead><tbody></tbody></table></div>").appendTo($(this.fd.followup.wrapper));
 
 		},
 
@@ -602,11 +601,13 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					checked = "";
 					if((pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested' && pd[i].se_follow_up_status !='Reschedule') 
 						|| (pd[i].se_follow_up_status =='Reschedule' && pd[i].se_visit!=pd[i].prev_sv_no)){
+						se_follow_up_status = pd[i].se_follow_up_status ? pd[i].se_follow_up_status:"" ;
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
 							<td align='center' id='se_sattus'>"+pd[i].site_visit+"</td>\
 							<td align='center' id='se_sattus'>"+pd[i].se_status+"</td>\
+							<td align='center' id='se_sattus'>"+se_follow_up_status+"</td>\
 							<td align='center' id='status'><select class='select_dropdown' id='followup_status'>\
 							<option value=''></option>\
 							<option value='Intrested'>Intrested</option>\
@@ -635,11 +636,13 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					checked = "";
 					if((pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close' && pd[i].acm_followup_status !='Reschedule')
 						|| (pd[i].acm_followup_status =='Reschedule' && pd[i].acm_visit!=pd[i].prev_acm_no)){
+						acm_followup_status = pd[i].acm_followup_status? pd[i].acm_followup_status:"";
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
 							<td align='center' id='acm_status'>"+pd[i].acm_visit+"</td>\
 							<td align='center' id='acm_status'>"+pd[i].acm_status+"</td>\
+							<td align='center' id='acm_status'>"+acm_followup_status+"</td>\
 							<td align='center' id='status'><select class='select_dropdown' id='followup_status'>\
 								<option value=''></option>\
 								<option value='Hold'>Hold</option>\
