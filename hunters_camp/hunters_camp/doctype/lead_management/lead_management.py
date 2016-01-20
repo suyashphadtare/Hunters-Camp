@@ -134,6 +134,7 @@ def notify_se_about_sv(lead_record,se_visit,child_id,assign_to):
 def update_se_status_in_leadform(source_name,se_visit,assign_to,schedule_date):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
 	lead_name.se_status = 'Scheduled'
+	lead_name.prev_sv_no = lead_name.site_visit
 	lead_name.site_visit = se_visit
 	lead_name.site_visit_assignee = assign_to
 	lead_name.se_date = datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')
@@ -191,6 +192,7 @@ def notify_acm_about_acm(lead_record,se_visit,child_id,assign_to):
 def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date):
 	lead_name = frappe.get_doc("Lead Property Details", source_name)
 	lead_name.acm_status = 'Scheduled'
+	lead_name.prev_acm_no = lead_name.acm_visit
 	lead_name.acm_visit = acm_visit
 	lead_name.acm_visit_assignee = assign_to
 	lead_name.acm_date = datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')

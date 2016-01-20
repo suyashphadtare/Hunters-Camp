@@ -22,7 +22,6 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			frm.add_custom_button(__("Set Follow Ups"), function() { 
 				pop_up = new frappe.SetFollowUps();
 			})	
-
 			frm.add_custom_button(__("schedule SE"), function() {
 				pop_up = new frappe.SEFollowUps();
 			})	
@@ -458,32 +457,34 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					var pd = doc.property_details;
 					if(me.pop_up.fields_dict.type_followup.input.value && me.pop_up.fields_dict.followup_date.input.value){
 						if(!property_details_list.length && (me.flag==1 || me.flag1==1 || me.flag2==1)){
+							console.log("1")
 							for(i=0;i<pd.length;i++){
 								property_details_list.push(pd[i].name)
 							}
 							if(me.pop_up.fields_dict.followup_date.input.value){
 								return frappe.call({
-								method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_followup_date',
-								freeze: true,
-								freeze_message:"Updating Follow Date",
-								args: {
-									"prop_list":property_details_list,
-									"followup_type":me.pop_up.fields_dict.type_followup.input.value,
-									"followup_date":me.pop_up.fields_dict.followup_date.input.value,
-									"doc_name":doc.name
-								},
-								callback: function(r) {
-									me.pop_up.hide();
-									cur_frm.reload_doc()
-									setTimeout(function(){},1000)
-								}
-							});
-
+									method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_followup_date',
+									freeze: true,
+									freeze_message:"Updating Follow Date",
+									args: {
+										"prop_list":property_details_list,
+										"followup_type":me.pop_up.fields_dict.type_followup.input.value,
+										"followup_date":me.pop_up.fields_dict.followup_date.input.value,
+										"doc_name":doc.name
+									},
+									callback: function(r) {
+										me.pop_up.hide();
+										cur_frm.reload_doc()
+										setTimeout(function(){},1000)
+									}
+								});
 							}
 						}
 							//msgprint("Please first select the property to set followup");
 						else if(me.check_for_status_property_id(property_details_list) && (me.flag==0 || me.flag1==0 || me.flag2==0)){
+							console.log("2")
 							if (property_details_list.length){
+
 								return frappe.call({
 									method: 'hunters_camp.hunters_camp.doctype.lead_management.lead_management.update_details',
 									freeze: true,
@@ -599,7 +600,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if((pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested') || pd[i].se_follow_up_status=='Another Follow Up'){
+					if((pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested' && pd[i].se_follow_up_status !='Reschedule') 
+						|| (pd[i].se_follow_up_status =='Reschedule' && pd[i].se_visit!=pd[i].prev_sv_no)){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
@@ -618,6 +620,9 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 						if(pd[i].se_follow_up_status == 'Not Intrested'){
 							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Another Follow Up'>Another Follow Up</option>")
 						}
+						if((pd[i].se_status =='Cancelled By SE' || pd[i].se_status == 'Cancelled By Client') && pd[i].se_follow_up_status=='Another Follow Up'){
+							$(pop_up.body).find("#property_details tbody tr").last().find("#followup_status").html("<option value=''></option><option value='Reschedule'>Reschedule</option><option value='Not Intrested'> Not Intrested</option>")
+						}	
 					}
 				}
 			};
@@ -628,7 +633,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close' && pd[i].acm_followup_status !='Reschedule'){
+					if((pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close' && pd[i].acm_followup_status !='Reschedule')
+						|| (pd[i].acm_followup_status =='Reschedule' && pd[i].acm_visit!=pd[i].prev_acm_no)){
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_id_id'>"+ pd[i].property_name +"</td>\
@@ -938,7 +944,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if((pd[i].share_followup_status =='Intrested' && !pd[i].site_visit) || (pd[i].share_followup_status =='Intrested' && (pd[i].se_status=="Cancelled By SE" || pd[i].se_status=="Cancelled By Client"))){
+					if((pd[i].share_followup_status =='Intrested' && !pd[i].site_visit) || (pd[i].se_follow_up_status =='Reschedule' && pd[i].se_status !='Scheduled')){
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_name'>"+ pd[i].property_name +"</td>\
