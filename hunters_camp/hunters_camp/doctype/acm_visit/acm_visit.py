@@ -35,7 +35,7 @@ def add_book_property_details(bank=None,cheque_no=None,payer=None,cheque_date=No
 
 
 def update_lead_management_book_details(bank=None,cheque_no=None,payer=None,cheque_date=None,amount=None,description=None,name=None,lead_management_id=None, property_id=None):
-	lm =frappe.get_doc('Lead Management',lead_management_id)
+	lm =frappe.get_doc('Lead Property Details',lead_management_id)
 	lm.bank = bank
 	lm.cheque_no = cheque_no
 	lm.payer = payer
@@ -44,6 +44,7 @@ def update_lead_management_book_details(bank=None,cheque_no=None,payer=None,cheq
 	lm.amount = amount
 	lm.description = description
 	lm.purchased_property_id = property_id
+	lm.booked = 1
 	lm.save(ignore_permissions=True)
 
 def get_permission_query_conditions(user):

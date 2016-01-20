@@ -3,7 +3,8 @@
  "creation": "2015-09-14 14:57:11.142145", 
  "docstatus": 0, 
  "doctype": "Page", 
- "modified": "2015-09-14 14:57:11.142145", 
+ "idx": 0, 
+ "modified": "2016-01-20 15:18:46.204969", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "property", 
@@ -11,7 +12,19 @@
  "page_name": "property", 
  "roles": [
   {
-   "role": "All"
+   "role": "Administrator"
+  }, 
+  {
+   "role": "Builder"
+  }, 
+  {
+   "role": "Consultant"
+  }, 
+  {
+   "role": "Account Closure Manager"
+  }, 
+  {
+   "role": "Propshikari Project Manager"
   }
  ], 
  "script": null, 
