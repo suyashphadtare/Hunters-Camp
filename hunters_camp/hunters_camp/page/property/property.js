@@ -602,7 +602,6 @@ Property = Class.extend({
 		else
 			$('[data-fieldname=search]').css('display','block')
 
-		console.log([frappe.route_options['total_records'],"dsa"])
 		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
 	},
 	set_advance_filter_values_on_basic_search:function(fields,search_dict){
@@ -975,7 +974,7 @@ Property = Class.extend({
 		}
 
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#contact-name").append('<div class="row property-row">'+d['contact_person'] ? d['property_person'] : ""+'</div>')
+		$($(me.body).find("#"+d['property_id']+"")).find("#contact-name").append('<div class="row property-row">'+d['contact_person'] ? d['contact_person']: ""+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#contact_no").append('<div class="row property-row">'+d['contact_no'] ? d['contact_no'] :" "+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#agent_name").append('<div class="row property-row">'+d['agent_name'] ? d['agent_name'] : ""+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#agent_no").append('<div class="row property-row">'+d['agent_no'] ? d['agent_no'] : ""+'</div>')
