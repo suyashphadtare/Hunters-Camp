@@ -37,8 +37,7 @@ def get_conditions(filters):
 	elif filters.get("agent"):
 		user_id = frappe.db.get_value("User", filters.get("agent"), "user_id")
 		agent_properties = get_agent_properties(json.dumps({"user_id":user_id}))
-		if agent_properties:
-			frappe.errprint(agent_properties)
+		if agent_properties.get("data"):
 			cond_build = ", ".join(['"{0}"'.format(prop.get("property_id")) for prop in agent_properties.get("data")])
 			cond = "where sp.property_id in ({})".format(cond_build)
 	return cond	
