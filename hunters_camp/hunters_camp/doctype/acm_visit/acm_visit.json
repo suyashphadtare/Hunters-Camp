@@ -84,7 +84,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "collapsible_depends_on": "", 
    "depends_on": "eval:doc.enquiry_from=='Lead'", 
    "fieldname": "lead_details", 
@@ -255,7 +255,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "depends_on": "eval:doc.enquiry_from=='Customer'", 
    "fieldname": "customer_details", 
    "fieldtype": "Section Break", 
@@ -450,7 +450,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "fieldname": "property_detail", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -714,7 +714,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "depends_on": "eval:doc.amount", 
    "fieldname": "bank_details", 
    "fieldtype": "Section Break", 
@@ -906,7 +906,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "fieldname": "more_information", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -1132,7 +1132,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-18 12:17:31.701112", 
+ "modified": "2016-01-23 20:10:17.506904", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "ACM Visit", 

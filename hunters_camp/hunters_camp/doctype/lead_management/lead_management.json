@@ -109,7 +109,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "collapsible_depends_on": "", 
    "depends_on": "", 
    "fieldname": "lead_details", 
@@ -668,7 +668,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "fieldname": "property_search_criteria", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -1491,7 +1491,7 @@
   {
    "allow_on_submit": 0, 
    "bold": 0, 
-   "collapsible": 0, 
+   "collapsible": 1, 
    "fieldname": "more_information", 
    "fieldtype": "Section Break", 
    "hidden": 0, 
@@ -1670,7 +1670,7 @@
  "issingle": 0, 
  "istable": 0, 
  "max_attachments": 0, 
- "modified": "2016-01-23 16:30:52.439405", 
+ "modified": "2016-01-23 19:48:17.827496", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Lead Management", 
