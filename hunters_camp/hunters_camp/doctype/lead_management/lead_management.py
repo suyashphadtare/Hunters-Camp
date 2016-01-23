@@ -142,6 +142,7 @@ def update_se_status_in_leadform(source_name,se_visit,assign_to,schedule_date):
 	lead_name.site_visit = se_visit
 	lead_name.site_visit_assignee = assign_to
 	lead_name.se_date = datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')
+	lead_name.schedule_se = 0
 	lead_name.save()
 
 def create_to_do(assign_to,name,doctype):
@@ -199,6 +200,7 @@ def update_acm_status_in_leadform(source_name,acm_visit,assign_to,schedule_date)
 	lead_name.prev_acm_no = lead_name.acm_visit
 	lead_name.acm_visit = acm_visit
 	lead_name.acm_visit_assignee = assign_to
+	lead_name.schedule_acm = 0
 	lead_name.acm_date = datetime.datetime.strptime(cstr(schedule_date),'%d-%m-%Y %H:%M:%S')
 	lead_name.save()
 
@@ -307,12 +309,18 @@ def update_details(prop_list=None,followup_type=None,followup_date=None):
 		if followup_type=='Follow-Up For Share':
 			lead_property.share_followup_status = i.get('status')
 			lead_property.share_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+			if i.get("status") in ["Intrested"]:
+				lead_property.schedule_se = 0
 		elif followup_type=='Follow-Up For SE':
 			lead_property.se_follow_up_status = i.get('status')
 			lead_property.se_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+			if i.get("status") in ["Reschedule","Intrested"]:
+				lead_property.schedule_se = 1
 		else:
 			lead_property.acm_followup_status = i.get('status')
 			lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
+			if i.get("status") in ["Reschedule"]:
+				lead_property.schedule_acm = 1
 		lead_property.save(ignore_permissions=True)
 
 
@@ -395,3 +403,21 @@ def get_permission_query_conditions(user):
 	#pass
 	if not user == 'Administrator':
 		return """(`tabLead Management`.consultant ='{0}')""".format(user)
+
+@frappe.whitelist()
+def get_total_lms():
+	cond = ''
+	cond = build_conds(cond)
+	stat_list=["Total Lead Allocations"]
+	count = frappe.db.sql("""select count(*) 
+		from `tabLead Management` {0}""".format(cond),as_list=1)[0][0]
+	stat_list.append(count)
+	return {"field":"total","label":"Total","stat":[stat_list]}
+
+def build_conds(cond):
+	if 'Consultant' in frappe.get_roles(frappe.session.user) and not frappe.session.user =="Administrator":
+		cond += "where consultant='%s'"%frappe.session.user
+	return cond
+
+
+
