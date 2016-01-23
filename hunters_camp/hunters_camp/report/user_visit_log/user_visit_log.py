@@ -17,6 +17,7 @@ def execute(filters=None):
 
 
 def get_result(filters):
+	res = ''
 	if filters.get("agent"):
 		user_id = frappe.db.get_value("User", filters.get("agent"), "user_id")
 		agent_properties = get_agent_properties(json.dumps({"user_id":user_id}))
