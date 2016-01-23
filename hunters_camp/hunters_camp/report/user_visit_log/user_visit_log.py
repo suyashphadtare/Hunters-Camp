@@ -24,7 +24,7 @@ def get_result(filters):
 								from `tabShow Contact Property` as sp join `tabUser` as usr  
 								on sp.user_id = usr.user_id
 								{0} order by sp.visiting_date desc			
-							 """.format(get_conditions(filters)),as_list=1,debug=1)
+							 """.format(get_conditions(filters)),as_list=1)
 	return res if res else [[]]
 
 
