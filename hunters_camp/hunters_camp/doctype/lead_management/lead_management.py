@@ -310,12 +310,14 @@ def update_details(prop_list=None,followup_type=None,followup_date=None):
 			lead_property.share_followup_status = i.get('status')
 			lead_property.share_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			if i.get("status") in ["Intrested"]:
-				lead_property.schedule_se = 0
+				lead_property.schedule_se = 1
 		elif followup_type=='Follow-Up For SE':
 			lead_property.se_follow_up_status = i.get('status')
 			lead_property.se_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
-			if i.get("status") in ["Reschedule","Intrested"]:
+			if i.get("status") in ["Reschedule"]:
 				lead_property.schedule_se = 1
+			if i.get("status") in ["Intrested"]:
+				lead_property.schedule_acm = 1
 		else:
 			lead_property.acm_followup_status = i.get('status')
 			lead_property.acm_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
