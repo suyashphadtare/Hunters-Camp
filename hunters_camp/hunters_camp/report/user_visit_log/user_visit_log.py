@@ -17,7 +17,7 @@ def execute(filters=None):
 
 
 def get_result(filters):
-	if filters.get("agent")
+	if filters.get("agent"):
 		res = frappe.db.sql(""" select 
 								usr.name, usr.first_name, usr.last_name, 
 								usr.mobile_no, sp.visiting_date ,sp.property_id, sp.property_title
