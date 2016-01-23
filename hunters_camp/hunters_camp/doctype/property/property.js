@@ -202,7 +202,6 @@ prop_operations = {
 		if (!(frappe.get_cookie("user_id") == "Administrator" || inList(user_roles, "Propshikari Project Manager"))){
 			frm.toggle_enable(prop_fields, false)
 		}
-			
 	},
 	add_possession_status : function(frm, doc){
 		if (cur_frm.doc.possession == 1){
@@ -215,9 +214,7 @@ prop_operations = {
 				cur_frm.doc.year =  po_list[1]
 				refresh_field(["month","year","possession"])
 			}
-
 		}
-		
 	},
 	display_property_photo:function(frm, doc){
 		wrapper = $(cur_frm.get_field("attachment_display").wrapper)
@@ -232,12 +229,15 @@ prop_operations = {
 	},
 	add_status_and_tag_to_menu:function(frm){
 		var me = this;
-		frm.page.add_menu_item(__("Set as Discounted"),function(){ me.update_tag("Discounted",frm) },"icon-file-alt");
-		frm.page.add_menu_item(__("Set as Verified"),function(){ me.update_tag("Verified",frm) },"icon-file-alt");
-		frm.page.add_menu_item(__("Set as Invested"),function(){ me.update_tag("Invested",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Discounted"),function(){ me.update_tag("Discounted",frm,"add") },"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Verified"),function(){ me.update_tag("Verified",frm,"add") },"icon-file-alt");
+		frm.page.add_menu_item(__("Set as Invested"),function(){ me.update_tag("Invested",frm,"add") },"icon-file-alt");
 		frm.page.add_menu_item(__("Activate Property"),function(){ me.update_status("Active",frm) },"icon-file-alt");
 		frm.page.add_menu_item(__("Deactivate Property"),function(){ me.update_status("Deactivated",frm) },"icon-file-alt");
 		frm.page.add_menu_item(__("Set as Sold"),function(){ me.update_status("Sold",frm) },"icon-file-alt");
+		frm.page.add_menu_item(__("Remove Discounted"),function(){ me.update_tag("Discounted",frm,"remove") },"icon-file-alt");
+		frm.page.add_menu_item(__("Remove Invested"),function(){ me.update_tag("Invested",frm,"remove") },"icon-file-alt");
+		frm.page.add_menu_item(__("Remove Verified"),function(){ me.update_tag("Verified",frm,"remove") },"icon-file-alt");
 	},
 	manage_primary_operations_for_update:function(frm){
 		var me = this;
@@ -259,7 +259,6 @@ prop_operations = {
 						refresh_field(["property_photos"])
 						msgprint(r.message.message)
 						me.reload_doc(frm)
-
 					},
 					always: function() {
 						frappe.ui.form.is_saving = false;
@@ -271,13 +270,15 @@ prop_operations = {
 		$.each(frappe.meta.docfield_list["Property"] || [], function(i, docfield) {
 			var df = frappe.meta.get_docfield(doc.doctype,
 				docfield.fieldname, frm.doc.name);
+			
 			if (in_list(['tag', 'thumbnails', 'full_size_images'], docfield.fieldname ) && Array.isArray(doc[0][docfield.fieldname])){
-				frm.doc[docfield.fieldname] = doc[0][docfield.fieldname].join(',')
+				//frm.doc[docfield.fieldname] = doc[0][docfield.fieldname].join(',')
+				cur_frm.set_value(docfield.fieldname,doc[0][docfield.fieldname].join(','))
 			}
 			else{
+				//cur_frm.set_value(docfield.fieldname,doc[0][docfield.fieldname])
 				frm.doc[docfield.fieldname] = doc[0][docfield.fieldname]
 			}
-
 			refresh_field(docfield.fieldname)
 		});
 		this.add_distance_from_imp_loc(frm,doc)
@@ -291,17 +292,18 @@ prop_operations = {
 		}
 		
 	},
-	update_tag:function(tag,frm){
+	update_tag:function(tag,frm,operation){
 		var me = this;
 		frappe.call({
 			freeze: true,
 			freeze_message:"Updaing Proeprty Tag,Please Wait..",
 			method:"hunters_camp.hunters_camp.doctype.property.property.update_tag",
-			args:{doc: frm.doc,sid:frappe.get_cookie('sid'),"tag":tag},
+			args:{doc: frm.doc,sid:frappe.get_cookie('sid'),"tag":tag,"operation":operation},
 			callback: function(r) {
 				if (!r.exec){
 					frappe.msgprint(r.message[0].message)
-					frm.doc.tag = r.message[1]
+					//frm.doc.tag = r.message[1]
+					cur_frm.set_value("tag",r.message[1])
 					refresh_field(["property_id","tag"])
 				}	
 			},

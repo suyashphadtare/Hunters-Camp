@@ -73,31 +73,36 @@ def view_property(property_id,sid):
 	doc["sid"] = sid
 	doc["property_id"] = property_id
 	data = json.dumps(doc)
-	doc = update_api.get_property_of_given_id(data)
-	doclist = get_mapped_doc(doc["data"],{
-				"amenities": {
-					"doctype": "Amenities Child",
-					"field_map": {
-						"status": "status",
-						"name": "amenity_name",
-						"image":"image"
+	try:
+		doc = update_api.get_property_of_given_id(data)
+		doclist = get_mapped_doc(doc["data"],{
+					"amenities": {
+						"doctype": "Amenities Child",
+						"field_map": {
+							"status": "status",
+							"name": "amenity_name",
+							"image":"image"
+						}
+					},
+					"flat_facilities":{
+						"doctype": "Flat Facilities Child",
+						"field_map": {
+							"status": "status",
+							"name": "facility_name",
+							"image":"image"
+						}
 					}
-				},
-				"flat_facilities":{
-					"doctype": "Flat Facilities Child",
-					"field_map": {
-						"status": "status",
-						"name": "facility_name",
-						"image":"image"
-					}
-				}
-			}, "Property")
-	doclist.city_link = frappe.db.get_value("City",{"city_name":doclist.city},"name")
-	doclist.location_link = frappe.db.get_value("Area",{"area":doclist.location},"name")
-	return doclist
+				}, "Property")
+		doclist.city_link = frappe.db.get_value("City",{"city_name":doclist.city},"name")
+		doclist.location_link = frappe.db.get_value("Area",{"area":doclist.location},"name")
+		return doclist
+	except Exception, e:
+		#http_status_code = getattr(e, "status_code", 500)
+		message = getattr(e, "message", 500)
+		frappe.msgprint(message)
 
 @frappe.whitelist(allow_guest=True)
-def update_tag(doc,sid,tag):
+def update_tag(doc,sid,tag,operation):
 	doc = json.loads(doc)
 	data = {}
 	data["user_id"] = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
@@ -106,9 +111,13 @@ def update_tag(doc,sid,tag):
 	data["property_id"] = doc["property_id"]
 	data["fields"] = ["tag"]
 	data = json.dumps(data)
-	doc_rec = update_api.update_tags_of_property(data)
+	doc_rec = ''
+	if operation=='add':
+		doc_rec = update_api.update_tags_of_property(data)
+	elif operation=='remove':
+		doc_rec = update_api.remove_tag_of_property(data)
+
 	tags = update_api.get_property_details(data)
-	print tags["data"]["tag"]	
 	tag = ",".join(tags["data"]["tag"]) if tags else []
 	return doc_rec,tag
 

@@ -17,13 +17,15 @@ def execute(filters=None):
 
 
 def get_result(filters):
-	res = frappe.db.sql(""" select 
-								usr.name, usr.first_name, usr.last_name, usr.mobile_no, sp.visiting_date ,sp.property_id, sp.property_title
+	if filters.get("agent")
+		res = frappe.db.sql(""" select 
+								usr.name, usr.first_name, usr.last_name, 
+								usr.mobile_no, sp.visiting_date ,sp.property_id, sp.property_title
 								from `tabShow Contact Property` as sp join `tabUser` as usr  
 								on sp.user_id = usr.user_id
 								{0} order by sp.visiting_date desc			
-						 """.format(get_conditions(filters)),as_list=1)
-	return res
+							 """.format(get_conditions(filters)),as_list=1)
+	return res if res else [[]]
 
 
 
@@ -32,6 +34,12 @@ def get_conditions(filters):
 	cond = ''
 	if filters.get("property_id"):
 		cond = "where sp.property_id='{0}' ".format(filters.get("property_id"))
+	elif filters.get("agent"):
+		user_id = frappe.db.get_value("User", filters.get("agent"), "user_id")
+		agent_properties = get_agent_properties(json.dumps({"user_id":user_id}))
+		if agent_properties:
+			cond_build = ", ".join(['"{0}"'.format(prop.property_id) for prop in agent_properties.get("data")])
+			cond = "where sp.property_id in ({})".format(cond_build)
 	return cond	
 
 

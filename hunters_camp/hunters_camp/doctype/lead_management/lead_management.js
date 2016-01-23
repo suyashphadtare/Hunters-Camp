@@ -599,8 +599,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if((pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && pd[i].se_follow_up_status!='Intrested' && pd[i].se_follow_up_status !='Reschedule') 
-						|| (pd[i].se_follow_up_status =='Reschedule' && pd[i].se_visit!=pd[i].prev_sv_no)){
+					if(pd[i].share_followup_status=='Intrested' && pd[i].site_visit && pd[i].acm_status!='Close' && !pd[i].acm_visit && !pd[i].schedule_se){
 						se_follow_up_status = pd[i].se_follow_up_status ? pd[i].se_follow_up_status:"" ;
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
@@ -634,8 +633,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if((pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close' && pd[i].acm_followup_status !='Reschedule')
-						|| (pd[i].acm_followup_status =='Reschedule' && pd[i].acm_visit!=pd[i].prev_acm_no)){
+					if(pd[i].se_follow_up_status=='Intrested' && pd[i].acm_visit && pd[i].acm_followup_status !='Close' && !pd[i].schedule_acm){
 						acm_followup_status = pd[i].acm_followup_status? pd[i].acm_followup_status:"";
 						$("<tr><td><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center'>"+ pd[i].property_id +"</td>\
@@ -947,7 +945,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if((pd[i].share_followup_status =='Intrested' && !pd[i].site_visit) || (pd[i].se_follow_up_status =='Reschedule' && pd[i].se_status !='Scheduled')){
+					if(pd[i].share_followup_status =='Intrested' && pd[i].schedule_se && pd[i].se_follow_up_status =='Intrested'){
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
 							<td align='center' id='property_name'>"+ pd[i].property_name +"</td>\
@@ -1221,7 +1219,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			for (var i = 0; i < pd.length; i++) {
 				if(pd[i].property_id){
 					checked = "";
-					if(pd[i].acm_followup_status =='Reschedule' || (pd[i].se_follow_up_status =='Intrested' && !pd[i].acm_visit)){
+					if(pd[i].se_follow_up_status =='Intrested' && pd[i].schedule_acm){
 						$("<tr><td class='d'><input type='checkbox' class='select' id='_select'><input type='hidden' id='cdn' value='"+ pd[i].name +"'></td>\
 							<td align='center' id ='property_id'>"+ pd[i].property_id +"</td>\
 							<td align='center' id ='property_name'>"+ pd[i].property_name +"</td>\
