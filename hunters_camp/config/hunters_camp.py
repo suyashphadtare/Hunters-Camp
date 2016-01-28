@@ -156,6 +156,12 @@ def get_data():
 					"name": "Shared Properties For Agent",
 					"label": _("Shared Properties"),
 					"description": _("Agent to Agent Shared Properties"),
+				},
+				{
+					"type": "doctype",
+					"name": "Literature",
+					"label": _("Literatures"),
+					"description": _("Literatures for Agent"),
 				}
 			]
 		},
