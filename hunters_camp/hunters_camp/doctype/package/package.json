@@ -1,6 +1,6 @@
 {
  "allow_copy": 0, 
- "allow_import": 0, 
+ "allow_import": 1, 
  "allow_rename": 0, 
  "autoname": "PCKG.######", 
  "creation": "2015-11-03 15:40:40.901596", 
@@ -117,7 +117,7 @@
  "istable": 0, 
  "max_attachments": 0, 
  "menu_index": 0, 
- "modified": "2015-12-28 13:37:28.695340", 
+ "modified": "2016-02-05 11:21:20.589676", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "Package", 
