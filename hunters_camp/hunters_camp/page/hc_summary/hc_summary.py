@@ -4,6 +4,7 @@ import frappe.utils
 import json
 from frappe import _
 from propshikari.propshikari.elastic_controller import ElasticSearchController
+from propshikari.propshikari.propshikari_api import get_total_owner_count
 
 @frappe.whitelist()
 def get_data():
@@ -17,6 +18,7 @@ def get_data():
 	data["commercial"] = get_commercial_properties_count()
 	data["rented"] = get_rented_properties_count()
 	data["land"] = get_land_properties_count()
+	data["owner_count"] = get_total_owner_count()
 	return data
 
 def get_leads():

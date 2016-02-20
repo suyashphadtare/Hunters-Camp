@@ -2,9 +2,6 @@
 
 frappe.ui.form.on("Agent", {
 	
-	onload: function(frm) {
-		console.log("in onload")
-	},
 	refresh:function(frm){
 		if(!frm.doc.__islocal && !frappe.user.has_role("Agent")){
 
