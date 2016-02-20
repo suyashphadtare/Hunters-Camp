@@ -17,7 +17,7 @@ cur_frm.add_fetch("facility_name", "icon", "image")
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
 	$(cur_frm.get_field("attachment_display").wrapper).empty()
-	//alert("prop_operation");
+	alert("prop_operation");
 	prop_operations.init(frm);
 	cur_frm.cscript.render_google_map(frm)
 	
@@ -76,11 +76,11 @@ prop_operations = {
 		//alert("init");
 		console.log(JSON.stringify(frappe.route_options));
 		if (frappe.route_options){
-			//alert("if");
+			alert("if");
 			me.enable_property_editing(frm,frappe.route_options["doc"])
 		}
 		else {
-			//alert("else");
+			alert("else");
 			me.enable_property_posting(frm)
 		}
 		new SearchProperty(frm)
@@ -90,7 +90,7 @@ prop_operations = {
 		me.manage_primary_operations(frm)	
 		me.remove_menu_operations(frm)
 		// added by arpit , if user is Agent;
-		//alert("111111111");
+		alert("111111111");
 		if(!(frappe.get_cookie("user_id") == "Administrator") && inList(user_roles, "Agent") ){
 				//data = frappe.meta.get_docfield(cur_frm.doctype, "listed_by", cur_frm.docname);
 				//data.read_only =1;
@@ -109,13 +109,12 @@ prop_operations = {
 	},
 	post_property:function(frm,doc){
 		var me = this
-
 		if(me.check_mandatory(frm)) {
 			frappe.call({
 				freeze: true,
 				freeze_message:"Posting Property,Please Wait..",
 				method:"hunters_camp.hunters_camp.doctype.property.property.post_property",
-				args:{doc: frm.doc,sid:frappe.get_cookie('sid'),posted_through:"hunters_camp"},
+				args:{doc: frm.doc,sid:frappe.get_cookie('sid')},
 				callback: function(r) {
 					if (!r.exec){
 						frappe.msgprint(r.message.message)
@@ -567,12 +566,14 @@ cur_frm.fields_dict["flat_facilities"].grid.get_field("facility_name").get_query
 
 SearchProperty = Class.extend({
 	init:function(frm){
-		//alert("second init");
+		alert("second init");
 		this.frm = frm
 		this.init_for_search_property()
 	},
 	init_for_search_property:function(){
 		var me = this
+		cur_frm.add_custom_button(__('Short List'),function() {
+				  },"btn-primary");
 		cur_frm.add_custom_button(__('Search Property'),function() {
 				me.render_dialog_for_property_search() },"btn-primary");
 		cur_frm.add_custom_button(__('Clear form'),function() {

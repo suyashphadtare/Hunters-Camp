@@ -24,8 +24,6 @@ Property = Class.extend({
 		this.property_list = []
 		this.make();
 		this.refresh();
-		//this.chk_box_class1 = "cb"
-		this.chk_box_class = "cb"
 	},
 	make: function() {
 		var me = this;
@@ -101,12 +99,7 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-search"
 		});
-		me.unpublished_prop = me.wrapper.page.add_field({
-						fieldname: "unpublished_prop",
-						label: __("Unpublished Property"),
-						fieldtype: "Button",
-						icon: "icon-search"
-		});
+
 		me.advance_filters = me.wrapper.page.add_field({
 						fieldname: "advance_filters",
 						label: __("Advance Filters"),
@@ -132,24 +125,16 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-filter"
 		});
-		me.activate_prop = me.wrapper.page.add_field({
-						fieldname: "activate_prop",
-						label: __("Activate Property"),
-						fieldtype: "Button",
-						icon: "icon-share-sign"
-		});
+
 		$('[data-fieldname=tag]').css('display','none')
 		$('[data-fieldname=share]').css('display','none')
 		$('[data-fieldname=lead_management]').css('display','none')
-		$('[data-fieldname=activate_prop]').css('display','none')
 		this.init_for_multiple_location()
 		this.init_for_property_type_change_for_filters()
 		// SEARCH CLICK
 		//var me = this;
 		me.search.$input.on("click", function() {
-			$("#property").remove();
-			$('[data-fieldname=activate_prop]').css('display','none')
-			var me1 = this;
+			//var me = this;
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
 					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
@@ -177,11 +162,7 @@ Property = Class.extend({
 					callback: function(r,rt) {
 						if(!r.exc) {
 							if(r.message['total_records']>0){
-								//me.chk_box_class1 = "up"
-								//alert(me.chk_box_class1)
-								me.chk_box_class = "cb";
-
-								me.render(r.message['data'],r.message['total_records'],me.chk_box_class)
+								me.render(r.message['data'],r.message['total_records'])
 							}
 							else{
 								$("#property").remove();
@@ -200,125 +181,6 @@ Property = Class.extend({
 
 	});
 
-
-// Code added by Arpit for Unpublished property
-
-me.unpublished_prop.$input.on("click", function() {
-			$('[data-fieldname=tag]').css('display','none')
-			$('[data-fieldname=share]').css('display','none')
-			//var me = this;
-		//	if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
-				return frappe.call({
-					method:'hunters_camp.hunters_camp.page.property.property.search_data_unpublished_prop',
-					freeze: true,
-					freeze_message:"Building Search.....This Might Take Some Time",
-					args :{
-						"data":{
-						"operation": me.filters.operation.$input.val(),
-						"property_type": me.filters.property_type.$input.val(),
-						"property_subtype": me.filters.property_subtype.$input.val(),
-						"location": me.filters.location.$input.val(),
-						"property_subtype_option":me.filters.property_subtype_option.$input.val(),
-						"min_budget": parseInt(me.filters.budget_min.$input.val()),
-						"max_budget": parseInt(me.filters.budget_max.$input.val()),
-						"min_area": parseInt(me.filters.area_min.$input.val()),
-						"max_area": parseInt(me.filters.area_max.$input.val()),
-						"city":$(me.filters.location.$input).attr("data-field-city"),
-						"records_per_page": 10,
-						"page_number":1,
-						"request_source":'Hunterscamp',
-						//"user_id": 'Guest',
-						"sid": 'Guest',	//added by arpit
-						//"published_status": "Inactive"
-					  },
-					},
-					callback: function(r,rt) {
-						if(!r.exc) {
-							if(r.message['total_records']>0){
-								me.chk_box_class = "up_prop";
-								//alert(me.chk_box_class1)
-								me.render(r.message['data'],r.message['total_records'],me.chk_box_class)
-							}
-							else{
-								$("#property").remove();
-								$("#buttons").remove();
-								$("#sorting").remove();
-								msgprint("Property is not available related to search criteria which you have specified.")
-							}		
-					}
-
-				},
-				
-			});
-	//}
-	//else
-		//msgprint("OPERATION, PROPERTY TYPE, PROPERTY SUBTYPE are the mandatory fields to search criteria please specify it.")
-
-	});
-
-	/*me.activate_prop.$input.on("click", function() {
-			 
-			result_set= []
-			
-			$.each(me.check_property_list, function(i, j) {
-				frappe.call({
-					method:'propshikari.versions.v1.update_unpublished_property_flag',
-					freeze_message:"Activating Published Property Status....",
-					freeze:true,
-					'async': false,
-					args :{
-						"data":{
-						"property_id": j,
-						"property_status": "Active",
-						"published_status": "published",
-						"user_id": frappe.get_cookie('hc_user_id'),
-						"sid": frappe.get_cookie('sid')
-					  },
-					},
-					callback: function(r,rt) {
-						if(!r.exc) {
-							//if(i+1==me.check_property_list.length){
-							//	$('[data-fieldname=search]').trigger("click");	
-							//}
-								
-						}
-					},
-				});	
-			})
-		});*/
-
-
-me.activate_prop.$input.on("click", function() {
-			 
-			result_set= []
-		
-				frappe.call({
-					method:'hunters_camp.hunters_camp.page.property.property.publish_properties',
-					freeze_message:"Activating Published Property Status....",
-					freeze:true,
-					'async': false,
-					args :{
-						"data":{
-						"property_ids": me.check_property_list,
-						"user_id": frappe.get_cookie('hc_user_id'),
-						"sid": frappe.get_cookie('sid')
-					  },
-					},
-					callback: function(r,rt) {
-						if(!r.exc) {
-							//if(i+1==me.check_property_list.length){
-							//	$('[data-fieldname=search]').trigger("click");	
-							//}
-								
-						}
-					},
-				});	
-		})
-
-
-
-
-// end of code for unpublished prop
 	
 	// ADVANCE FILTERING...................................................................................
 	me.advance_filters.$input.on("click", function() {
@@ -418,8 +280,7 @@ me.activate_prop.$input.on("click", function() {
 					if(r.message['total_records']>0){
 						me.filters.area_max.input.value = "2"
 						me.set_advance_filter_values_on_basic_search(fields,search_dict)
-						me.chk_box_class = "cb";
-						me.render(r.message['data'],r.message['total_records'],me.chk_box_class)
+						me.render(r.message['data'],r.message['total_records'])
 					}
 					else{
 							$("#property").remove();
@@ -740,8 +601,8 @@ me.activate_prop.$input.on("click", function() {
 			$('[data-fieldname=search]').css('display','none')
 		else
 			$('[data-fieldname=search]').css('display','block')
-		me.chk_box_class ="cb"
-		me.render(frappe.route_options['data'],frappe.route_options['total_records'],me.chk_box_class);
+
+		me.render(frappe.route_options['data'],frappe.route_options['total_records']);
 	},
 	set_advance_filter_values_on_basic_search:function(fields,search_dict){
 		var me = this;
@@ -757,7 +618,7 @@ me.activate_prop.$input.on("click", function() {
 			me.filters[field["ffn"]].input.value = fields[field["afn"]].$input[0].value
 		})
 	},
-	render: function(prop_list,total_records,chk_box_class) {
+	render: function(prop_list,total_records) {
 		var me = this;
 		var current_page = 1;
 		var records_per_page = 10;
@@ -770,13 +631,13 @@ me.activate_prop.$input.on("click", function() {
 		this.body.empty();
 		this.prop_list=prop_list
 		
-		this.changePage(1,numPages,this.prop_list,records_per_page,this.prop_list.length,flag='Normal',total_records,chk_box_class);
+		this.changePage(1,numPages,this.prop_list,records_per_page,this.prop_list.length,flag='Normal',total_records);
 		
 
 	},
 
 
-	changePage: function(page,numPages,values,records_per_page,length,flag,total_records,chk_box_class)
+	changePage: function(page,numPages,values,records_per_page,length,flag,total_records)
 	{	
 		var me=this
 		if(flag=='Normal'){
@@ -811,7 +672,7 @@ me.activate_prop.$input.on("click", function() {
 	    if (page < 1) page = 1;
 	    if (page > numPages) page = numPages;
 
-	    me.show_user_property_table(page,numPages,values,records_per_page,length,flag,total_records,chk_box_class);
+	    me.show_user_property_table(page,numPages,values,records_per_page,length,flag,total_records);
 
 	    $("#page").text(total_records)
 	    if(length==1)
@@ -832,7 +693,7 @@ me.activate_prop.$input.on("click", function() {
 	},
 
 
-	show_user_property_table: function(page,numPages,values,records_per_page,length,flag,total_records,chk_box_class) {
+	show_user_property_table: function(page,numPages,values,records_per_page,length,flag,total_records) {
 
 		var me = this
 		me.property_data=values
@@ -871,28 +732,28 @@ me.activate_prop.$input.on("click", function() {
 			      <li role='presentation' class=''><a href='#contact"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-user'></i>&nbsp;&nbsp;Contacts</a></li>\
 			      <li role='presentation' class=''><a href='#tag"+""+i+"' role='tab' id='profile-tab' data-toggle='tab' style='height:35px;margin-top:-3px;' aria-controls='profile' aria-expanded='false'><i class='icon-li icon-tag'></i>&nbsp;&nbsp;Tags</a></li>\
 			      <div id="+d['property_id']+" style='float:right;' >\
-				<input type='checkbox' class="+chk_box_class+" />\
+				<input type='checkbox' class='cb' />\
 				</div></ul></div>\
 			    </ul>\
 			    <div id='mytable' class='tab-content' style='background-color=#fafbfc;'>\
 			      <div role='tabpanel' class='tab-pane fade active in' style='overflow:auto;height: 110px;' id='general"+""+i+"' aria-labelledby='home-tab'>\
 			       <div class='col-md-6' style='background-color=#fafbfc;'>\
-					        <div class='row row-id'>\
-								        <div class='col-md-6 row'>\
-								       <div class='row property-row'><b>Property Id :</b></div>\
-								       </div>\
-								       <div class='col-md-6 row'>\
-								        		<div class='row property-row' id='property-id'></div>\
-								        </div>\
-					       </div>\
-					          <div class='row row-id'>\
-							        <div class='col-md-6 row'>\
-							      	<div class='row property-row'><b>Posted By :</b></div>\
-								    </div>\
-							       	<div class='col-md-6 row'>\
-							       	<div class='row property-row' id='posted_by'></div>\
-							       	</div>\
-						</div>\
+			        <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Property Id :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='property-id'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Area :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='area'></div>\
+			        </div>\
+			       </div>\
 			       <div class='row row-id'>\
 			        <div class='col-md-6 row'>\
 			       <div class='row property-row'><b>Location :</b></div>\
@@ -911,14 +772,6 @@ me.activate_prop.$input.on("click", function() {
 			       </div>\
 			       </div>\
 			       <div class='col-md-6' style='background-color=#fafbfc;'>\
-			        <div class='row row-id'>\
-			        <div class='col-md-6 row'>\
-			       <div class='row property-row'><b>Area :</b></div>\
-			       </div>\
-			       <div class='col-md-6 row'>\
-			        <div class='row property-row' id='area'></div>\
-			        </div>\
-			       </div>\
 			       <div class='row row-id'>\
 			        <div class='col-md-6 row'>\
 			       <div class='row property-row'><b>Property Name :</b></div>\
@@ -941,6 +794,14 @@ me.activate_prop.$input.on("click", function() {
 			       </div>\
 			       <div class='col-md-6 row'>\
 			        <div class='row property-row' id='posting_date'></div>\
+			        </div>\
+			       </div>\
+			       <div class='row row-id'>\
+			        <div class='col-md-6 row'>\
+			       <div class='row property-row'><b>Bathroom :</b></div>\
+			       </div>\
+			       <div class='col-md-6 row'>\
+			        <div class='row property-row' id='bathroom'></div>\
 			        </div>\
 			       </div>\
 			       </div>\
@@ -1016,18 +877,10 @@ me.activate_prop.$input.on("click", function() {
 			       </div>\
 			      </div>\
 			      <div role='tabpanel' class='tab-pane fade' style='overflow:auto;height: 110px;' id='amenities"+""+i+"' aria-labelledby='profile-tab'>\
-				      <div class='col-md-6' id='amenities-first' style='background-color=#fafbfc;'>\
-				        <div class='row row-id'>\
-								       <div class='col-md-6 row'>\
-								       <div class='row property-row'><b> Bathroom :</b></div>\
-								       </div>\
-								       <div class='col-md-6 row'>\
-								       <div class='row property-row' id='bathroom'></div>\
-								       </div>\
-					    </div>\
-				      </div>\
-				      <div class='col-md-6' id='amenities-second' style='background-color=#fafbfc;'>\
-				      </div>\
+			      <div class='col-md-6' id='amenities-first' style='background-color=#fafbfc;'>\
+			      </div>\
+			      <div class='col-md-6' id='amenities-second' style='background-color=#fafbfc;'>\
+			      </div>\
 			      </div>\
 			      <div role='tabpanel' class='tab-pane fade'  id='contact"+""+i+"' aria-labelledby='profile-tab'>\
 			      <div class='col-md-6' style='background-color=#fafbfc;'>\
@@ -1099,7 +952,7 @@ me.activate_prop.$input.on("click", function() {
 		$($(me.body).find("#"+d['property_id']+"")).find("#society_name").append('<div class="row property-row">'+d['society_name'] ? d['society_name'] : ""+'</div>')
 		$($(me.body).find("#"+d['property_id']+"")).find("#address").append('<div class="row property-row">'+d['address'] ? d['address'] : ""+'</div>')
 
-		$($(me.body).find("#"+d['property_id']+"")).find("#posted_by").append('<div class="row property-row">'+d['listed_by'] ? d['listed_by'] : ""+'</div>')
+
 		
 
 		if(d['amenities']!=null){
@@ -1152,7 +1005,7 @@ me.activate_prop.$input.on("click", function() {
 
 
 	me.init_for_checkbox();
-	me.unpublished_checkbox();
+
 
 	$('.pv').click(function(){
 		return frappe.call({
@@ -1212,7 +1065,7 @@ me.activate_prop.$input.on("click", function() {
 									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 								}
 								else
-									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records,me.chk_box_class);
+									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 						}
 					}
 					},
@@ -1258,7 +1111,7 @@ me.activate_prop.$input.on("click", function() {
 									me.show_unique_properties(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 								}
 								else
-									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records,me.chk_box_class);
+									me.changePage(page,numPages,r.message['data'],records_per_page,r.message['data'].length,flag='Normal',total_records);
 							}
 							else{
 								msgprint("There is no more properties available against the required serach criteria")
@@ -1277,11 +1130,11 @@ me.activate_prop.$input.on("click", function() {
 		result_set= []
 		if($("#select_alert").val()=='posting_date'){
 			me.property_data.sort(date_sort_desc);
-			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting',total_records,me.chk_box_class);
+			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting',total_records);
 		}
 		else if($("#select_alert").val()=='rate'){
 			me.property_data.sort(rate_sort_asc);
-			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting',total_records,me.chk_box_class);
+			me.changePage(page,numPages,me.property_data,records_per_page,me.property_data.length,flag='Sorting',total_records);
 		}
 
 
@@ -1345,7 +1198,6 @@ me.activate_prop.$input.on("click", function() {
 		var me = this;
 		me.flag=0
 		var e = document.getElementById("status");
-		
 		$('.cb').click(function(){
 			if ($(this).prop('checked')==true){ 
 				me.property_list.push($(this).parent().attr("id"))
@@ -1378,35 +1230,8 @@ me.activate_prop.$input.on("click", function() {
 	
 	},
 
-	
-// Code added  by Arpit for creation of check box in unpublished property .
-	unpublished_checkbox: function(){
-		var me = this;
-		me.flag=0
-		 
-		$('.up_prop').click(function(){
-			if ($(this).prop('checked')==true){ 
-				me.property_list.push($(this).parent().attr("id"))
-				if(me.property_list.length==1){
-					$('[data-fieldname=activate_prop]').css('display','block')
-				}
-			}
-			else if($(this).prop('checked')==false){
-				var removeItem = $(this).parent().attr("id");
-				me.property_list = jQuery.grep(me.property_list, function(value) {
-				  return value != removeItem;
-				});
-				if(me.property_list.length==0){
-					$('[data-fieldname=activate_prop]').css('display','none')
-			 	}
-			}
-			me.check_property_list=me.property_list
-		});
-	},
-	// End of code by Arpit jain
 
-
-	show_unique_properties:function(page,numPages,data,records_per_page,length,flag,total_records,chk_box_class){
+	show_unique_properties:function(page,numPages,data,records_per_page,length,flag,total_records){
 		var me=this
 		result=data
 		return frappe.call({
@@ -1428,7 +1253,7 @@ me.activate_prop.$input.on("click", function() {
 						});
 						if(final_result.length>0){
 							final_result=final_result
-							me.changePage(page,numPages,final_result,records_per_page,final_result.length,flag='Normal',total_records,chk_box_class);
+							me.changePage(page,numPages,final_result,records_per_page,final_result.length,flag='Normal',total_records);
 						}
 						else{
 							return frappe.call({
@@ -1451,7 +1276,7 @@ me.activate_prop.$input.on("click", function() {
 				  }		}
 			}
 			  else{
-			  	me.changePage(page,numPages,result,records_per_page,result.length,flag='Normal',total_records,chk_box_class);
+			  	me.changePage(page,numPages,result,records_per_page,result.length,flag='Normal',total_records);
 			  }
 			},
 		});		
@@ -1511,13 +1336,12 @@ AgentPropertyShare = Class.extend({
 		table_html = "<table class='table table-fixed' id='prop_table' style='margin-top:20px'><thead ><tr class='row'><th class='col-xs-4 text-center'>Property Id</th>\
 				<th class='col-xs-4'>Comments</th><th class='col-xs-2'>Property Through</th><th class='col-xs-2'>Doc Available</th></tr></thead><tbody>"
 		$.each(this.prop_ids, function(i,property){
-			select_html = '<select class="form-control prop_through has-error"><option></option><option>Direct</option><option>Through 1</option>\
+			select_html = '<select class="form-control prop_through"><option></option><option>Direct</option><option>Through 1</option>\
 							<option>Through 2</option><option>Through 3+</option></select>'
-			doc_select = '<select class="has-error form-control doc_available"><option></option><option>Yes</option><option>No</option></select>'
+			doc_select = '<select class="form-control doc_available"><option></option><option>Yes</option><option>No</option></select>'
 			values = { "property_id":property["property_id"], "select":select_html, "doc_select":doc_select}
-			// classs is added by arpit for mandatory filed for property through and doc available
 			row = repl("<tr class='row'><td class='col-xs-4 p_id text-center' >%(property_id)s</td><td class='col-xs-4'><textarea type='text' class='comments'></textarea></td>\
-				<td class='col-xs-2 has-error'>%(select)s</td><td class='col-xs-2 has-error'>%(doc_select)s</td></tr>", values)
+				<td class='col-xs-2'>%(select)s</td><td class='col-xs-2'>%(doc_select)s</td></tr>", values)
 			table_html += row
 		})
 		table_html += "</tbody>"
@@ -1559,19 +1383,9 @@ AgentPropertyShare = Class.extend({
 	},
 	check_for_mandatory_fields:function(){
 		var me = this
-		var validate_field = me.validation_of_agent_fields()
 		if (! $(me.dialog.body).find("textarea[data-fieldname='agents']").val()){
 			frappe.msgprint("Agent Email Ids are mandatory for property sharing.")
 			return false
-		}else if(validate_field){
-			//alert(JSON.stringify(validate_field)+"   "+ validate_field.length)
-			for(var i =0 ; i <validate_field.length; i++){
-				if (Object.keys(validate_field[i]).length != 0 ){
-					frappe.msgprint(Object.keys(validate_field[i])+ " in row "+ (parseInt(i)+ 1)+" is mandatory for property sharing.");
- 					return false
- 					}
-				}
-			
 		}
 		return true
 	},
@@ -1587,29 +1401,6 @@ AgentPropertyShare = Class.extend({
 			comments_list.push(prop_dict)
 		})
 		return comments_list
-	},
-	// function start
-	// function is aded by arpit  for validation for prop_through and doc_available
-	validation_of_agent_fields:function(){
-		comments_list = []
-		var me = this
-		$.each($(me.dialog.body).find("#prop_table tbody tr"), function(i, row){
-			prop_dict = {}
-			prop_through_val = $(row).find(".prop_through").val();
-			if(!prop_through_val){
-				//prop_dict["prop_through"] = $(row).index() + 1
-				prop_dict["Property Through"] = i + 1
-			}
-			doc_available_val = $(row).find(".doc_available").val();
-			if(!doc_available_val){
-				prop_dict[" Doc Available"] = i + 1
-			}
-			//if(Object.keys(prop_dict).length != 0){				
-				comments_list.push(prop_dict)
-			//}
-			
-		})
-		return comments_list
 	}
-	// function end
+
 })

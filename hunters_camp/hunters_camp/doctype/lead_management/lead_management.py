@@ -287,6 +287,7 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 		pc.budget_maximum = budget_maximum
 		pc.lead_name = lead_name
 		pc.first_name = frappe.db.get_value("Lead",{"name":lead_name},"lead_name")
+		pc.last_name = frappe.db.get_value("Lead",{"name":lead_name},"last_name")
 		pc.insert(ignore_permissions=True)
 
 def create_email(user_id,property_type=None,property_subtype=None,location=None,operation=None,

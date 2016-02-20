@@ -9,14 +9,15 @@ import propshikari.propshikari.propshikari_api as api
 import propshikari.propshikari.property_update_api as update_api
 from hunters_camp.hunters_camp.mapper import get_mapped_doc
 import json
+from frappe import _
 
 class Property(Document):
 	pass
 
 
-
+# code change by arpit to chrck the the property posted through hhuntercamp or propshikari
 @frappe.whitelist(allow_guest=True)
-def post_property(doc,sid):
+def post_property(doc,sid,posted_through):
 	"""
 		1. Either pop up the keys that are not needed or make and mapper and map the fields
 		2. Create json doc for uploading
@@ -31,8 +32,12 @@ def post_property(doc,sid):
 	doc["flat_facilities"] = [ facility.get("facility_name") for facility in doc.get("flat_facilities") if facility.get("status") == "Yes" ]
 	validate_for_possesion_date(doc)
 	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}
-
+	# Arpit start code
+	if posted_through:
+		doc["status"] = "Deactivated"
+	# End code
 	data = json.dumps(doc)
+	#frappe.throw(_(data)+_("---------------------------"))
 	try:
 		doc_rec = api.post_property(data)
 		update_agent_package() if agent_flag else ""

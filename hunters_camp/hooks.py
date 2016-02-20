@@ -89,7 +89,8 @@ permission_query_conditions = {
 	"Lead Management":"hunters_camp.hunters_camp.doctype.lead_management.lead_management.get_permission_query_conditions",
 	"Site Visit":"hunters_camp.hunters_camp.doctype.site_visit.site_visit.get_permission_query_conditions",
 	"ACM Visit":"hunters_camp.hunters_camp.doctype.acm_visit.acm_visit.get_permission_query_conditions",
-	"Enquiry":"hunters_camp.hunters_camp.doctype.enquiry.enquiry.get_permission_query_conditions"
+	"Enquiry":"hunters_camp.hunters_camp.doctype.enquiry.enquiry.get_permission_query_conditions",
+	"Agent":"hunters_camp.hunters_camp.doctype.agent.agent.get_permission_query_conditions"
 }
 # Testing
 # -------

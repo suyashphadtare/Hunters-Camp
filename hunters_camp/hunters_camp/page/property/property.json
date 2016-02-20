@@ -4,7 +4,7 @@
  "docstatus": 0, 
  "doctype": "Page", 
  "idx": 0, 
- "modified": "2016-02-01 10:48:26.694043", 
+ "modified": "2016-02-10 11:43:16.932577", 
  "modified_by": "Administrator", 
  "module": "Hunters Camp", 
  "name": "property", 
@@ -25,6 +25,9 @@
   }, 
   {
    "role": "Propshikari Project Manager"
+  }, 
+  {
+   "role": "Agent"
   }
  ], 
  "script": null, 
