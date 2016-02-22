@@ -24,7 +24,6 @@ Property = Class.extend({
 		this.property_list = []
 		this.make();
 		this.refresh();
-		//this.chk_box_class1 = "cb"
 		this.chk_box_class = "cb"
 	},
 	make: function() {
@@ -101,17 +100,17 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-search"
 		});
-		me.unpublished_prop = me.wrapper.page.add_field({
-						fieldname: "unpublished_prop",
-						label: __("Unpublished Property"),
-						fieldtype: "Button",
-						icon: "icon-search"
-		});
 		me.advance_filters = me.wrapper.page.add_field({
 						fieldname: "advance_filters",
 						label: __("Advance Filters"),
 						fieldtype: "Button",
 						icon: "icon-filter"
+		});
+		me.unpublished_prop = me.wrapper.page.add_field({
+						fieldname: "unpublished_prop",
+						label: __("Unpublished Property"),
+						fieldtype: "Button",
+						icon: "icon-search"
 		});
 		me.share = me.wrapper.page.add_field({
 						fieldname: "share",
@@ -119,7 +118,6 @@ Property = Class.extend({
 						fieldtype: "Button",
 						icon: "icon-share-sign"
 		});
-
 		me.tag = me.wrapper.page.add_field({
 						fieldname: "tag",
 						label: __("Apply Tag"),
@@ -144,12 +142,12 @@ Property = Class.extend({
 		$('[data-fieldname=activate_prop]').css('display','none')
 		this.init_for_multiple_location()
 		this.init_for_property_type_change_for_filters()
+
 		// SEARCH CLICK
-		//var me = this;
 		me.search.$input.on("click", function() {
 			$("#property").remove();
 			$('[data-fieldname=activate_prop]').css('display','none')
-			var me1 = this;
+			
 			if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
 				return frappe.call({
 					method:'hunters_camp.hunters_camp.page.property.property.build_data_to_search_with_location_names',
@@ -203,121 +201,82 @@ Property = Class.extend({
 
 // Code added by Arpit for Unpublished property
 
-me.unpublished_prop.$input.on("click", function() {
-			$('[data-fieldname=tag]').css('display','none')
-			$('[data-fieldname=share]').css('display','none')
-			//var me = this;
-		//	if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
-				return frappe.call({
-					method:'hunters_camp.hunters_camp.page.property.property.search_data_unpublished_prop',
-					freeze: true,
-					freeze_message:"Building Search.....This Might Take Some Time",
-					args :{
-						"data":{
-						"operation": me.filters.operation.$input.val(),
-						"property_type": me.filters.property_type.$input.val(),
-						"property_subtype": me.filters.property_subtype.$input.val(),
-						"location": me.filters.location.$input.val(),
-						"property_subtype_option":me.filters.property_subtype_option.$input.val(),
-						"min_budget": parseInt(me.filters.budget_min.$input.val()),
-						"max_budget": parseInt(me.filters.budget_max.$input.val()),
-						"min_area": parseInt(me.filters.area_min.$input.val()),
-						"max_area": parseInt(me.filters.area_max.$input.val()),
-						"city":$(me.filters.location.$input).attr("data-field-city"),
-						"records_per_page": 10,
-						"page_number":1,
-						"request_source":'Hunterscamp',
-						//"user_id": 'Guest',
-						"sid": 'Guest',	//added by arpit
-						//"published_status": "Inactive"
-					  },
+	me.unpublished_prop.$input.on("click", function() {
+				$('[data-fieldname=tag]').css('display','none')
+				$('[data-fieldname=share]').css('display','none')
+				//console.log("in unpublished property")
+				//var me = this;
+			//	if(me.filters.operation.$input.val() && me.filters.property_type.$input.val() && me.filters.property_subtype.$input.val()){
+					return frappe.call({
+						method:'hunters_camp.hunters_camp.page.property.property.search_data_unpublished_prop',
+						freeze: true,
+						freeze_message:"Building Search.....This Might Take Some Time",
+						args :{
+							"data":{
+							"operation": me.filters.operation.$input.val(),
+							"property_type": me.filters.property_type.$input.val(),
+							"property_subtype": me.filters.property_subtype.$input.val(),
+							"location": me.filters.location.$input.val(),
+							"property_subtype_option":me.filters.property_subtype_option.$input.val(),
+							"min_budget": parseInt(me.filters.budget_min.$input.val()),
+							"max_budget": parseInt(me.filters.budget_max.$input.val()),
+							"min_area": parseInt(me.filters.area_min.$input.val()),
+							"max_area": parseInt(me.filters.area_max.$input.val()),
+							"city":$(me.filters.location.$input).attr("data-field-city"),
+							"records_per_page": 10,
+							"page_number":1,
+							"request_source":'Hunterscamp',
+							//"user_id": 'Guest',
+							"sid": 'Guest',	
+						  },
+						},
+						callback: function(r,rt) {
+							if(!r.exc) {
+								//console.log(r.message)
+								if(r.message['total_records']>0){
+									me.chk_box_class = "up_prop";
+									//alert(me.chk_box_class1)
+									me.render(r.message['data'],r.message['total_records'],me.chk_box_class)
+								}
+								else{
+									$("#property").remove();
+									$("#buttons").remove();
+									$("#sorting").remove();
+									msgprint("No more unpublished property available.")
+								}		
+						}
+
 					},
-					callback: function(r,rt) {
-						if(!r.exc) {
-							if(r.message['total_records']>0){
-								me.chk_box_class = "up_prop";
-								//alert(me.chk_box_class1)
-								me.render(r.message['data'],r.message['total_records'],me.chk_box_class)
-							}
-							else{
-								$("#property").remove();
-								$("#buttons").remove();
-								$("#sorting").remove();
-								msgprint("Property is not available related to search criteria which you have specified.")
-							}		
-					}
+					
+				});
+		//}
+		//else
+			//msgprint("OPERATION, PROPERTY TYPE, PROPERTY SUBTYPE are the mandatory fields to search criteria please specify it.")
 
-				},
-				
-			});
-	//}
-	//else
-		//msgprint("OPERATION, PROPERTY TYPE, PROPERTY SUBTYPE are the mandatory fields to search criteria please specify it.")
+		});
 
-	});
-
-	/*me.activate_prop.$input.on("click", function() {
-			 
-			result_set= []
+	me.activate_prop.$input.on("click", function() {
+				result_set= []
 			
-			$.each(me.check_property_list, function(i, j) {
 				frappe.call({
-					method:'propshikari.versions.v1.update_unpublished_property_flag',
-					freeze_message:"Activating Published Property Status....",
-					freeze:true,
-					'async': false,
-					args :{
-						"data":{
-						"property_id": j,
-						"property_status": "Active",
-						"published_status": "published",
-						"user_id": frappe.get_cookie('hc_user_id'),
-						"sid": frappe.get_cookie('sid')
-					  },
-					},
-					callback: function(r,rt) {
-						if(!r.exc) {
-							//if(i+1==me.check_property_list.length){
-							//	$('[data-fieldname=search]').trigger("click");	
-							//}
-								
-						}
-					},
-				});	
-			})
-		});*/
-
-
-me.activate_prop.$input.on("click", function() {
-			 
-			result_set= []
-		
-				frappe.call({
-					method:'hunters_camp.hunters_camp.page.property.property.publish_properties',
-					freeze_message:"Activating Published Property Status....",
-					freeze:true,
-					'async': false,
-					args :{
-						"data":{
-						"property_ids": me.check_property_list,
-						"user_id": frappe.get_cookie('hc_user_id'),
-						"sid": frappe.get_cookie('sid')
-					  },
-					},
-					callback: function(r,rt) {
-						if(!r.exc) {
-							//if(i+1==me.check_property_list.length){
-							//	$('[data-fieldname=search]').trigger("click");	
-							//}
-								
-						}
-					},
-				});	
-		})
-
-
-
-
+						method:'hunters_camp.hunters_camp.page.property.property.publish_properties',
+						freeze_message:"Activating Published Property Status....",
+						freeze:true,
+						'async': false,
+						args :{
+							"data":{
+							"property_ids": me.check_property_list,
+							"user_id": frappe.get_cookie('hc_user_id'),
+							"sid": frappe.get_cookie('sid')
+						  },
+						},
+						callback: function(r,rt) {
+							if(!r.exc) {
+								$('[data-fieldname=unpublished_prop]').trigger("click");	
+							}
+						},
+					});	
+	})
 // end of code for unpublished prop
 	
 	// ADVANCE FILTERING...................................................................................
@@ -1383,10 +1342,11 @@ me.activate_prop.$input.on("click", function() {
 	unpublished_checkbox: function(){
 		var me = this;
 		me.flag=0
-		 
+		
 		$('.up_prop').click(function(){
 			if ($(this).prop('checked')==true){ 
 				me.property_list.push($(this).parent().attr("id"))
+				//console.log(JSON.stringify(me.property_list))
 				if(me.property_list.length==1){
 					$('[data-fieldname=activate_prop]').css('display','block')
 				}
@@ -1394,6 +1354,7 @@ me.activate_prop.$input.on("click", function() {
 			else if($(this).prop('checked')==false){
 				var removeItem = $(this).parent().attr("id");
 				me.property_list = jQuery.grep(me.property_list, function(value) {
+				//console.log(JSON.stringify(me.property_list)+"---------"+JSON.stringify(removeItem)+"---------"+JSON.stringify(removeItem))
 				  return value != removeItem;
 				});
 				if(me.property_list.length==0){
@@ -1401,6 +1362,7 @@ me.activate_prop.$input.on("click", function() {
 			 	}
 			}
 			me.check_property_list=me.property_list
+			//console.log(JSON.stringify(me.check_property_list))
 		});
 	},
 	// End of code by Arpit jain

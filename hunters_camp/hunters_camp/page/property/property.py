@@ -184,10 +184,7 @@ def build_data_to_search_with_location_names(data):
 @frappe.whitelist()
 def search_data_unpublished_prop(data):
   property_data = json.loads(data)
-  #frappe.throw(_(json.dumps(property_data)))
-  #msgprint(_(property_data))
-  #msgprint(_("###########_______######"))
-  #msgprint(_(json.dumps(property_data)))
+
   if property_data.get("location"):
     location_names = property_data.get("location").split(',')
     condition = ",".join('"{0}"'.format(loc) for loc in location_names)

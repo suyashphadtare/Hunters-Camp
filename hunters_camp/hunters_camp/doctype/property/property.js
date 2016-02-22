@@ -73,14 +73,10 @@ prop_operations = {
 	init:function(frm){
 		var me = this;
 		this.doc = frm.doc
-		//alert("init");
-		console.log(JSON.stringify(frappe.route_options));
 		if (frappe.route_options){
-			//alert("if");
 			me.enable_property_editing(frm,frappe.route_options["doc"])
 		}
 		else {
-			//alert("else");
 			me.enable_property_posting(frm)
 		}
 		new SearchProperty(frm)
@@ -90,7 +86,6 @@ prop_operations = {
 		me.manage_primary_operations(frm)	
 		me.remove_menu_operations(frm)
 		// added by arpit , if user is Agent;
-		//alert("111111111");
 		if(!(frappe.get_cookie("user_id") == "Administrator") && inList(user_roles, "Agent") ){
 				//data = frappe.meta.get_docfield(cur_frm.doctype, "listed_by", cur_frm.docname);
 				//data.read_only =1;
@@ -115,7 +110,7 @@ prop_operations = {
 				freeze: true,
 				freeze_message:"Posting Property,Please Wait..",
 				method:"hunters_camp.hunters_camp.doctype.property.property.post_property",
-				args:{doc: frm.doc,sid:frappe.get_cookie('sid'),posted_through:"hunters_camp"},
+				args:{doc: frm.doc,sid:frappe.get_cookie('sid')},
 				callback: function(r) {
 					if (!r.exec){
 						frappe.msgprint(r.message.message)
