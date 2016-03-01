@@ -22,6 +22,16 @@ def get_property_details(property_id):
 	}
 
 
+
+@frappe.whitelist()
+def dialog_box_query(doctype, txt, searchfield, start, page_len, filters):
+  return  frappe.db.sql("""select `user` from tabAgent 
+              where agent_status = 'Active'""")
+
+  
+
+
+
 @frappe.whitelist()
 def add_properties_in_lead_management(lead_management=None,property_resultset=None):
   properties = json.loads(property_resultset)

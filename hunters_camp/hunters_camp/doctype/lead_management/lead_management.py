@@ -268,7 +268,7 @@ def get_diffrent_property(data=None,lead_management=None):
 
 @frappe.whitelist()
 def get_administartor(property_type=None,property_subtype=None,location=None,operation=None,
-						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None,lead_name=None):
+						area_minimum=None,area_maximum=None,budget_minimum=None,budget_maximum=None,lead_name=None,consultant_id=None):
 	
 	users =  frappe.db.sql("""select parent from `tabUserRole` where role='System Manager' 
 						and parent!='Administrator'""",as_list=1)
@@ -288,6 +288,7 @@ def get_administartor(property_type=None,property_subtype=None,location=None,ope
 		pc.lead_name = lead_name
 		pc.first_name = frappe.db.get_value("Lead",{"name":lead_name},"lead_name")
 		pc.last_name = frappe.db.get_value("Lead",{"name":lead_name},"last_name")
+		pc.consultant_id = consultant_id
 		pc.insert(ignore_permissions=True)
 
 def create_email(user_id,property_type=None,property_subtype=None,location=None,operation=None,

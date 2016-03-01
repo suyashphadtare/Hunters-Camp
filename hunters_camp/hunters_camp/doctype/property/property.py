@@ -29,10 +29,11 @@ def post_property(doc,sid):
 	doc["sid"] = sid
 	doc["amenities"] = [ amenity.get("amenity_name") for amenity in doc.get("amenities") if amenity.get("status") == "Yes" ]
 	doc["flat_facilities"] = [ facility.get("facility_name") for facility in doc.get("flat_facilities") if facility.get("status") == "Yes" ]
+	
 	validate_for_possesion_date(doc)
 	doc["distance_from_imp_locations"] = {"airport" :doc.get("airport"), "central_bus_stand":doc.get("central_bus_stand"), "railway_station":doc.get("railway_station")}
 	data = json.dumps(doc)
-
+	
 	try:
 		doc_rec = api.post_property(data)
 		update_agent_package() if agent_flag else ""
@@ -42,10 +43,11 @@ def post_property(doc,sid):
 
 
 def validate_for_possesion_date(doc):
-	if doc.get("possession") == 1 or not doc.get("possession"):
+	if doc.get("possession") == 1:
 		map(lambda x: doc.pop(x,None), ['month','year'])
-	elif doc.get("possession") == 0: 
+	else: 
 		doc["possession_date"] = "-".join([doc.get("month"),doc.get("year")])
+		
 
 
 def get_user_roles():
@@ -178,3 +180,10 @@ def delete_photo(doc, sid, img_url):
 	except Exception,e:
 		frappe.throw(e)
 	return response	 
+
+# Arpit code for amenities search from masters
+@frappe.whitelist(allow_guest=True)
+def show_amenities_acc_to_property_type(doctype, txt, searchfield, start, page_len, filters):
+	property_type1 = filters['property_type']
+	return frappe.db.sql("""select `name` from `tabAmenities` where `property_type`='{0}' """ .format(property_type1))
+ 
