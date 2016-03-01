@@ -35,24 +35,39 @@ cur_frm.cscript.render_google_map = function(frm){
 
 }
 
-
-
-
-
 frappe.ui.form.on("Property", "possession", function(frm) {
 	var me = this;
 	frm.toggle_reqd("month", frm.doc.possession == 0);
 	frm.toggle_reqd("year", frm.doc.possession == 0);
 });
 
+// code added by arpit 
 frappe.ui.form.on("Property", "operation", function(frm) {
 	var me = this;
 	frm.toggle_reqd("month", frm.doc.operation==="Buy");
 	frm.toggle_reqd("year", frm.doc.operation==="Buy");
-	if (frm.doc.operation=='Rent') frm.fields_dict["price"].set_label("Expected Rent");
-	else frm.fields_dict["price"].set_label("Price");
+	if (frm.doc.operation=='Rent') {
+		frm.fields_dict["price"].set_label("Expected Rent");
+		cur_frm.set_df_property("price_per_sq_ft", "hidden", 1)
+	}else{
+		frm.fields_dict["price"].set_label("Price");
+		cur_frm.set_df_property("price_per_sq_ft", "hidden", 0)
+	}
 });
 
+// code added by arpit 
+frappe.ui.form.on("Property", "property_type", function(frm) {
+	var me = this;
+	if (frm.doc.property_type=='Zameen'){
+		frm.fields_dict["carpet_area"].set_label("Total Area");
+		cur_frm.set_df_property("transaction_type", "hidden", 1)
+	}else{
+		frm.fields_dict["carpet_area"].set_label("Carpet Area");
+		cur_frm.set_df_property("transaction_type", "hidden", 0)
+	}
+
+});	
+// end of code by arpit
 
 // frappe.ui.form.on("Property", "railway_station", function(frm) {
 // 	map = frm.doc.distance_from_imp_locations
@@ -73,6 +88,7 @@ prop_operations = {
 	init:function(frm){
 		var me = this;
 		this.doc = frm.doc
+		me.show_amenities_acc_to_property_type(frm)
 		if (frappe.route_options){
 			me.enable_property_editing(frm,frappe.route_options["doc"])
 		}
@@ -94,6 +110,18 @@ prop_operations = {
 			cur_frm.set_value("listed_by","Agent");		
 		}
 		 
+	},
+	show_amenities_acc_to_property_type :function(frm){
+		cur_frm.set_query("amenity_name", "amenities", function(frm) {
+		//alert(cur_frm.doc.property_type)
+				return {
+					query:"hunters_camp.hunters_camp.doctype.property.property.show_amenities_acc_to_property_type",
+					filters:{
+							'property_type': cur_frm.doc.property_type,
+						}
+				}
+			});
+
 	},
 	manage_primary_operations:function(frm){
 		var me = this;
@@ -259,6 +287,7 @@ prop_operations = {
 	},
 	update_property:function(frm){
 		var me = this
+		me.remove_menu_operations(frm)
 		if(me.check_mandatory(frm)) {
 				frappe.call({
 					freeze: true,

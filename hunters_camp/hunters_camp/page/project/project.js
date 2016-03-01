@@ -97,8 +97,7 @@ Project = Class.extend({
 		// 				icon: "icon-filter"
 		// });
 		this.init_for_multiple_location()
-
-
+		
 
 		me.search.$input.on("click", function() {
 			if(me.filters.project_type.$input.val() && me.filters.project_subtype.$input.val()){
@@ -191,6 +190,10 @@ Project = Class.extend({
 		    if (page > numPages) page = numPages;
 
 		    me.show_user_project_table(page,numPages,values,records_per_page,length,flag);
+		    
+		    //Added by Arpit
+			me.shows_only_zameen_related_fields()
+			// End
 
 		    $("#page").text(length)
 		    if(length==1)
@@ -377,8 +380,7 @@ Project = Class.extend({
 			      </div>\
 			      </div>\
 			    </div>").appendTo($(me.body).find("#"+d['project_id']+""))
-
-
+		
 
 		$($(me.body).find("#"+d['project_id']+"")).find("#project-id").append('<div class="row property-row"><a class="pv" id="'+d['project_id']+'">'+d['project_id']+'<a></div>')
 		$($(me.body).find("#"+d['project_id']+"")).find("#project_name").append('<div class="row property-row">'+d['project_name'] ? d['project_name'] : ""+'</div>')
@@ -561,5 +563,18 @@ Project = Class.extend({
 		})	
 	},
 
+//code Added by Arpit to hide field for land related field 
+	shows_only_zameen_related_fields:function(){
+		var me = this;
+		var project_type = 	$(me.wrapper).find("input[data-fieldname=project_type]").val()
+		if (project_type == "Zameen"){
+				$("#possession_status").parent('div').parent('div').css('display','none')
+				$("#floor").parent('div').parent('div').css('display','none')
+		}else{
+				$("#possession_status").parent('div').parent('div').css('display','block')
+				$("#floor").parent('div').parent('div').css('display','block')
+			}
+	},
+// end of code
 
 })

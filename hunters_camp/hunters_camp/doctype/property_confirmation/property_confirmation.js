@@ -17,13 +17,13 @@ cur_frm.cscript.confirm_property = function(){
 	refresh_field("status")
 	cur_frm.save()
 }
-
+// code added by arpit to send email to particular consultant after confirm the property
 cur_frm.cscript.email_notification_to_consultant = function(){
 					return frappe.call({
 						method:'hunters_camp.hunters_camp.doctype.property_confirmation.property_confirmation.mail_notifiction_to_consultant',
 						freeze:true,
 						freeze_message:"Property Confirmation Please Wait......",
-						args:{"email_id":"arpit.j@indictranstech.com" },
+						args:{"email_id":cur_frm.doc.consultant_id },
 						callback: function(r,rt) {
 							if(!r.exc) {
 									frappe.msgprint(r.message.message)
@@ -34,5 +34,5 @@ cur_frm.cscript.email_notification_to_consultant = function(){
 					});	
 				}
 
-
+// end of code
  

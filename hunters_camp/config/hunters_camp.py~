@@ -201,12 +201,6 @@ def get_data():
 				},
 				{
 					"type": "report",
-					"name":"Booked Property",
-					"doctype": "Lead Management",
-					"is_query_report": True,
-				},
-				{
-					"type": "report",
 					"name":"Agent Location Report",
 					"doctype": "Agent",
 					"is_query_report": True

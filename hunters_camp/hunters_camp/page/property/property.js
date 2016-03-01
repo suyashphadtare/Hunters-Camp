@@ -142,6 +142,13 @@ Property = Class.extend({
 		$('[data-fieldname=activate_prop]').css('display','none')
 		this.init_for_multiple_location()
 		this.init_for_property_type_change_for_filters()
+		if (frappe.get_cookie("user_id") == "Administrator"){
+		 
+			$('[data-fieldname=unpublished_prop]').css('display','block')
+		}else{
+			 
+			$('[data-fieldname=unpublished_prop]').css('display','none')
+		}
 
 		// SEARCH CLICK
 		me.search.$input.on("click", function() {
@@ -625,6 +632,14 @@ Property = Class.extend({
 		var subtype_obj = ''
 		var me = this;
 		$(me.wrapper).find("input[data-fieldname=property_type]").change(function(){
+		//code Added by Arpit to hide field for land related field 
+			var property_type = $(this).val()
+			if (property_type == "Zameen"){
+				$('[data-fieldname=property_subtype_option]').css('display','none')
+			}else{
+				$('[data-fieldname=property_subtype_option]').css('display','block')
+			}
+		// end of code
 			$(me.wrapper).find("input[data-fieldname=property_subtype_option]").val("")
 			frappe.call({
 				method:"hunters_camp.hunters_camp.page.property.property.get_amenities",
@@ -1441,7 +1456,13 @@ AgentPropertyShare = Class.extend({
 							{fieldtype:"Button", label:__("Share Property"), fieldname:"share_prop"}		
 						]
 					});
-
+		// Added by arpit to show all the Agent in in agent field
+		this.dialog.fields_dict['agent'].get_query = function(){
+		return {
+			query: "hunters_camp.hunters_camp.page.property.property.dialog_box_query"
+			}
+		}		
+		// end of code
 		this.fields=this.dialog.fields_dict
 		this.dialog.show();
 		$(".modal-dialog").css("width","750px");

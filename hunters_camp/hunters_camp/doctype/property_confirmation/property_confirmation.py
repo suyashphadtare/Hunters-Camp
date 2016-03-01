@@ -11,7 +11,7 @@ class PropertyConfirmation(Document):
 
 
 
-
+# property confirmatio mail is send to the consultanat after confirming the property 
 @frappe.whitelist()
 def mail_notifiction_to_consultant(email_id):
     user_name = frappe.db.get_value("User", frappe.session.user, ["first_name", "last_name"],as_dict=True)
@@ -23,3 +23,4 @@ def mail_notifiction_to_consultant(email_id):
 def send_email(email, subject, template, args):
   frappe.sendmail(recipients=email, sender=None, subject=subject,
       message=frappe.get_template(template).render(args))
+# end of code
