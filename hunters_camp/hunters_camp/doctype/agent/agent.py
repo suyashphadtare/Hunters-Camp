@@ -62,3 +62,11 @@ def send_email_notification():
 def get_agent_list(doctype, txt, searchfield, start, page_len, filters):
 	print "in agent"
 	return frappe.get_all("Agent",fields= ['name'], as_list=1)
+
+# added by arpit for agent can see his data only
+def get_permission_query_conditions(user):
+	if not user: user = frappe.session.user
+
+	if not user == "Administrator":
+		return """(`tabAgent`.user = '{0}')""".format(user)
+# end of code

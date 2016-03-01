@@ -14,12 +14,10 @@ frappe.provide("property")
 cur_frm.add_fetch("amenity_name", "icon", "image")
 cur_frm.add_fetch("facility_name", "icon", "image")
 
-
-
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
 	$(cur_frm.get_field("attachment_display").wrapper).empty()
-	//alert("prop_operation");
+	alert("prop_operation");
 	prop_operations.init(frm);
 	cur_frm.cscript.render_google_map(frm)
 	
@@ -37,39 +35,24 @@ cur_frm.cscript.render_google_map = function(frm){
 
 }
 
+
+
+
+
 frappe.ui.form.on("Property", "possession", function(frm) {
 	var me = this;
 	frm.toggle_reqd("month", frm.doc.possession == 0);
 	frm.toggle_reqd("year", frm.doc.possession == 0);
 });
 
-// code added by arpit 
 frappe.ui.form.on("Property", "operation", function(frm) {
 	var me = this;
 	frm.toggle_reqd("month", frm.doc.operation==="Buy");
 	frm.toggle_reqd("year", frm.doc.operation==="Buy");
-	if (frm.doc.operation=='Rent') {
-		frm.fields_dict["price"].set_label("Expected Rent");
-		cur_frm.set_df_property("price_per_sq_ft", "hidden", 1)
-	}else{
-		frm.fields_dict["price"].set_label("Price");
-		cur_frm.set_df_property("price_per_sq_ft", "hidden", 0)
-	}
+	if (frm.doc.operation=='Rent') frm.fields_dict["price"].set_label("Expected Rent");
+	else frm.fields_dict["price"].set_label("Price");
 });
 
-// code added by arpit 
-frappe.ui.form.on("Property", "property_type", function(frm) {
-	var me = this;
-	if (frm.doc.property_type=='Zameen'){
-		frm.fields_dict["carpet_area"].set_label("Total Area");
-		cur_frm.set_df_property("transaction_type", "hidden", 1)
-	}else{
-		frm.fields_dict["carpet_area"].set_label("Carpet Area");
-		cur_frm.set_df_property("transaction_type", "hidden", 0)
-	}
-
-});	
-// end of code by arpit
 
 // frappe.ui.form.on("Property", "railway_station", function(frm) {
 // 	map = frm.doc.distance_from_imp_locations
@@ -90,11 +73,14 @@ prop_operations = {
 	init:function(frm){
 		var me = this;
 		this.doc = frm.doc
-		me.show_amenities_acc_to_property_type(frm)
+		//alert("init");
+		console.log(JSON.stringify(frappe.route_options));
 		if (frappe.route_options){
+			alert("if");
 			me.enable_property_editing(frm,frappe.route_options["doc"])
 		}
 		else {
+			alert("else");
 			me.enable_property_posting(frm)
 		}
 		new SearchProperty(frm)
@@ -104,6 +90,7 @@ prop_operations = {
 		me.manage_primary_operations(frm)	
 		me.remove_menu_operations(frm)
 		// added by arpit , if user is Agent;
+		alert("111111111");
 		if(!(frappe.get_cookie("user_id") == "Administrator") && inList(user_roles, "Agent") ){
 				//data = frappe.meta.get_docfield(cur_frm.doctype, "listed_by", cur_frm.docname);
 				//data.read_only =1;
@@ -112,18 +99,6 @@ prop_operations = {
 			cur_frm.set_value("listed_by","Agent");		
 		}
 		 
-	},
-	show_amenities_acc_to_property_type :function(frm){
-		cur_frm.set_query("amenity_name", "amenities", function(frm) {
-		//alert(cur_frm.doc.property_type)
-				return {
-					query:"hunters_camp.hunters_camp.doctype.property.property.show_amenities_acc_to_property_type",
-					filters:{
-							'property_type': cur_frm.doc.property_type,
-						}
-				}
-			});
-
 	},
 	manage_primary_operations:function(frm){
 		var me = this;
@@ -134,7 +109,6 @@ prop_operations = {
 	},
 	post_property:function(frm,doc){
 		var me = this
-
 		if(me.check_mandatory(frm)) {
 			frappe.call({
 				freeze: true,
@@ -245,15 +219,17 @@ prop_operations = {
 		}
 	},
 	add_possession_status : function(frm, doc){
-		if (cur_frm.doc.possession != 1){
+		if (cur_frm.doc.possession == 1){
+					
+		}
+		else{
 			if (cur_frm.doc.possession_status){
 				po_list = cur_frm.doc.possession_status.split('-')
 				cur_frm.doc.month = po_list[0]  
 				cur_frm.doc.year =  po_list[1]
 				refresh_field(["month","year","possession"])
-			}		
+			}
 		}
-			
 	},
 	display_property_photo:function(frm, doc){
 		wrapper = $(cur_frm.get_field("attachment_display").wrapper)
@@ -287,7 +263,6 @@ prop_operations = {
 	},
 	update_property:function(frm){
 		var me = this
-		me.remove_menu_operations(frm)
 		if(me.check_mandatory(frm)) {
 				frappe.call({
 					freeze: true,
@@ -591,12 +566,14 @@ cur_frm.fields_dict["flat_facilities"].grid.get_field("facility_name").get_query
 
 SearchProperty = Class.extend({
 	init:function(frm){
-		//alert("second init");
+		alert("second init");
 		this.frm = frm
 		this.init_for_search_property()
 	},
 	init_for_search_property:function(){
 		var me = this
+		cur_frm.add_custom_button(__('Short List'),function() {
+				  },"btn-primary");
 		cur_frm.add_custom_button(__('Search Property'),function() {
 				me.render_dialog_for_property_search() },"btn-primary");
 		cur_frm.add_custom_button(__('Clear form'),function() {
@@ -682,8 +659,8 @@ SearchProperty = Class.extend({
 							if(!r.exc) {
 									var doc = frappe.model.sync(r.message);
 									frappe.route_options = {"doc":doc};
-									// frappe.set_route("Form",'Property','Property');
-									cur_frm.refresh();
+									frappe.set_route("Form",'Property','Property');
+									cur_frm.reload_doc()
 									me.dialog.hide()
 								}
 							}

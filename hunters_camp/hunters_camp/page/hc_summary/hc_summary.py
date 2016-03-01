@@ -45,6 +45,14 @@ def get_builders():
 				and user.enabled=1
 				and user_role.parent = user.name
 			and user_role.parent not in ('Administrator') limit 1""",as_list=1)[0][0]
+# added by arpit
+def owners():
+	return frappe.db.sql("""select count(*) from tabUserRole user_role, tabUser user
+			where user_role.role=''
+				and user.docstatus<2
+				and user.enabled=1
+				and user_role.parent = user.name
+			and user_role.parent not in ('Administrator') limit 1""",as_list=1)[0][0]
 
 def get_residentail_properties_count():
 	es = ElasticSearchController()

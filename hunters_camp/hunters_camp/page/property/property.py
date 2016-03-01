@@ -6,6 +6,7 @@ import json
 from collections import Counter
 import propshikari.propshikari.property_update_api as update_api
 import propshikari.propshikari.propshikari_api as api
+from frappe import _ ,msgprint
 
 
 
@@ -19,6 +20,16 @@ def get_property_details(property_id):
 		'test_details': test_details
 		# 'test_name': test_name[:re.search("\d",test_name).start()]
 	}
+
+
+
+@frappe.whitelist()
+def dialog_box_query(doctype, txt, searchfield, start, page_len, filters):
+  return  frappe.db.sql("""select `user` from tabAgent 
+              where agent_status = 'Active'""")
+
+  
+
 
 
 @frappe.whitelist()
@@ -178,3 +189,25 @@ def build_data_to_search_with_location_names(data):
   from propshikari.versions.v1 import search_property
   return search_property(data=json.dumps(property_data))
     
+
+ # Code added by Arpit for searching unpublished property
+@frappe.whitelist()
+def search_data_unpublished_prop(data):
+  property_data = json.loads(data)
+
+  if property_data.get("location"):
+    location_names = property_data.get("location").split(',')
+    condition = ",".join('"{0}"'.format(loc) for loc in location_names)
+    area_list = frappe.db.sql(""" select * from 
+      `tabArea` where area in ({0}) and city_name='{1}'""".format(condition,property_data.get("city")), as_dict=True)
+    if area_list:
+       property_data["location"] = ",".join([ area.get("name") for area in area_list ])
+  from propshikari.versions.v1 import search_unpublished_property
+  return search_unpublished_property(data=json.dumps(property_data))
+
+  # End of Code by Arpit Jain
+
+@frappe.whitelist()
+def publish_properties(data):
+  request_data = json.loads(data)
+  return api.update_unpublished_property_flag(request_data)

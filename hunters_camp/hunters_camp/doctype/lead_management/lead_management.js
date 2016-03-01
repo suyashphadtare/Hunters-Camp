@@ -103,7 +103,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 														"area_minimum": doc.area_minimum,
 														"area_maximum": doc.area_maximum,
 														"total_records":total_records,
-														"data": final_result,
+														"data": final_result,	
 														"city":doc.city
 													};
 													frappe.set_route("property","Hunters Camp");	
@@ -123,7 +123,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 																"area_minimum": doc.area_minimum,
 																"area_maximum": doc.area_maximum,
 																"city":doc.city,
-																"lead_name":doc.lead		
+																"lead_name":doc.lead,
+																"consultant_id":doc.consultant		
 															},
 															callback: function(r,rt) {
 																doc.email_sent = 'Yes'
@@ -175,7 +176,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 										"area_minimum": doc.area_minimum,
 										"area_maximum": doc.area_maximum,
 										"city":doc.city,
-										"lead_name":doc.lead
+										"lead_name":doc.lead,
+										"consultant_id":doc.consultant	
 									},
 									callback: function(r,rt) {
 										msgprint("There is no any properties found against the specified criteria so,email with property search criteria is sent to administartor.")
@@ -198,6 +200,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 	frappe.SetFollowUps = Class.extend({
 		init: function() {
 			property_details_list = [];
+			//list_for_time =[];
 			this.make();
 		},
 		make: function() {
@@ -683,6 +686,8 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 	frappe.SEFollowUps = Class.extend({
 		init: function() {
 			this.make();
+			dict ={};
+			list_for_time = [];
 		},
 		make: function() {
 			property_details_list = []
@@ -757,10 +762,25 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			$(me.pop_up.fields_dict.assign_to.input).change(function(){
 				me.assign_to=me.pop_up.fields_dict.assign_to.$input.val()
 				me.set_site_visit_details(cur_frm.doc,me)
-
 			});	
 
+// code added by arpit to check the validation od date
+			$(me.pop_up.fields_dict.date.input).change(function(){
+				me.date = me.pop_up.fields_dict.date.$input.val()
+				date_field = frappe.datetime.user_to_obj(me.date)
+				time_in_second = me.convert_time_to_second(me.date)
+				$.each(dict , function(index , value){
+					if((dateutil.get_diff(date_field, index) == 0) && (dict[index] == time_in_second)){
+								frappe.msgprint(" Schedule Date & Time should not be same.");
+								me.pop_up.fields_dict.date.$input.val('');
+								return false	
+						}
+					});
+			});
 		},
+
+// end of code to check the validation		
+
 		show_pop_up_dialog: function(doc, me){
 			return new frappe.ui.Dialog({
 				title: "Schedule SE",
@@ -842,6 +862,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					}
 					else{
 						$('#container_second').remove()
+						//alert(JSON.stringify(r.message)+"--1-----")
 						me.append_se_details(me,r.message)
 						me.append_se_details_on_popup(cur_frm.doc,r.message)
 					}
@@ -921,16 +942,38 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 		},
 
 		append_se_details_on_popup: function(doc,message){
+			//alert(JSON.stringify(message))
+			var me = this;
 			for (var i = 0; i < message.length; i++) {
 				if(message[i]['name']){
+
 					$("<tr>\
 						<td align='center' id='status'>"+message[i]['name']+"</td>\
 						<td align='center' id='status'>"+message[i]['schedule_date']+"</td>\
 						<td align='center' id='status'>"+message[i]['visiter']+"</td>\
 						</tr>").appendTo($("#site_details tbody"));
+
+					date_time1 = frappe.datetime.str_to_obj(message[i]['schedule_date'])
+					val = me.convert_time_to_second(message[i]['schedule_date'])
+					if ($.trim(val) != undefined &&  date_time1 != null && date_time1 != undefined) {
+						dict[date_time1] = (dict[date_time1] ? dict[date_time1] : '') + ( val ? val :'' );
+					}
+					list_for_time.push(date_time1);
 					}	
 			};
 
+		},
+		convert_time_to_second :function(data){
+				if (data){ 
+						date_time = data;
+						arr1 = date_time.split(' ');
+						arr = arr1[1].split(':');
+						hour = (arr[0] *60*60) ;
+						min = (arr[1] *60);
+						sec = arr[2];
+						return (hour + min + sec)
+				}
+			
 		},
 
 		append_pop_up_dialog_body: function(pop_up,doc){
@@ -1055,6 +1098,7 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 					}
 					else{
 						$('#container_second').remove()
+						//alert(JSON.stringify(r.message)+"--2-----")
 						me.append_se_details(me,r.message)
 						me.append_se_details_on_popup(cur_frm.doc,r.message)
 					}
