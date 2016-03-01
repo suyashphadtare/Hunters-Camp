@@ -185,7 +185,7 @@ project.operations = {
 	},
 	make_property_details_read_only:function(frm){
 		cur_frm.set_df_property("property_details", "read_only", true)
-		$.each([2,3,4,5,6,7,8,9], function(index , value){
+		$.each([1,2,3,4,5,6,7,8,9], function(index , value){
 			cur_frm.get_field("property_details").grid.docfields[value].read_only = 1
 		})
 		refresh_field(["property_details"])
@@ -443,17 +443,32 @@ frappe.ui.form.on("Project Details", {
     "property_details_add": function(frm,cdt,cdn) {
       	var d = locals[cdt][cdn]
       	d.property_type = frm.doc.project_type
-      	d.property_subtype = frm.doc.project_subtype
+      	// d.property_subtype = frm.doc.project_subtype
       	refresh_field["property_details"]
     }
 });
 
 frappe.ui.form.on("Projects", "possession", function(frm) {
 	var me = this;
+	console.log("in possession")
 	frm.toggle_reqd("month", frm.doc.possession===0);
 	frm.toggle_reqd("year", frm.doc.possession===0);
 	
 });
+
+frappe.ui.form.on("Projects", "project_type", function(frm) {
+	frm.doc.project_subtype = ""
+	refresh_field("project_subtype")
+	update_possession_fields(frm)
+
+	
+});
+
+update_possession_fields =function(frm){
+	if (frm.doc.project_type == "Zameen"){
+		cur_frm.set_value("possession", 1)
+	}
+}
 
 cur_frm.fields_dict.project_subtype.get_query = function(doc) {
 	return{
@@ -519,7 +534,7 @@ SearchProperty = Class.extend({
 		        return false;
 		      }
     	}).autocomplete( "instance" )._renderItem = function( ul, property ) {
-      			return $( "<li>" ).append( "<a><b>" + property.project_id + "</b><br>" + property.overview + "</a>" ).appendTo( ul );
+      			return $( "<li>" ).append( "<a><b>" + property.project_id + "</b><br>" + property.project_name + "</a>" ).appendTo( ul );
     		};
 	},
 	get_property_data:function(){
@@ -549,7 +564,7 @@ SearchProperty = Class.extend({
         }
          
         $.each(me.property_data, function(index, obj){
-         	if (hasMatch(obj.project_id) || hasMatch(obj.overview)) {
+         	if (hasMatch(obj.project_id) || hasMatch(obj.project_name)) {
                 matches.push(obj);
             }
         })  
@@ -573,8 +588,8 @@ SearchProperty = Class.extend({
 							if(!r.exc) {
 									var doc = frappe.model.sync(r.message);
 									frappe.route_options = {"doc":doc};
-									frappe.set_route("Form",'Projects','Projects');
-									cur_frm.reload_doc()
+									// frappe.set_route("Form",'Projects','Projects');
+									cur_frm.refresh()
 									me.dialog.hide()
 								}
 							}
@@ -599,14 +614,41 @@ cur_frm.fields_dict.project_by.get_query = function(doc) {
 }
 
 
-cur_frm.fields_dict.project_tieup_by.get_query = function(doc) {
+// cur_frm.fields_dict.project_tieup_by.get_query = function(doc) {
+// 	return {
+// 			query:"hunters_camp.hunters_camp.doctype.projects.projects.get_consultant",
+// 		}
+// }
+
+cur_frm.fields_dict.property_details.grid.get_field("property_subtype_option").get_query = function(doc, cdt, cdn) {
+	var row = locals[cdt][cdn];
 	return {
-			query:"hunters_camp.hunters_camp.doctype.projects.projects.get_consultant",
+			filters:{"property_type":row.property_type},
 		}
 }
 
-cur_frm.fields_dict.property_details.grid.get_field("property_subtype_option").get_query = function(doc) {
+
+cur_frm.fields_dict.property_details.grid.get_field("property_subtype").get_query = function(doc, cdt, cdn) {
+	var row = locals[cdt][cdn];
 	return {
-			filters:{"property_type":doc.project_type},
-		}
+		filters:{"property_type": ["in", row.property_type] }
+	}
+}
+
+cur_frm.fields_dict.property_details.grid.get_field("property_type").get_query = function(doc, cdt, cdn) {
+	prop_types = get_property_types(doc)
+	return {
+		filters:{"name": ["in", prop_types] }
+	}
+}
+
+
+get_property_types = function(doc){
+	prop_types = []
+	if (doc.project_type == "Residential" && doc.project_subtype == "Residential cum commercial"){
+		prop_types = ["Residential", "Commercial"]
+	}else if(doc.project_type){
+		prop_types = [doc.project_type]
+	}
+	return prop_types	
 }

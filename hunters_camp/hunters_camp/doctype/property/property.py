@@ -41,7 +41,7 @@ def post_property(doc,sid):
 
 
 def validate_for_possesion_date(doc):
-	if doc.get("possession") == 1 or not doc.get("possession"):
+	if doc.get("possession") == 1:
 		map(lambda x: doc.pop(x,None), ['month','year'])
 	elif doc.get("possession") == 0: 
 		doc["possession_date"] = "-".join([doc.get("month"),doc.get("year")])

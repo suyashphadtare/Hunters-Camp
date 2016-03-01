@@ -14,6 +14,8 @@ frappe.provide("property")
 cur_frm.add_fetch("amenity_name", "icon", "image")
 cur_frm.add_fetch("facility_name", "icon", "image")
 
+
+
 frappe.ui.form.on("Property", "refresh", function(frm) {
 	var me = this;
 	$(cur_frm.get_field("attachment_display").wrapper).empty()
@@ -204,17 +206,15 @@ prop_operations = {
 		}
 	},
 	add_possession_status : function(frm, doc){
-		if (cur_frm.doc.possession == 1){
-					
-		}
-		else{
+		if (cur_frm.doc.possession != 1){
 			if (cur_frm.doc.possession_status){
 				po_list = cur_frm.doc.possession_status.split('-')
 				cur_frm.doc.month = po_list[0]  
 				cur_frm.doc.year =  po_list[1]
 				refresh_field(["month","year","possession"])
-			}
+			}		
 		}
+			
 	},
 	display_property_photo:function(frm, doc){
 		wrapper = $(cur_frm.get_field("attachment_display").wrapper)
@@ -641,8 +641,8 @@ SearchProperty = Class.extend({
 							if(!r.exc) {
 									var doc = frappe.model.sync(r.message);
 									frappe.route_options = {"doc":doc};
-									frappe.set_route("Form",'Property','Property');
-									cur_frm.reload_doc()
+									// frappe.set_route("Form",'Property','Property');
+									cur_frm.refresh();
 									me.dialog.hide()
 								}
 							}
