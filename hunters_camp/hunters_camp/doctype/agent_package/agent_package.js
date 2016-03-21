@@ -12,7 +12,7 @@ frappe.ui.form.on("Agent Package", {
 		if(!frm.doc.__islocal){
 			cur_frm.set_df_property("package_name", "read_only", 1);
 			cur_frm.set_df_property("start_date", "read_only", 1);
-			if(!frappe.user.has_role("Agent")){
+			if(frappe.user.name == "Administrator"){
 				cur_frm.add_custom_button(__('Renew Package'), cur_frm.cscript.renew_package).addClass("btn-primary");
 				cur_frm.add_custom_button(__('Upgrade Package'), cur_frm.cscript.upgrade_package).addClass("btn-primary");		
 			}

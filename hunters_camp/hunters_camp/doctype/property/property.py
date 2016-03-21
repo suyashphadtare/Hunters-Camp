@@ -23,7 +23,7 @@ def post_property(doc,sid):
 		2. Create json doc for uploading
 		3. Return Response
 	"""
-	agent_flag = get_user_roles()
+	agent_flag = get_user_roles() if frappe.session.user != "Administrator" else False
 	doc = json.loads(doc)
 	doc["user_id"] = frappe.db.get_value("User",{"name":frappe.session.user},"user_id")
 	doc["sid"] = sid
