@@ -337,7 +337,7 @@ def update_followup_date(prop_list=None,followup_type=None,followup_date=None,do
 		for i in properties:
 			lead_property = frappe.get_doc("Lead Property Details", i)
 			if followup_type=='Follow-Up For Share':
-				lead_property.share_followup_date = getdate(cstr(followup_date))#datetime.datetime.strptime(cstr(followup_date),'%d-%m-%y')
+				lead_property.share_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			elif followup_type=='Follow-Up For SE':
 				lead_property.se_followup_date = datetime.datetime.strptime(cstr(followup_date),'%d-%m-%Y')
 			else:
