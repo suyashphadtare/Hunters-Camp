@@ -55,6 +55,7 @@ frappe.ui.form.on("Property", "operation", function(frm) {
 		frm.fields_dict["price"].set_label("Price");
 		cur_frm.set_df_property("price_per_sq_ft", "hidden", 0)
 	}
+	toggle_posseession_field(frm);
 });
 
 // code added by arpit 
@@ -67,8 +68,18 @@ frappe.ui.form.on("Property", "property_type", function(frm) {
 		frm.fields_dict["carpet_area"].set_label("Carpet Area");
 		cur_frm.set_df_property("transaction_type", "hidden", 0)
 	}
-
+	toggle_posseession_field(frm);
 });	
+
+
+
+toggle_posseession_field = function(frm){
+	if(frm.doc.operation == "Rent" || (frm.doc.operation == "Buy" && frm.doc.property_type == "Zameen") ){
+		cur_frm.set_value("possession", 1)
+	}else{
+		cur_frm.set_value("possession", 0)
+	}
+}
 // end of code by arpit
 
 // frappe.ui.form.on("Property", "railway_station", function(frm) {
@@ -704,6 +715,14 @@ SearchProperty = Class.extend({
 cur_frm.fields_dict.property_subtype_option.get_query = function(doc) {
 	return {
 			filters:{"property_type":doc.property_type},
+		}
+}
+
+
+cur_frm.fields_dict.property_type.get_query = function(doc) {
+	var ptype_list = doc.operation == "Rent" ? ["Zameen"] : [""]
+	return {
+			filters:{"name": ["not in", ptype_list ]},
 		}
 }
 
