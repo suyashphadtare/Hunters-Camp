@@ -652,3 +652,14 @@ get_property_types = function(doc){
 	}
 	return prop_types	
 }
+
+
+frappe.ui.form.on("Projects", "contact_no", function(frm) {
+	var me = this;
+	if (  !( /^\d+$/.test(frm.doc.contact_no) ) ){
+		frm.doc.contact_no = ""
+		refresh_field("contact_no")
+		msgprint("Contact number must contain only digits")
+	}
+
+});

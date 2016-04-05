@@ -22,7 +22,6 @@ frappe.ui.form.on("Property", "refresh", function(frm) {
 	//alert("prop_operation");
 	prop_operations.init(frm);
 	cur_frm.cscript.render_google_map(frm)
-	
 			
 });
 
@@ -726,3 +725,13 @@ cur_frm.fields_dict.property_type.get_query = function(doc) {
 		}
 }
 
+
+frappe.ui.form.on("Property", "contact_no", function(frm) {
+	var me = this;
+	if (  !( /^\d+$/.test(frm.doc.contact_no) ) ){
+		frm.doc.contact_no = ""
+		refresh_field("contact_no")
+		msgprint("Contact number must contain only digits")
+	}
+
+});
