@@ -80,6 +80,16 @@ cur_frm.fields_dict['property_subtype'].get_query = function(doc) {
 	}
 }
 
+
+cur_frm.fields_dict['property_subtype_option'].get_query = function(doc) {
+	return {
+		filters: {
+			
+			"property_type": doc.property_type
+		}
+	}
+}
+
 cur_frm.cscript.lead = function(doc,cdt,cdn){
 	doc.address=""
 	doc.address_details=""

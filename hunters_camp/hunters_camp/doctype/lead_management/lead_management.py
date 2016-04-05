@@ -5,7 +5,7 @@
 from __future__ import unicode_literals
 import frappe
 from frappe.model.document import Document
-from frappe.utils import nowdate, cstr, flt, now, getdate, add_months
+from frappe.utils import nowdate, cstr, flt, now, getdate, add_months, get_datetime
 from frappe.model.mapper import get_mapped_doc
 from frappe.utils import validate_email_add
 import datetime
@@ -117,7 +117,7 @@ def schedule_se_visit(child_property,assign_to,parent,doctype,schedule_date):
 
 def notify_lead_about_sv(lead_record,se_visit,child_id,assign_to):
 	user = frappe.get_doc("User",assign_to)
-	se_name = ' '.join([user.first_name,userlast_name]) if user.first_name and user.last_name else user.first_name	
+	se_name = ' '.join([user.first_name,user.last_name]) if user.first_name and user.last_name else user.first_name	
 	msg = get_sms_template("Lead Site Visit",{"site_visit":se_visit.schedule_date,"se_name":se_name,"se_mobile":user.mobile_no})
 	if lead_record.mobile_no:
 		rec_list = []
@@ -422,6 +422,5 @@ def build_conds(cond):
 	if 'Consultant' in frappe.get_roles(frappe.session.user) and not frappe.session.user =="Administrator":
 		cond += "where consultant='%s'"%frappe.session.user
 	return cond
-
 
 

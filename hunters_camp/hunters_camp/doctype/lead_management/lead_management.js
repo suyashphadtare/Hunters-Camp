@@ -22,10 +22,10 @@ frappe.ui.form.on("Lead Management", "refresh", function(frm) {
 			frm.add_custom_button(__("Set Follow Ups"), function() { 
 				pop_up = new frappe.SetFollowUps();
 			})	
-			frm.add_custom_button(__("schedule SE"), function() {
+			frm.add_custom_button(__("Schedule SE"), function() {
 				pop_up = new frappe.SEFollowUps();
 			})	
-			frm.add_custom_button(__("schedule ACM"), function() { 
+			frm.add_custom_button(__("Schedule ACM"), function() { 
 				pop_up = new frappe.ACMFollowUps();
 			})	
 		}

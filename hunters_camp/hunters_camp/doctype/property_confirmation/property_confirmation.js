@@ -23,7 +23,7 @@ cur_frm.cscript.email_notification_to_consultant = function(){
 						method:'hunters_camp.hunters_camp.doctype.property_confirmation.property_confirmation.mail_notifiction_to_consultant',
 						freeze:true,
 						freeze_message:"Property Confirmation Please Wait......",
-						args:{"email_id":cur_frm.doc.consultant_id },
+						args:{"prop_data":cur_frm.doc},
 						callback: function(r,rt) {
 							if(!r.exc) {
 									frappe.msgprint(r.message.message)

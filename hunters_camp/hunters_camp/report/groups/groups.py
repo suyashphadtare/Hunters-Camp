@@ -40,7 +40,7 @@ def get_result(filters):
 		name,group_title,operation,
 		property_type,property_subtype,
 		property_subtype_option,
-		location,
+		ifnull(location, "") as location,
 		min_area,max_area,
 		min_budget,max_budget,
 		unit_of_area,status 
