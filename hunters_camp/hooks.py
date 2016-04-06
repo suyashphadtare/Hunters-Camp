@@ -14,7 +14,7 @@ app_version = "0.0.1"
 # ------------------
 
 # include js, css files in header of desk.html
-# app_include_css = "/assets/hunters_camp/css/hunters_camp.css"
+app_include_css = "/assets/hunters_camp/css/hunters_camp.css"
 app_include_js = "https://maps.googleapis.com/maps/api/js?key=AIzaSyDO87KWhu8luHXgtWPR9Mmhuxgsu-hejww&libraries=places"
 
 # include js, css files in header of web template
